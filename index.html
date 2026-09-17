@@ -1,1 +1,110 @@
-hello
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="AIKO 欧洲展车数字孪生、升级改装导览、设备规格与新旧系统对比。">
+  <title>AIKO 展车升级改装系统</title>
+  <link rel="icon" type="image/png" href="assets/brand/aiko-logo-dark.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航" data-i18n-aria="mainNav">
+      <div class="brand">
+        <img class="brand-logo" src="assets/brand/aiko-logo-light.png" alt="AIKO">
+        <div><span data-i18n="brandSubtitle">欧洲展车数字孪生</span></div>
+      </div>
+
+      <nav class="side-nav">
+        <button class="nav-item nav-primary is-active" type="button" data-route="guide" aria-current="page">
+          <span class="nav-icon">01</span><span><strong data-i18n="navGuide">升级改装导览</strong><small data-i18n="navGuideSub">2 项核心升级</small></span><b>→</b>
+        </button>
+        <button class="nav-item" type="button" data-route="exterior"><span class="nav-icon">02</span><span><strong data-i18n="navExterior">全车外观</strong><small data-i18n="navExteriorSub">车身与光伏组件</small></span></button>
+        <button class="nav-item" type="button" data-route="interior"><span class="nav-icon">03</span><span><strong data-i18n="navInterior">车内总览</strong><small data-i18n="navInteriorSub">固定镜头与关键设备</small></span></button>
+        <button class="nav-item" type="button" data-route="electrical"><span class="nav-icon">04</span><span><strong data-i18n="navElectrical">电路舱</strong><small data-i18n="navElectricalSub">原电路／改装电路</small></span></button>
+        <button class="nav-item" type="button" data-route="gx"><span class="nav-icon">05</span><span><strong data-i18n="navGx">GX 与玻璃门</strong><small data-i18n="navGxSub">旧版／新版安装比较</small></span></button>
+        <button class="nav-item" type="button" data-route="catalog"><span class="nav-icon">06</span><span><strong data-i18n="navCatalog">设备资料</strong><small data-i18n="navCatalogSub">规格、连接与注意事项</small></span></button>
+      </nav>
+
+      <div class="baseline">
+        <span class="lock-dot" aria-hidden="true"></span>
+        <div><strong data-i18n="baselineTitle">锁定母版已接入</strong><small data-i18n="baselineSub">只读引用 · 不覆盖源版本</small></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="route-title">
+          <span id="routeEyebrow">UPGRADE GUIDANCE</span>
+          <h1 id="routeTitle">升级改装导览</h1>
+        </div>
+        <div class="top-actions">
+          <div class="segmented language-switch" id="languageSwitch" role="group" aria-label="语言 / Language">
+            <button type="button" data-language="zh" aria-pressed="true">中文</button>
+            <button type="button" data-language="en" aria-pressed="false">EN</button>
+          </div>
+          <div class="segmented" id="versionSwitch" role="group" aria-label="系统版本" hidden>
+            <button type="button" data-version="old" aria-pressed="true" data-i18n="versionOld">旧车系统</button>
+            <button type="button" data-version="new" aria-pressed="false" data-i18n="versionNew">改装后系统</button>
+          </div>
+          <button class="outline-action" id="compareButton" type="button" aria-pressed="false" hidden data-i18n="compare">轮廓对比</button>
+        </div>
+      </header>
+
+      <div class="guide-steps" id="guideSteps" aria-label="改装步骤">
+        <button type="button" data-guide-step="overview" class="is-active"><span>01</span><b data-i18n="stepOverview">定位改装区域</b></button>
+        <button type="button" data-guide-step="electrical"><span>02</span><b data-i18n="stepElectrical">电路舱升级</b></button>
+        <button type="button" data-guide-step="gx"><span>03</span><b data-i18n="stepGx">GX 升级</b></button>
+        <button type="button" data-guide-step="communication"><span>04</span><b data-i18n="stepCommunication">通讯检查</b></button>
+      </div>
+
+      <section class="workspace" aria-label="三维交互工作区" data-i18n-aria="workspace">
+        <div class="stage-column">
+          <div class="stage" id="stage">
+            <div class="frame-stack" id="frameStack" aria-live="polite"></div>
+            <div class="cover-sheet" id="coverSheet" aria-hidden="true">
+              <img class="cover-logo" src="assets/brand/aiko-logo-light.png" alt="AIKO">
+              <strong>FIND YOUR POWER</strong>
+              <span data-i18n="coverLabel">电路舱展示覆盖面</span>
+            </div>
+            <div class="hotspots" id="hotspots"></div>
+            <div class="outline-layer" id="outlineLayer" hidden></div>
+            <div class="stage-status">
+              <span id="stageStatus">后部向前固定镜头</span>
+              <small id="stageHint">展示面将自动上掀，请选择高亮改装区域</small>
+            </div>
+            <div class="loading" id="loading"><span></span><b data-i18n="loading">正在装入锁定视图…</b></div>
+          </div>
+
+          <div class="view-strip" id="viewStrip" aria-label="固定镜头快捷入口"></div>
+          <div class="communication-card" id="communicationCard" hidden>
+            <div class="comm-node"><strong data-i18n="commBoards">恒流板 ×3</strong><small data-i18n="commBoardsSub">三路 RS485 A／B → 隔离 RS485 转 USB</small></div><i>→</i>
+            <div class="comm-node"><strong data-i18n="commHub">有源 USB 集线器</strong><small data-i18n="commHubSub">3 路独立输入，上行 USB 接电脑</small></div><i>→</i>
+            <div class="comm-node"><strong data-i18n="commPc">工业电脑</strong><small data-i18n="commPcSub">RS485 采集、MQTT 发布、固定 IP</small></div><i>→</i>
+            <div class="comm-node"><strong>Moxa EDS-205A</strong><small data-i18n="commSwitchSub">5 口工业交换机</small></div><i>→</i>
+            <div class="comm-node"><strong>Ekrano GX</strong><small data-i18n="commGxSub">固定 IP 接收与显示</small></div>
+          </div>
+        </div>
+
+        <aside class="inspector" id="inspector" aria-label="设备信息" data-i18n-aria="inspector">
+          <div class="inspector-head">
+            <div><span id="detailStatus">改装总览</span><h2 id="detailTitle">选择一项升级</h2></div>
+            <span class="source-chip" id="sourceChip">锁定资产</span>
+          </div>
+          <p class="detail-summary" id="detailSummary">电路舱和 GX 是本次改装的两个核心区域。展示面打开后，可分别进入旧版、改装后版本和安装资料。</p>
+
+          <div class="detail-tabs" role="tablist" aria-label="资料分类">
+            <button type="button" role="tab" data-detail-tab="overview" aria-selected="true" class="is-active" data-i18n="tabOverview">概览</button>
+            <button type="button" role="tab" data-detail-tab="specs" aria-selected="false" data-i18n="tabSpecs">规格尺寸</button>
+            <button type="button" role="tab" data-detail-tab="connections" aria-selected="false" data-i18n="tabConnections">连接结构</button>
+            <button type="button" role="tab" data-detail-tab="notes" aria-selected="false" data-i18n="tabNotes">安装注意</button>
+          </div>
+          <div class="detail-body" id="detailBody"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

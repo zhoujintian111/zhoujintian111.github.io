@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-09-17T20:10:21.063Z",
+  "policy": "Read-only integration copies. Source masters remain untouched; only requested UI, communication and interaction patches are applied to copies.",
+  "sources": {
+    "vehicle": {
+      "file": "/workspace/aiko-full-vehicle-master-v1-cab-corrected.html",
+      "sha256": "c530abad8dd7683cbfb86c5b63cc3e49ca3319f09f2e1dd3561df8793beb03a7"
+    },
+    "electricalOld": {
+      "file": "/workspace/locked-backups/旧车系统v1.0/旧车系统v1.0.html",
+      "sha256": "92fbc7d429ece6b210b23903b37cdcae0e2a9d95fdc0a18b6db303df58b80d63"
+    },
+    "electricalNew": {
+      "file": "/workspace/scratch/e776deb97b48/新电路系统v1.0.html",
+      "sha256": "157c40bbfc36f540c4d3c9a31931b9b06251c063f518871bf4276f3230825c5f"
+    },
+    "gxOld": {
+      "file": "/workspace/locked-backups/旧版GXv01/旧版GXv01-preview.html",
+      "sha256": "84b618cae2ce6be657f6242ae2478b243494e0b1b4ad7806528cebe182744c48"
+    },
+    "gxNew": {
+      "file": "/workspace/locked-backups/新版GXv01/新版GXv01-preview.html",
+      "sha256": "d416a0ef181ab428725630893f9a4c9d6376d793b83427393fb759b12edf8e25"
+    }
+  }
+}
