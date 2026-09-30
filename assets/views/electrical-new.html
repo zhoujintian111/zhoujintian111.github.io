@@ -4,26 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>新电路系统v1.0</title>
+<title>新电路系统 · 2026.09 更新</title>
 
 <style>
-:root{color-scheme:dark;--background:#0b1015;--foreground:#edf2f5;--card:#121a22;--card-foreground:#edf2f5;--popover:#151e27;--popover-foreground:#edf2f5;--primary:#ff5a00;--primary-foreground:#fff;--secondary:#202b35;--secondary-foreground:#edf2f5;--muted:#1b252e;--muted-foreground:#a7b1b9;--accent:#25313c;--accent-foreground:#fff;--destructive:#ef4444;--border:#2b3741;--input:#33414d;--ring:#ff5a00;--blue:#4aa3ff;--orange:#ff5a00;--green:#3ccf91;--red:#f05d5e;--purple:#9c7cff;--yellow:#f5c451;--font-sans:Inter,"Noto Sans SC","Microsoft YaHei",sans-serif;--font-size-base:14px}
+:root{color-scheme:dark;--background:#0b1015;--foreground:#edf2f5;--card:#121a22;--card-foreground:#edf2f5;--popover:#151e27;--popover-foreground:#edf2f5;--primary:#ff5a00;--primary-foreground:#fff;--secondary:#202b35;--secondary-foreground:#edf2f5;--muted:#1b252e;--muted-foreground:#a7b1b9;--accent:#25313c;--accent-foreground:#fff;--destructive:#ef4444;--border:#2b3741;--input:#33414d;--ring:#ff5a00;--blue:#4aa3ff;--orange:#ff5a00;--green:#3ccf91;--red:#f05d5e;--purple:#9c7cff;--yellow:#f5c451;--font-sans:Arial,"Microsoft YaHei",sans-serif;--font-size-base:14px}
 html,body{margin:0;min-height:100%;background:#0b1015;color:#edf2f5;font-family:var(--font-sans)}
 body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background:var(--secondary);color:var(--foreground);border-radius:8px;padding:8px 12px;font:inherit}.btn-primary{background:var(--primary);color:var(--primary-foreground)}.btn-ghost{background:transparent}.nav{display:flex;gap:6px;flex-wrap:wrap}.nav-link{appearance:none;border:0;background:transparent;color:var(--muted-foreground);border-radius:8px;padding:8px 11px;font:inherit}.nav-link.active{background:var(--primary);color:var(--primary-foreground)}.viz-badge{display:inline-flex;border-radius:999px;padding:5px 9px;background:var(--accent);color:var(--accent-foreground)}.text-small{font-size:12px}.text-muted{color:var(--muted-foreground)}
 </style>
 </head>
 <body>
 <style>
-.a3-device-tooltip{position:absolute;z-index:80;display:none;pointer-events:none;padding:7px 9px;border:1px solid rgba(255,255,255,.22);border-radius:7px;background:rgba(6,10,13,.94);color:#fff;font:600 12px/1.25 Inter,"Noto Sans SC","Microsoft YaHei",sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.42);white-space:nowrap;transform:translate(12px,12px)}
+.a3-device-tooltip{position:absolute;z-index:80;display:none;pointer-events:none;padding:7px 9px;border:1px solid rgba(255,255,255,.22);border-radius:7px;background:rgba(6,10,13,.94);color:#fff;font:600 12px/1.25 Arial,"Microsoft YaHei",sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.42);white-space:normal;max-width:min(360px,calc(100% - 24px));overflow-wrap:anywhere}
 </style>
 <div id="aiko-old-system-routing-fix">
   <section class="a3-app" aria-label="AIKO展车电器仓毫米级三维数字孪生">
     <header class="a3-head">
       <div>
-        <span class="a3-eyebrow">AIKO VAN · NEW CIRCUIT SYSTEM V1.0 · 1 UNIT = 100 MM</span>
-        <h2>新电路系统 V1.0 · 三路恒流充电系统</h2>
+        <span class="a3-eyebrow">AIKO VAN · CIRCUIT UPDATE 2026.09 · 1 UNIT = 100 MM</span>
+        <h2>三路恒流 · CM5 原生 RS485</h2>
       </div>
-      <div class="a3-status"><i></i><span><b>NEW CIRCUIT V1.0</b><small>基准已锁定 · 后续修改须另建分支</small></span></div>
+      <div class="a3-status"><i></i><span><b>NEW CIRCUIT V1.0</b><small>安装方案 · GX Touch 50 暂缓</small></span></div>
     </header>
 
     <div class="a3-toolbar" role="group" aria-label="装配显示模式">
@@ -32,18 +32,20 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       <button type="button" class="a3-mode" data-mode="signal" aria-pressed="false">RS485 / 通讯链路</button>
       <button type="button" class="a3-mode" data-mode="dimension" aria-pressed="false">尺寸 / 孔位</button>
       <button type="button" class="a3-mode" data-mode="replacement" aria-pressed="false">V1.0旧件对比</button>
+      <button type="button" class="a3-focus" data-action="communication">通讯区近景</button>
+      <button type="button" class="a3-focus" data-action="cm5-wiring">CM5 接线近景</button>
       <button type="button" class="a3-reset" data-action="reset"><i data-lucide="scan-line" aria-hidden="true"></i>复位镜头</button>
     </div>
 
     <div class="a3-viewport" aria-label="可旋转的三维电器仓模型">
       <canvas class="a3-canvas"></canvas>
       <div class="a3-loading" aria-live="polite"><span></span><b>正在建立三维场景</b></div>
-      <div class="a3-guide"><i data-lucide="move-3d" aria-hidden="true"></i><span>拖动旋转 · 滚轮缩放 · 点击设备查看端口</span></div>
+      <div class="a3-guide"><i data-lucide="move-3d" aria-hidden="true"></i><span>拖动旋转 · 滚轮缩放 · 悬停线缆看类型 · 点击看详情</span></div>
       <div class="a3-axis" aria-hidden="true"><span class="x">X</span><span class="y">Y</span><span class="z">Z</span></div>
       <div class="a3-selection" aria-live="polite">
         <span class="a3-selection-id">NEW V1.0</span>
         <strong>改造后完整装配</strong>
-        <p>以旧系统基准态V1.0为母版，将三台MPPT、右下通讯模块及其直属线路替换为恒流充电方案；当前状态锁定为新电路系统V1.0。</p>
+        <p>三块恒流板独立接入 CM5 原生 RS485；新增 USR-G806w、MOXA 与 Cerbo。安装底板为首件方案；GX Touch 50 位置暂缓。</p>
       </div>
       <div class="a3-dimension-panel" hidden>
         <b>安装基准 / mm</b>
@@ -55,16 +57,19 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
         <span>电源 / 信号孔 <i>Ø16.5 · 电源孔距33</i></span>
         <span>恒流板孔距 <i>146 ±0.1 × 73 ±0.1</i></span>
         <span>恒流板安装孔 <i>4×Ø4.5 / Ø7.5深3</i></span>
-        <span>转接板 <i>196 × 120 × 3</i></span>
-        <span>旧MPPT孔位 <i>176 × 71.5</i></span>
+        <span>转接板 <i>196 × 150 × 4</i></span>
+        <span>旧MPPT孔位 <i>132 × 122</i></span>
         <span>MOXA EDS-205A <i>30 × 115 × 70</i></span>
-        <span>工业主机配置 <i>i7-1165G7 · 16G · 512G</i></span>
-        <span>隔离控制网 <i>PC .52 · GX .54 · /24</i></span>
+        <span>CM5 机身 <i>136 × 92 × 39.5</i></span>
+        <span>USR-G806w <i>102 × 104 × 28</i></span>
+        <span>Cerbo GX MK2 <i>154 × 78 × 48</i></span>
+        <span>通讯底板 <i>450 × 250 × 4 · 首件方案</i></span>
+        <span>原生串口 <i>RS485 1–3 使用；4 备用</i></span>
         <span>MG Master LV <i>430 × 227 × 118</i></span>
         <span>MG HE 300 <i>500 × 361 × 193</i></span>
-        <em>结论：旧孔与新孔不直接复用；三块恒流板均通过196 × 120 × 3 mm转接板固定。</em>
-        <em>MC4按Stäubli Original MC4外形与锁扣结构建模；最终线束BOM仍须锁定壳体/金属端子性别。</em>
-        <em>工业主机照片前面板标DC 12V；车载24V供电版本及机壳安装孔须由卖方尺寸图确认。</em>
+        <em>结论：旧孔与新孔不直接复用；三块恒流板均通过196 × 150 × 4 mm转接板固定。</em>
+        <em>恒流板外壳和MC4按已有图纸显示；本批次实物外形、接头和针脚需复核。</em>
+        <em>L 型排布：1号在 Orion 正右方，2号在1号正下方，3号在2号正左方、Orion 正下方。实际孔位和线束长度须首件复核。</em>
       </div>
       <div class="a3-error" role="alert" hidden>三维资源加载失败，请重新打开此视图。</div>
     </div>
@@ -72,16 +77,16 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
     <footer class="a3-foot">
       <span><i class="a3-key positive"></i>正极 / PV＋</span>
       <span><i class="a3-key negative"></i>负极 / GND / PV−</span>
-      <span><i class="a3-key signal"></i>RS485 / USB 信号</span>
+      <span><i class="a3-key signal"></i>RS485 屏蔽信号</span>
       <span><i class="a3-key ethernet"></i>RJ45 / Ethernet</span>
       <span><i class="a3-key can"></i>Battery CAN</span>
-      <span class="a3-confirm"><b></b>新电路系统 V1.0 · 锁定基准</span>
+      <span class="a3-confirm"><b></b>2026.09 更新 · 首件安装方案</span>
     </footer>
   </section>
 </div>
 
 <style>
-#aiko-old-system-routing-fix{color-scheme:dark;--a3-bg:#080b0e;--a3-panel:#0d1217;--a3-panel-2:#161e25;--a3-text:#eaf0f3;--a3-sub:#8797a1;--a3-line:rgba(177,199,211,.14);--a3-scene:#05080a;--a3-accent:#ff5a2d;--a3-cyan:#71abc9;--a3-green:#5fd390;width:100%;font-family:Inter,"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--a3-text)}
+#aiko-old-system-routing-fix{color-scheme:dark;--a3-bg:#080b0e;--a3-panel:#0d1217;--a3-panel-2:#161e25;--a3-text:#eaf0f3;--a3-sub:#8797a1;--a3-line:rgba(177,199,211,.14);--a3-scene:#05080a;--a3-accent:#ff5a00;--a3-cyan:#71abc9;--a3-green:#5fd390;width:100%;font-family:Arial,"Microsoft YaHei",sans-serif;color:var(--a3-text)}
 #aiko-old-system-routing-fix *{box-sizing:border-box}
 #aiko-old-system-routing-fix .a3-app{overflow:hidden;background:var(--a3-bg);border:1px solid var(--a3-line);border-radius:18px;box-shadow:0 30px 100px rgba(0,0,0,.36)}
 #aiko-old-system-routing-fix .a3-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:24px 28px 17px;border-bottom:1px solid var(--a3-line);background:linear-gradient(110deg,var(--a3-panel),transparent)}
@@ -120,6 +125,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
 <script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.min.js","three/addons/":"../vendor/three/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
+import { hardware, deviceMessage, cableProfile, deviceEnglish } from '../upgrade-data.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -132,7 +138,7 @@ let interfaceLanguage='zh';
 window.addEventListener('message',event=>{
   if(event.origin!==location.origin || event.data?.type!=='aiko-language') return;
   interfaceLanguage=event.data.language==='en'?'en':'zh';
-  document.documentElement.lang=interfaceLanguage==='en'?'en':'zh-CN';
+  document.documentElement.lang=interfaceLanguage==='en'?'en':'zh-CN';window.aikoSceneInterface?.refresh();
 });
 
 try{
@@ -152,18 +158,24 @@ try{
   scene.fog=new THREE.FogExp2(scene.background,0.016);
 
   const camera=new THREE.PerspectiveCamera(31,1,.05,80);
-  const home={position:new THREE.Vector3(11.8,8.1,18.9),target:new THREE.Vector3(0,5.35,.2)};
+  const home={position:new THREE.Vector3(12.4,8.1,20.1),target:new THREE.Vector3(0,5.10,.2)};
   camera.position.copy(home.position);
 
   const controls=new OrbitControls(camera,canvas);
   controls.target.copy(home.target);
   controls.enableDamping=true;
   controls.dampingFactor=.065;
-  controls.minDistance=10.2;
+  controls.minDistance=.7;
   controls.maxDistance=30;
   controls.minPolarAngle=.42;
   controls.maxPolarAngle=1.68;
-  controls.enablePan=true;
+  controls.enablePan=true;controls.screenSpacePanning=true;
+  let panMode=false;
+  const navigation=document.createElement('button');navigation.type='button';navigation.className='a3-focus';navigation.dataset.action='pan';
+  root.querySelector('.a3-toolbar').appendChild(navigation);
+  function navigationLabel(){navigation.textContent=interfaceLanguage==='en'?(panMode?'Pan ON · switch to rotate':'Pan · move the view'):(panMode?'平移中 · 切回旋转':'平移 · 移动画面');navigation.setAttribute('aria-pressed',String(panMode));}
+  navigation.addEventListener('click',()=>{panMode=!panMode;controls.mouseButtons.LEFT=panMode?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;canvas.style.cursor=panMode?'grab':'';navigationLabel();});
+  navigationLabel();
 
   const hemi=new THREE.HemisphereLight(0x748996,0x100d0b,.34);scene.add(hemi);
   const key=new THREE.SpotLight(0xffd8b8,58,34,.58,.68,1.25);key.position.set(-6.5,13.2,12.8);key.target.position.set(-1.2,5.7,.1);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.00022;scene.add(key,key.target);
@@ -286,16 +298,16 @@ try{
     return new THREE.Vector3(x,y,z+.08);
   }
   function deviceMeta(group,id,title,text,flow='all'){
-    group.userData={id,title,text,flow};
-    group.traverse(o=>{if(o.isMesh){o.userData.deviceRoot=group;pickables.push(o)}});
+    const [titleEn,textEn]=deviceEnglish(id,title,text);group.userData={id,title,text,titleEn,textEn,flow};
+    group.traverse(o=>{if(o.isMesh&&!o.userData.deviceRoot){o.userData.deviceRoot=group;pickables.push(o)}});
   }
   function axisCylinder(parent,r,length,material,x,y,z,axis='z',segments=24){
     const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,length,segments),material);
     if(axis==='x')mesh.rotation.z=Math.PI/2;else if(axis==='z')mesh.rotation.x=Math.PI/2;
     mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
   }
-  function mc4Connector(parent,x,y,z,direction,positive,male){
-    const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);
+  function mc4Connector(parent,x,y,z,direction,positive,male,rotationZ=0){
+    const g=new THREE.Group();g.position.set(x,y,z);g.rotation.z=rotationZ;parent.add(g);
     const shell=new THREE.MeshPhysicalMaterial({color:0x0b0e10,roughness:.73,metalness:.015,clearcoat:.045});
     const shellEdge=new THREE.MeshPhysicalMaterial({color:0x1b2023,roughness:.59,metalness:.04});
     const cavity=new THREE.MeshBasicMaterial({color:0x020304});
@@ -331,7 +343,28 @@ try{
       axisCylinder(g,.050,.118,cavity,direction*.263,0,0,'x',24);
       axisCylinder(g,.025,.046,mat.brass,direction*.235,0,0,'x',18);
     }
-    return new THREE.Vector3(x+direction*.34,y,z);
+    return new THREE.Vector3(direction*.34,0,0).applyAxisAngle(new THREE.Vector3(0,0,1),rotationZ).add(g.position);
+  }
+  function mc4PanelSocket(parent,side,py,z,positive,male){
+    const g=new THREE.Group();g.userData.connectorType='mc4-panel';g.userData.mountSide=side;g.userData.polarity=positive?'+':'−';
+    parent.add(g);
+    // Through-wall socket: seal, panel hex nut, rigid housing and mating nose.
+    // Exact supplier socket envelope remains pending; no external pigtail.
+    axisCylinder(g,.083,.022,mat.blackRubber,side*.661,py,z,'x');
+    axisCylinder(g,.108,.043,mat.blackRubber,side*.690,py,z,'x',6);
+    axisCylinder(g,.074,.17,mat.blackRubber,side*.788,py,z,'x');
+    axisCylinder(g,.080,.024,mat.black,side*.875,py,z,'x');
+    axisCylinder(g,male?.056:.070,.09,mat.blackRubber,side*.928,py,z,'x');
+    axisCylinder(g,male?.034:.046,.036,new THREE.MeshBasicMaterial({color:0x020304}),side*.972,py,z,'x');
+    const mark=new THREE.Mesh(new THREE.TorusGeometry(.075,.004,8,24),positive?mat.red:mat.black);mark.rotation.y=Math.PI/2;mark.position.set(side*.855,py,z);g.add(mark);
+    g.userData.panelMale=male;
+    return new THREE.Vector3(side*.96,py,z);
+  }
+  function matedMC4Lead(parent,socket,side,positive,panelMale){
+    const centre=socket.clone().add(new THREE.Vector3(side*.30,0,0));
+    mc4Connector(parent,centre.x,centre.y,centre.z,-side,positive,!panelMale);
+    const plug=parent.children.at(-1);plug.userData.connectorType='mc4-cable';plug.userData.matingSocket=socket.toArray();plug.userData.panelMale=panelMale;plug.userData.cableMale=!panelMale;
+    return centre.add(new THREE.Vector3(side*.255,0,0));
   }
   function textPlate(parent,lines,w,h,x,y,z,color='#e8eceb',bg=null,font=52){
     const tex=canvasTexture(1024,Math.max(180,Math.round(1024*h/w)),(ctx,cw,ch)=>{
@@ -411,7 +444,7 @@ try{
   const buckOut=terminal(buck,-.4,-1.065,.38,'red');const buckGnd=terminal(buck,0,-1.065,.38,'black');const buckIn=terminal(buck,.4,-1.065,.38,'red');
   deviceMeta(buck,'buck','Buck Boost 800','厂家外形：213 × 120 × 30 mm（竖装）。OUT+ · GND · IN+；原车侧至MG受控充电。','drive');
 
-  const orionSmart=makeBlueDevice({x:3.28,y:6.3,w:mm(187),h:mm(131),d:mm(71),title:'Orion-Tr Smart',subtitle:'24/12–20 · 187 × 131 × 71 mm',id:'orion-smart'});
+  const orionSmart=makeBlueDevice({x:1.90,y:6.3,w:mm(187),h:mm(131),d:mm(71),title:'Orion-Tr Smart',subtitle:'24/12–20 · 187 × 131 × 71 mm',id:'orion-smart'});
   texturePlane(orionSmart,orionSmartFaceMap,1.55,.98,.80,0,.02);
   [-.48,-.16,.16,.48].forEach((x,i)=>terminal(orionSmart,x,-.655,.77,i%2===0?'red':'black',.06));
   const remote=box(.3,.12,.09,mat.white,.58,.5,.79,.02);orionSmart.add(remote);
@@ -458,129 +491,177 @@ try{
   const mppt1=makeMPPT(5.34,6.28,'mppt-1');
   const mppt2=makeMPPT(5.34,4.02,'mppt-2');
   const mppt3=makeMPPT(.02,3.55,'mppt-3',.34);mppt3.position.z=-.14;
-  mppt3.userData.title='MPPT 03（受遮挡）';mppt3.userData.text='位于Buck Boost下方；设备本体弱化，线束保持实体显示。';
+  mppt3.userData.titleEn='MPPT 03 (partly obscured)';mppt3.userData.textEn='Below Buck Boost; body subdued, harness visible.';mppt3.userData.title='MPPT 03（受遮挡）';mppt3.userData.text='位于Buck Boost下方；设备本体弱化，线束保持实体显示。';
 
-  // Ordered lower-right communication zone. It remains part of the V1.1 change set:
-  // RS485→USB 1–3 → powered hub → Windows industrial PC → MOXA EDS-205A → Ekrano GX.
-  // A router is deliberately not installed in the core control LAN; WAN is an optional uplink only.
-  const commBack=box(6.82,2.18,.035,new THREE.MeshPhysicalMaterial({color:0x252d32,roughness:.78,metalness:.24}),3.96,1.72,-.18,.06);equipment.add(commBack);
-  const commRail=box(6.36,.09,.07,mat.frame,4.00,2.72,-.02,.018);equipment.add(commRail);
-  const commTitle=textPlate(equipment,['COMMUNICATION · ISOLATED STATIC LAN'],3.7,.20,3.26,2.82,.02,'#cbd7dc',null,46);
-
-  const usbHub=new THREE.Group();usbHub.position.set(6.58,1.65,.05);equipment.add(usbHub);
-  usbHub.add(box(1.20,.54,.24,new THREE.MeshPhysicalMaterial({color:0x171b1d,roughness:.58,metalness:.32}),0,0,.16,.06));
-  addDecal(usbHub,'POWERED USB HUB','3 × RS485→USB · 1 × UPSTREAM',1.04,.34,.295);
-  const hubPorts=[];[-.36,0,.36].forEach((xx)=>{
-    usbHub.add(box(.18,.10,.045,new THREE.MeshPhysicalMaterial({color:0x485159,roughness:.28,metalness:.82}),xx,.285,.18,.014));
-    usbHub.add(box(.12,.055,.05,new THREE.MeshBasicMaterial({color:0x050708}),xx,.306,.20,.008));
-    hubPorts.push(new THREE.Vector3(6.58+xx,1.965,.28));
-  });
-  const hubUplink=new THREE.Vector3(5.94,1.64,.28),hubDc=new THREE.Vector3(7.22,1.64,.28);
-  usbHub.add(box(.14,.16,.045,new THREE.MeshPhysicalMaterial({color:0x485159,roughness:.28,metalness:.82}),-.62,-.01,.18,.014));
-  usbHub.add(box(.12,.12,.05,new THREE.MeshBasicMaterial({color:0x050708}),.62,-.01,.20,.018));
-  deviceMeta(usbHub,'usb-hub','有源 USB 集线器','RS485→USB 1–3进入三个独立母座；USB上行连接Windows电脑。DC IN供电点与应力释放方式保留现场确认。','signal');
-
-  function makeCommDevice(x,y,w,h,d,title,subtitle,id){
-    const g=new THREE.Group();g.position.set(x,y,.04);equipment.add(g);
-    g.add(box(w,h,d,new THREE.MeshPhysicalMaterial({color:0x151a1e,roughness:.52,metalness:.38,clearcoat:.08}),0,0,d/2,.055));
-    addDecal(g,title,subtitle,w*.86,h*.62,d+.025,'#e5ecee');
-    addMountingScrews(g,w,h,d+.04);
-    deviceMeta(g,id,title,subtitle,'signal');return g;
-  }
-
-  function makeIndustrialPc(){
-    const g=new THREE.Group();g.position.set(4.48,1.48,.04);equipment.add(g);
-    const alu=new THREE.MeshPhysicalMaterial({color:0x111518,roughness:.44,metalness:.72,clearcoat:.045});
-    const edge=new THREE.MeshPhysicalMaterial({color:0x272d31,roughness:.36,metalness:.76});
-    g.add(box(2.45,1.02,.38,alu,0,0,.23,.045));
-    g.add(box(2.72,.18,.055,edge,0,-.55,.07,.025));
-    [-1.26,1.26].forEach(x=>{
-      g.add(box(.19,.40,.055,edge,x,0,.08,.025));
-      [-.12,.12].forEach(y=>{g.add(cylinder(.041,.018,mat.blackRubber,x,y,.118));screw(x,y,.132,g,.62)});
-    });
-    // Dense extrusion fins reproduce the fanless black aluminium chassis in the attachment.
-    for(let i=0;i<20;i++){
-      const x=-1.08+i*.114;
-      if(Math.abs(x)<.17)continue;
-      g.add(box(.048,.58,.095,edge,x,.18,.455,.008));
+  // P04 first-article communications plate. One scene unit = 100 mm.
+  // The vehicle master and unrelated power equipment retain their baseline geometry.
+  const commOrigin=new THREE.Vector3(2.87,.30,-.18);
+  const commAt=(x,y,z=0)=>new THREE.Vector3(commOrigin.x+mm(x),commOrigin.y+mm(y),commOrigin.z+mm(z));
+  const communication=new THREE.Group();equipment.add(communication);
+  const commBack=box(4.50,2.50,.04,new THREE.MeshPhysicalMaterial({color:0x151515,roughness:.68,metalness:.56}),5.12,1.55,-.18,.03);communication.add(commBack);
+  function port(parent,x,y,z,w=.145,h=.12,kind='RJ45',axis='z'){
+    const frame=box(w+.04,h+.04,.038,mat.silver,x,y,z,.008);
+    const opening=box(w,h,.045,mat.blackRubber,x,y-.005,z+.022,.003);
+    if(axis==='x'){frame.rotation.y=Math.PI/2;opening.rotation.y=Math.PI/2;opening.position.set(x+.022,y-.005,z);}
+    if(axis==='-x'){frame.rotation.y=-Math.PI/2;opening.rotation.y=-Math.PI/2;opening.position.set(x-.022,y-.005,z);}
+    if(axis==='-y'){frame.rotation.x=Math.PI/2;opening.rotation.x=Math.PI/2;opening.position.set(x,y-.022,z-.005);}
+    parent.add(frame,opening);
+    if(kind==='RJ45')for(let i=0;i<8;i++){
+      const pin=box(.006,.025,.008,mat.brass,x-w*.33+i*w*.094,y+h*.22,z+.049,0);
+      if(axis==='x')pin.position.set(x+.049,y+h*.22,z-w*.33+i*w*.094);
+      if(axis==='-x')pin.position.set(x-.049,y+h*.22,z+w*.33-i*w*.094);
+      if(axis==='-y')pin.position.set(x-w*.33+i*w*.094,y-.049,z-h*.22);
+      parent.add(pin);
     }
-    g.add(box(.28,.65,.075,alu,0,.16,.448,.014));
-    textPlate(g,['FANLESS INDUSTRIAL PC','i7-1165G7 · 16GB · 512GB'],1.82,.20,0,.37,.506,'#dce3e5','#111518',39);
-    textPlate(g,['STATIC LAN 192.168.8.52','MASK 255.255.255.0'],1.22,.16,-.43,-.39,.506,'#b8d7e5','#111518',36);
-
-    const portMetal=new THREE.MeshPhysicalMaterial({color:0x737d83,roughness:.25,metalness:.84});
-    const portDark=new THREE.MeshBasicMaterial({color:0x020405});
-    const addDb9=(x,y)=>{
-      g.add(box(.27,.11,.045,portMetal,x,y,.455,.015));
-      g.add(box(.18,.060,.050,portDark,x,y,.480,.010));
-      g.add(cylinder(.014,.018,mat.silver,x-.115,y,.490));g.add(cylinder(.014,.018,mat.silver,x+.115,y,.490));
-    };
-    [-.76,-.38,0,.38,.76].forEach((x,i)=>addDb9(x,-.18-(i%2)*.14));
-    addDb9(-.95,-.34);
-    g.add(cylinder(.055,.045,portDark,-1.02,.08,.47));
-    textPlate(g,['DC 12V*'],.27,.075,-1.04,.19,.505,'#d8dddf',null,72);
-    g.add(box(.31,.10,.047,portDark,-.67,.09,.474,.012));
-    g.add(box(.25,.13,.047,new THREE.MeshBasicMaterial({color:0x1c4464}),-.34,.09,.474,.012));
-    [-.04,.16].forEach(x=>{g.add(box(.16,.13,.047,new THREE.MeshBasicMaterial({color:0x1d4b66}),x,.09,.474,.012))});
-    [.42,.67].forEach(x=>{
-      g.add(box(.20,.16,.047,portMetal,x,.09,.474,.010));
-      g.add(box(.14,.10,.052,portDark,x,.07,.500,.006));
-    });
-    [.91,1.06].forEach((x,i)=>g.add(cylinder(.035,.035,new THREE.MeshPhysicalMaterial({color:i?0x82313e:0x56845c,roughness:.42}),x,.08,.486)));
-    const pcUsb=new THREE.Vector3(g.position.x+.16,g.position.y+.09,.57);
-    const pcEth=new THREE.Vector3(g.position.x+.67,g.position.y+.07,.57);
-    deviceMeta(g,'windows-pc','无风扇工业主机','按附件外形复刻：黑色鳍片铝壳、双网口、双USB、HDMI/VGA及6×COM；配置锁定i7-1165G7 / 16GB / 512GB。照片标DC 12V，车载24V版本、整机外形和安装孔待卖方尺寸图确认；控制网固定IP 192.168.8.52。','signal');
-    return {group:g,usb:pcUsb,eth:pcEth};
+    return new THREE.Vector3(x,y,z).add(axis==='x'?new THREE.Vector3(.06,0,0):axis==='-x'?new THREE.Vector3(-.06,0,0):axis==='-y'?new THREE.Vector3(0,-.06,0):new THREE.Vector3(0,0,.06));
   }
-  const industrialPc=makeIndustrialPc();
-  const windowsPc=industrialPc.group,pcUsb=industrialPc.usb,pcEth=industrialPc.eth;
+  function attachMeta(g,key){const d=deviceMessage(key);deviceMeta(g,d.id,d.title,d.text,'signal');Object.assign(g.userData,d);return g;}
+  function mountAt(x,y,r=.032){const p=commAt(x,y,2.7);communication.add(cylinder(r,.03,mat.blackRubber,p.x,p.y,p.z));screw(p.x,p.y,p.z+.027,communication,.58);}
+  [[15,15],[15,125],[15,235],[435,15],[435,125],[435,235]].forEach(([x,y])=>{
+    const p=commAt(x,y,-8);communication.add(cylinder(.06,.12,mat.frame,p.x,p.y,p.z));mountAt(x,y);
+  });
+  const commRail=new THREE.Group();commRail.position.copy(commAt(95,125,7));communication.add(commRail);
+  commRail.add(box(1.40,.35,.015,mat.frame,0,0,0,.005));
+  [-.175,.175].forEach(y=>{commRail.add(box(1.40,.018,.065,mat.frame,0,y,.032,.003));commRail.add(box(1.40,.045,.014,mat.frame,0,y*1.10,.070,.003));});
+  [31,159].forEach(x=>mountAt(x,125,.023));
+  [38,94,105,151].forEach(x=>{const p=commAt(x,125,12);communication.add(box(.05,.46,.10,mat.blackRubber,p.x,p.y,p.z,.008));});
+  const commTitle=textPlate(communication,['CM5 · MOXA · USR-G806w · CERBO GX MK2'],4.05,.14,5.12,2.72,-.14,'#ffffff',null,44);
+  const plateMeta=new THREE.Object3D();plateMeta.userData=deviceMessage('plate');commBack.userData.deviceRoot=plateMeta;pickables.push(commBack);
 
-  function makeMoxaEds205A(){
-    const g=new THREE.Group();g.position.set(2.28,1.70,.04);equipment.add(g);
-    const aluminium=new THREE.MeshPhysicalMaterial({color:0x70797b,roughness:.37,metalness:.78});
-    const face=new THREE.MeshPhysicalMaterial({color:0x171c1e,roughness:.48,metalness:.26});
-    const cyan=new THREE.MeshPhysicalMaterial({color:0x0d8e88,roughness:.42,metalness:.18,clearcoat:.08});
-    g.add(box(.30,1.15,.70,aluminium,0,0,.35,.025));
-    g.add(box(.255,1.08,.035,face,0,0,.716,.012));
-    g.add(box(.245,.98,.016,cyan,0,-.035,.740,.008));
-    g.add(box(.205,.19,.020,face,0,.405,.755,.006));
-    textPlate(g,['MOXA'],.20,.075,0,.46,.770,'#d6eeee',null,92);
-    const switchPorts=[];
-    [.27,.10,-.07,-.24,-.41].forEach((yy,i)=>{
-      g.add(box(.205,.135,.046,new THREE.MeshPhysicalMaterial({color:0x858f92,roughness:.26,metalness:.78}),0,yy,.772,.010));
-      g.add(box(.145,.084,.052,new THREE.MeshBasicMaterial({color:0x020504}),0,yy-.010,.799,.005));
-      textPlate(g,[String(i+1)],.055,.05,-.112,yy,.804,'#dce6e5',null,220);
-      switchPorts.push(new THREE.Vector3(g.position.x,g.position.y+yy-.010,.88));
+  const cm5=new THREE.Group();cm5.position.copy(commAt(...hardware.cm5.xy,16));communication.add(cm5);
+  cm5.add(box(.395,1.36,.92,mat.black,0,0,.46,.026));
+  cm5.add(box(.365,1.32,.024,mat.blackRubber,0,0,.930,.014));
+  [-.13,.13].forEach(x=>[-.60,.60].forEach(y=>screw(x,y,.954,cm5,.36)));
+  // Official face rotated 90° counterclockwise: two columns of six contacts.
+  // Left top→bottom: GND3/B3/A3/GND2/B2/A2; right: GND1/B1/A1/GND0/B0/A0.
+  const cm5Rs=[],cm5Terminals=[];
+  [-.087,.087].forEach(x=>cm5.add(box(.073,.35,.09,mat.blackRubber,x,.43,.985,.005)));
+  for(let channel=0;channel<4;channel++){
+    const x=channel<2?.087:-.087,base=channel%2===0?.287:.461;
+    const pins={};
+    ['a','b','gnd'].forEach((key,j)=>{
+      const y=base+j*.052;
+      cm5.add(box(.047,.024,.020,mat.orange,x,y,1.044,.004));
+      cm5.add(cylinder(.016,.017,mat.blackRubber,x,y,1.063));
+      pins[key]=new THREE.Vector3(x,y,1.075).add(cm5.position);
+      // Readability annotations sit in front of the ferrules; contact positions stay physical.
+      textPlate(cm5,[key==='a'?`R/A${channel}`:key==='b'?`T/B${channel}`:'GND'],.083,.034,x+(x>0?.068:-.068),y+.024,1.46,'#ffffff','#111820',230);
     });
-    [-.05,.05].forEach((x,i)=>g.add(cylinder(.018,.025,new THREE.MeshPhysicalMaterial({color:i?0x355040:0x5bc36d,emissive:i?0x101b13:0x248a3b,emissiveIntensity:.7}),x,.355,.783)));
-    textPlate(g,['P1  P2'],.17,.048,0,.35,.804,'#dce6e5',null,82);
-    textPlate(g,['EDS-205A','5×10/100M'],.205,.115,0,-.515,.804,'#dce6e5',null,90);
-    // Four-contact redundant power terminal and rear DIN-rail latch.
-    const greenTerm=new THREE.MeshPhysicalMaterial({color:0x2e7d49,roughness:.50,metalness:.05});
-    [-.09,-.03,.03,.09].forEach(x=>{g.add(box(.052,.10,.10,greenTerm,x,.625,.36,.008));g.add(cylinder(.014,.018,mat.silver,x,.642,.417))});
-    g.add(box(.11,.64,.055,mat.frame,.21,0,.30,.014));
-    deviceMeta(g,'ethernet-switch','MOXA EDS-205A','官方外形30 × 115 × 70 mm；5个10/100BaseT(X) RJ45；12/24/48 VDC双路冗余输入；非网管DIN导轨交换机。固定IP由PC和Ekrano GX端设置，交换机本身不分配地址。','signal');
-    return {group:g,ports:switchPorts};
+    cm5Terminals[channel]=pins;cm5Rs[channel]=pins.b.clone();
   }
-  const moxa=makeMoxaEds205A();
-  const netSwitch=moxa.group,switchPorts=moxa.ports;
+  const cm5Eth0=port(cm5,0,.075,.97,.15,.13),cm5Eth1=port(cm5,0,-.145,.97,.15,.13);
+  textPlate(cm5,['ETH0'],.25,.047,0,.176,.962,'#ffffff',null,60);
+  textPlate(cm5,['ETH1'],.25,.047,0,-.041,.962,'#ffffff',null,60);
+  [-.10,0,.10].forEach((x,i)=>[-.40,-.47].forEach((y,j)=>cm5.add(cylinder(.017,.017,i===j?mat.green:mat.red,x,y,.948))));
+  textPlate(cm5,['IPCBOX','CM5-A'],.30,.13,0,-.58,.960,'#ffffff',null,48);
+  [.25,.46,.60,.77].forEach((z,i)=>port(cm5,0,-.69,z,.13,.054,i===0?'HDMI':'USB','-y'));
+  const cm5Dc=new THREE.Vector3(cm5.position.x,cm5.position.y-.73,cm5.position.z+.105);
+  cm5.add(box(.29,.08,.095,new THREE.MeshStandardMaterial({color:0x397d4c}),0,-.70,.10,.005));
+  cm5.add(box(.10,.64,.065,mat.frame,0,0,-.035,.01));attachMeta(cm5,'cm5');
 
-  // Ekrano GX is installed outside this electrical-bay view. Keep only its cable endpoint; do not render a placeholder device.
-  const gxEth=new THREE.Vector3(1.63,1.46,.29);
-  const v11Comm=[commBack,commRail,commTitle,usbHub,windowsPc,netSwitch];
+  const netSwitch=new THREE.Group();netSwitch.position.copy(commAt(...hardware.moxa.xy,16));communication.add(netSwitch);
+  netSwitch.add(box(.30,1.15,.70,new THREE.MeshStandardMaterial({color:0x747e81,metalness:.78,roughness:.34}),0,0,.35,.018));
+  netSwitch.add(box(.26,1.08,.020,new THREE.MeshStandardMaterial({color:0x1d2528}),0,0,.714,.01));
+  netSwitch.add(box(.245,.96,.009,new THREE.MeshStandardMaterial({color:0x087c78}),0,-.025,.73,.005));
+  textPlate(netSwitch,['MOXA'],.22,.071,0,.473,.75,'#ffffff',null,86);
+  const switchPorts=[.28,.105,-.07,-.245,-.42].map((y,i)=>{textPlate(netSwitch,[String(i+1)],.04,.04,-.121,y,.79,'#ffffff',null,96);return port(netSwitch,0,y,.752,.145,.084).add(netSwitch.position);});
+  textPlate(netSwitch,['EDS-205A'],.235,.055,0,-.53,.785,'#ffffff',null,52);
+  [-.05,.05].forEach(x=>netSwitch.add(cylinder(.013,.020,mat.green,x,.37,.756)));
+  [-.09,-.03,.03,.09].forEach(x=>{netSwitch.add(box(.052,.075,.10,new THREE.MeshStandardMaterial({color:0x377b47}),x,.609,.35,.004));screw(x,.607,.41,netSwitch,.24);});
+  netSwitch.add(box(.12,.68,.088,mat.frame,0,0,-.044,.012));
+  const moxaDc=new THREE.Vector3(netSwitch.position.x-.05,netSwitch.position.y+.655,netSwitch.position.z+.35);attachMeta(netSwitch,'moxa');
+
+  const usr=new THREE.Group();usr.position.copy(commAt(...hardware.router.xy,3));communication.add(usr);
+  usr.add(box(1.02,1.04,.28,new THREE.MeshPhysicalMaterial({color:0x181818,metalness:.64,roughness:.49}),0,0,.14,.028));
+  [-.57,.57].forEach(x=>{usr.add(box(.12,.40,.03,mat.frame,x,0,.022,.012));[-.125,.125].forEach(y=>screw(x,y,.058,usr,.43));});
+  for(let i=0;i<9;i++)usr.add(box(.021,.76,.028,mat.blackRubber,-.41+i*.10,0,.286,.002));
+  textPlate(usr,['USR-G806w','4G / Wi-Fi ROUTER'],.83,.26,0,.14,.313,'#ffffff','#181818',51);
+  const usrLan=port(usr,-.26,-.535,.17,.145,.105,'RJ45','-y').add(usr.position);
+  port(usr,0,-.535,.17,.145,.105,'RJ45','-y');
+  const usrDc=new THREE.Vector3(usr.position.x+.31,usr.position.y-.585,usr.position.z+.16);
+  usr.add(box(.145,.08,.10,new THREE.MeshStandardMaterial({color:0x377b47}),.31,-.55,.16,.006));
+  [-.36,0,.36].forEach(x=>{
+    usr.add(cylinder(.03,.055,mat.brass,x,.543,.145,0));
+    usr.add(cylinder(.035,.13,mat.blackRubber,x,.63,.145,0));
+    usr.add(cylinder(.027,.64,mat.blackRubber,x,1.015,.145,0));
+  });
+  textPlate(usr,['LAN','WAN/LAN','DC'],.90,.085,0,-.41,.309,'#bebebe',null,49);attachMeta(usr,'router');
+
+  const cerbo=new THREE.Group();cerbo.position.copy(commAt(...hardware.cerbo.xy,3));communication.add(cerbo);
+  const cerboBlue=new THREE.MeshPhysicalMaterial({color:0x0d75a0,roughness:.48,metalness:.03,clearcoat:.10});
+  cerbo.add(box(.78,1.54,.48,cerboBlue,0,0,.24,.046));
+  [-.29,.29].forEach(x=>[-.715,.715].forEach(y=>{cerbo.add(box(.095,.093,.032,cerboBlue,x,y,.035,.01));screw(x,y,.064,cerbo,.42);}));
+  textPlate(cerbo,['victron energy','CERBO GX MK2'],.67,.26,0,.31,.488,'#ffffff',null,44);
+  // Opposed interface banks are mounted on the side faces, never on the label face.
+  const cerboEth=port(cerbo,.399,-.64,.14,.145,.12,'RJ45','x').add(cerbo.position);
+  port(cerbo,.399,.13,.14,.14,.060,'HDMI','x');
+  [.59,.44,.29].forEach(y=>port(cerbo,.399,y,.14,.125,.061,'USB','x'));
+  textPlate(cerbo,['USB ×3','HDMI','ETHERNET'],.64,.21,0,-.12,.491,'#ffffff',null,39);
+  const cerboEnergyPorts=[];
+  [.55,.37,-.07,-.25,-.49,-.67].forEach(y=>cerboEnergyPorts.push(port(cerbo,.399,y,.35,.13,.10,'RJ45','x').add(cerbo.position)));
+  [-.12,-.31,-.50].forEach(y=>port(cerbo,.399,y,.14,.052,.04,'VE.Direct','x'));
+  [.60,.34,.08].forEach(y=>{cerbo.add(box(.06,.20,.12,new THREE.MeshStandardMaterial({color:0x377b47}),-.405,y,.18,.004));});
+  [-.20,-.40].forEach(y=>cerbo.add(box(.065,.16,.12,new THREE.MeshStandardMaterial({color:0x377b47}),-.405,y,.28,.004)));
+  cerbo.add(box(.009,.20,.032,mat.blackRubber,-.398,.60,.38,.001));
+  const cerboDc=new THREE.Vector3(cerbo.position.x-.445,cerbo.position.y-.64,cerbo.position.z+.27);
+  cerbo.add(box(.065,.14,.115,new THREE.MeshStandardMaterial({color:0x377b47}),-.425,-.64,.27,.004));
+  attachMeta(cerbo,'cerbo');
+
+  const fuse=new THREE.Group();fuse.position.copy(commAt(...hardware.fuse.xy,3));communication.add(fuse);
+  fuse.add(box(.93,.44,.20,mat.blackRubber,0,0,.10,.025));
+  fuse.add(box(.80,.27,.104,new THREE.MeshPhysicalMaterial({color:0xc9d6de,transparent:true,opacity:.16,roughness:.25,depthWrite:false}),0,0,.272,.012));
+  fuse.add(box(.79,.027,.023,mat.brass,0,-.084,.216,.004));
+  function ringLug(x,y,input=false){
+    const hole=input?.025:.020;
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(hole+.009,.009,8,24),mat.silver);ring.position.set(x,y,.235);fuse.add(ring);
+    axisCylinder(fuse,hole,.075,mat.brass,x,y,.248,'z');
+    axisCylinder(fuse,hole+.012,.014,mat.silver,x,y,.282,'z',6);
+    axisCylinder(fuse,.018,.065,mat.silver,input?x-.057:x,input?y:y-.057,.235,input?'x':'y');
+    axisCylinder(fuse,.023,.042,mat.red,input?x-.097:x,input?y:y-.097,.235,input?'x':'y');
+    return new THREE.Vector3(input?x-.118:x,input?y:y-.118,.235).add(fuse.position);
+  }
+  const fusePorts=[];
+  [-.315,-.105,.105,.315].forEach((x,i)=>{
+    fuse.add(box(.14,.12,.09,new THREE.MeshPhysicalMaterial({color:0x886022,transparent:true,opacity:.72,roughness:.35}),x,-.065,.24,.008));
+    fusePorts.push(ringLug(x,-.16));
+    textPlate(fuse,[['CM5','MOXA','USR','GX'][i]],.17,.050,x,-.09,.326,'#ffffff',null,160);
+  });
+  const fusePositiveInput=ringLug(-.44,.06,true);
+  textPlate(fuse,['+ IN / 4 FUSED OUT'],.77,.065,0,.095,.31,'#ffffff',null,48);
+  [-.33,.33].forEach(x=>screw(x,0,.225,fuse,.43));attachMeta(fuse,'fuse');
+  fuse.userData.powerTopology={positiveInput:fusePositiveInput,positiveOutputs:fusePorts};
+  // Supplied LT-14 39.3×23.3×15.43 mm, adhered beside the holder.
+  const negativeDistributor=new THREE.Group();negativeDistributor.position.copy(commAt(...hardware.negative.xy,3));communication.add(negativeDistributor);
+  const lt=negativeDistributor,ltGray=new THREE.MeshStandardMaterial({color:0x858b8d,roughness:.68});
+  lt.add(box(.233,.393,.008,mat.blackRubber,0,0,.004,.006));
+  lt.add(box(.233,.25,.1543,ltGray,0,-.0715,.085,.018));
+  lt.add(box(.09,.143,.1543,ltGray,0,.125,.085,.014));
+  const negativePorts=[];
+  [-.084,-.028,.028,.084].forEach(x=>{
+    lt.add(box(.037,.15,.018,mat.orange,x,-.069,.172,.005));
+    axisCylinder(lt,.018,.032,mat.blackRubber,x,-.205,.080,'y');
+    negativePorts.push(new THREE.Vector3(x,-.2215,.080).add(lt.position));
+  });
+  lt.add(box(.041,.094,.018,mat.orange,0,.137,.172,.005));
+  axisCylinder(lt,.019,.032,mat.blackRubber,0,.205,.080,'y');
+  const negativeInput=new THREE.Vector3(0,.2215,.080).add(lt.position);
+  textPlate(lt,['LT-14'],.21,.055,0,-.078,.188,'#ffffff',null,185);
+  textPlate(lt,['LT-14 · 1 IN / 4 OUT'],.50,.075,.29,.30,1.40,'#ffffff','#111820',150);
+  attachMeta(lt,'negative');lt.userData.powerTopology={input:negativeInput,outputs:negativePorts,mount:'adhesive'};
+  const v11Comm=[communication];
 
   // Constant-current enclosure and adapter are rebuilt from YG-L04A-1171-000:
   // overall 158 × 104 × 58.8; body 130 × 100 × 50; I/O Ø16.5, spacing 33;
-  // new 146 × 73 mounting pattern on a 196 × 120 × 3 adapter using old 176 × 71.5 centres.
-  function makeConstantBoard(y,label,id,channel){
-    const g=new THREE.Group();g.position.set(5.55,y,.03);replacements.add(g);
+  // new 146 × 73 mounting pattern on a 196 × 150 × 4 adapter using old 132 × 122 centres.
+  function makeConstantBoard(x,y,label,id,channel){
+    const g=new THREE.Group();g.position.set(x,y,.03);replacements.add(g);
     const silver=new THREE.MeshPhysicalMaterial({color:0xaeb3b3,roughness:.29,metalness:.82,clearcoat:.13,clearcoatRoughness:.42,normalMap:micro,normalScale:new THREE.Vector2(.035,.035)});
     const adapterMat=new THREE.MeshPhysicalMaterial({color:0x30373b,roughness:.60,metalness:.58});
     const gasketMat=new THREE.MeshPhysicalMaterial({color:0x131719,roughness:.82,metalness:.04});
 
-    g.add(box(1.96,1.20,.03,adapterMat,0,0,.02,.06));
-    [[-.88,-.3575],[-.88,.3575],[.88,-.3575],[.88,.3575]].forEach(([x,hy])=>{
-      g.add(box(.08,.12,.018,mat.blackRubber,x,hy,.042,.035));
+    g.add(box(1.96,1.50,.04,adapterMat,0,0,.02,.03));
+    [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,hy])=>{
+      g.add(cylinder(.0325,.018,mat.blackRubber,x,hy,.045));
       screw(x,hy,.065,g,.74);
     });
     g.add(box(1.34,1.04,.035,silver,0,0,.075,.05));
@@ -596,68 +677,90 @@ try{
     [[-.61,-.46],[-.61,.46],[.61,-.46],[.61,.46]].forEach(([x,hy])=>screw(x,hy,.618,g,.82));
     [[-.62,-.43],[-.62,.43],[.62,-.43],[.62,.43]].forEach(([x,hy])=>g.add(box(.03,.07,.48,silver,x,hy,.335,.008)));
 
-    const glandMat=new THREE.MeshPhysicalMaterial({color:0x252b2f,roughness:.42,metalness:.64});
-    [-1,1].forEach(side=>[-.165,.165].forEach(py=>{
-      axisCylinder(g,.0825,.018,new THREE.MeshBasicMaterial({color:0x080a0b}),side*.658,py,.35,'x',24);
-      axisCylinder(g,.090,.055,glandMat,side*.675,py,.35,'x',6);
-      axisCylinder(g,.070,.105,mat.blackRubber,side*.715,py,.35,'x',18);
-      const ring=new THREE.Mesh(new THREE.TorusGeometry(.066,.010,8,28),mat.blackRubber);ring.rotation.y=Math.PI/2;ring.position.set(side*.765,py,.35);g.add(ring);
-    }));
-    axisCylinder(g,.0825,.018,new THREE.MeshBasicMaterial({color:0x080a0b}),0,.508,.35,'y',24);
-    axisCylinder(g,.090,.055,glandMat,0,.528,.35,'y',6);
-    axisCylinder(g,.070,.115,mat.blackRubber,0,.575,.35,'y',18);
+    // Schematic waterproof panel socket plus separate mating cable plug.
+    // Envelope and pin order remain pending; this is not an MC4 data connector.
+    const socket=new THREE.Group(),plug=new THREE.Group();g.add(socket,plug);
+    socket.userData.connectorType='rs485-panel';plug.userData.connectorType='rs485-cable';
+    socket.userData.pinout='pending';plug.userData.pinout='pending';
+    axisCylinder(socket,.0825,.035,mat.blackRubber,0,.516,.35,'y');
+    axisCylinder(socket,.091,.043,mat.frame,0,.539,.35,'y',6);
+    axisCylinder(socket,.069,.08,mat.blackRubber,0,.59,.35,'y');
+    axisCylinder(plug,.086,.11,mat.blackRubber,0,.677,.35,'y');
+    for(let k=0;k<5;k++)axisCylinder(plug,.090,.007,mat.black,0,.634+k*.020,.35,'y');
+    axisCylinder(plug,.049,.10,mat.blackRubber,0,.778,.35,'y');
 
-    const outN=mc4Connector(g,-1.00,.165,.35,-1,false,false);
-    const outP=mc4Connector(g,-1.00,-.165,.35,-1,true,true);
-    const inN=mc4Connector(g,1.00,.165,.35,1,false,true);
-    const inP=mc4Connector(g,1.00,-.165,.35,1,true,false);
-    cable(g,0x101417,.036,[[-.765,.165,.35],[-.86,.165,.35],[-.89,.165,.35]],'OUT− MC4尾线');
-    cable(g,0xa91e27,.036,[[-.765,-.165,.35],[-.86,-.165,.35],[-.89,-.165,.35]],'OUT+ MC4尾线');
-    cable(g,0x101417,.036,[[.765,.165,.35],[.86,.165,.35],[.89,.165,.35]],'IN− MC4尾线');
-    cable(g,0xa91e27,.036,[[.765,-.165,.35],[.86,-.165,.35],[.89,-.165,.35]],'IN+ MC4尾线');
+    const outN=mc4PanelSocket(g,-1,.165,.35,false,false);
+    const outP=mc4PanelSocket(g,-1,-.165,.35,true,true);
+    const inN=mc4PanelSocket(g,1,.165,.35,false,true);
+    const inP=mc4PanelSocket(g,1,-.165,.35,true,false);
 
-    textPlate(g,[label,'CONSTANT CURRENT',`PV${channel} · ${String(channel).padStart(2,'0')}`],.84,.36,-.10,.10,.616,'#293136',null,54);
+    textPlate(g,[`BOARD ${channel}`,'CONSTANT CURRENT',`PV${channel} · ${String(channel).padStart(2,'0')}`],.84,.36,-.10,.10,.616,'#293136',null,54);
     textPlate(g,['FS-FA27 (L) 130-100-50','YG-L04A-1171-000'],.86,.18,.08,-.17,.616,'#30373b',null,42);
     textPlate(g,['OUT−     OUT+'],.50,.10,-.36,-.39,.618,'#30373b',null,54);
     textPlate(g,['IN−       IN+'],.50,.10,.36,-.39,.618,'#30373b',null,54);
     g.add(box(.30,.012,.004,mat.orange,-.40,-.275,.621,0));
     textPlate(g,['RS485 / DATA'],.34,.085,0,.415,.620,'#30373b',null,48);
 
-    deviceMeta(g,id,label+' 恒流充电板',`第${channel}路。图纸总成158 × 104 × 58.8 mm；主体130 × 100 × 50 mm；左右电源孔Ø16.5、孔距33 mm；4×Ø4.5，Ø7.5沉孔深3；经196 × 120 × 3 mm转接板固定。MC4按Original MC4外形、压紧螺母、双锁扣与内缩触点建模；最终壳体/金属端子性别由线束BOM锁定。`,'pv');
+    deviceMeta(g,id,label+' 恒流充电板',`第${channel}路。图纸总成158 × 104 × 58.8 mm；主体130 × 100 × 50 mm；左右电源孔Ø16.5、孔距33 mm（图纸）；壳体直接安装MC4面板座，线束端MC4与面板座配套插合；准确座体型号待实物核对；4×Ø4.5，Ø7.5沉孔深3；经196 × 150 × 4 mm转接板固定。本批次壳体、线束和MC4端子性别尚待实物照复核；当前为图纸模型。`,'pv');
     g.userData.terminals={
       outN:outN.clone().add(g.position),outP:outP.clone().add(g.position),
       inN:inN.clone().add(g.position),inP:inP.clone().add(g.position)
     };
-    g.userData.signal=new THREE.Vector3(0,.72,.35).add(g.position);
+    g.userData.signal=new THREE.Vector3(0,.828,.35).add(g.position);
     return g;
   }
-  const cc1=makeConstantBoard(6.53,'恒流板 1','constant-aiko',1);
-  const cc2=makeConstantBoard(5.08,'恒流板 2','constant-ja',2);
-  const cc3=makeConstantBoard(3.63,'恒流板 3','constant-jk',3);
+  // Approved relationships; model spacing is not a fabrication datum.
+  const boardRightX=5.50,boardUpperY=orionSmart.position.y,boardLowerY=4.00;
+  const cc1=makeConstantBoard(boardRightX,boardUpperY,'恒流板 1','constant-aiko',1);
+  const cc2=makeConstantBoard(boardRightX,boardLowerY,'恒流板 2','constant-ja',2);
+  const cc3=makeConstantBoard(orionSmart.position.x,boardLowerY,'恒流板 3','constant-jk',3);
 
   // Hole-pattern overlay for the middle board: green = new 146 × 73 pattern;
-  // amber = retained MPPT 176 × 71.5 slot centres on the adapter plate.
+  // amber = retained MPPT 132 × 122 slot centres on the adapter plate.
   const dimNew=new THREE.MeshBasicMaterial({color:0x67d798,transparent:true,opacity:.88});
   const dimOld=new THREE.MeshBasicMaterial({color:0xd2a43e,transparent:true,opacity:.72});
   [[-.73,-.365],[-.73,.365],[.73,-.365],[.73,.365]].forEach(([x,hy])=>{
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(.052,.012,8,28),dimNew);ring.position.set(5.55+x,5.08+hy,1.02);dimensions.add(ring);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.052,.012,8,28),dimNew);ring.position.set(cc2.position.x+x,cc2.position.y+hy,1.02);dimensions.add(ring);
   });
-  [[-.88,-.3575],[-.88,.3575],[.88,-.3575],[.88,.3575]].forEach(([x,hy])=>dimensions.add(box(.08,.12,.018,dimOld,5.55+x,5.08+hy,1.01,.035)));
+  [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,hy])=>dimensions.add(cylinder(.0325,.018,dimOld,cc2.position.x+x,cc2.position.y+hy,1.01)));
   const dimLine=(a,b,material)=>{const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]);dimensions.add(new THREE.Line(geo,new THREE.LineBasicMaterial({color:material,transparent:true,opacity:.9})));};
-  dimLine([4.82,5.68,1.04],[6.28,5.68,1.04],0x67d798);
-  dimLine([6.42,4.715,1.04],[6.42,5.445,1.04],0x67d798);
-  dimLine([4.67,4.39,1.04],[6.43,4.39,1.04],0xd2a43e);
-  textPlate(dimensions,['新孔 146 ±0.1 × 73 ±0.1','4×Ø4.5 / Ø7.5深3'],1.70,.30,5.55,5.87,1.05,'#bff2d4','#13231c',42);
-  textPlate(dimensions,['旧MPPT孔位 176 × 71.5','转接板 196 × 120 × 3'],1.72,.30,5.55,4.18,1.05,'#f0d58b','#272113',42);
+  dimLine([cc2.position.x-.73,cc2.position.y+.60,1.04],[cc2.position.x+.73,cc2.position.y+.60,1.04],0x67d798);
+  dimLine([cc2.position.x+.87,cc2.position.y-.365,1.04],[cc2.position.x+.87,cc2.position.y+.365,1.04],0x67d798);
+  dimLine([cc2.position.x-.66,cc2.position.y-.78,1.04],[cc2.position.x+.66,cc2.position.y-.78,1.04],0xd2a43e);
+  textPlate(dimensions,['NEW 146 ±0.1 × 73 ±0.1','4×Ø4.5 / Ø7.5 DEPTH 3'],1.70,.30,cc2.position.x,cc2.position.y+.79,1.05,'#bff2d4','#13231c',42);
+  textPlate(dimensions,['OLD MPPT 132 × 122','ADAPTER 196 × 150 × 4'],1.72,.30,cc2.position.x,cc2.position.y-.90,1.05,'#f0d58b','#272113',42);
 
   const source=new THREE.Group();source.position.set(3.35,.38,.1);equipment.add(source);source.add(box(2.05,.56,.35,mat.black,0,0,.19,.09));addDecal(source,'VEHICLE SIDE','alternator / starter bus',1.8,.4,.38);
   const sourceP=terminal(source,-.68,0,.39,'red');const sourceN=terminal(source,-.42,0,.39,'black');deviceMeta(source,'vehicle-source','原车电源侧','发电机 / 启动电池母线','drive');
 
-  function cable(group,color,radius,pts,name=''){
-    const curve=new THREE.CatmullRomCurve3(pts.map(p=>p.isVector3?p:new THREE.Vector3(...p)),false,'centripetal',.45);
+  function orderedCurve(points,bend=.12){
+    const path=new THREE.CurvePath();let current=points[0];
+    for(let i=1;i<points.length-1;i++){
+      const p=points[i],before=p.clone().add(points[i-1].clone().sub(p).normalize().multiplyScalar(Math.min(bend,p.distanceTo(points[i-1])*.35)));
+      const after=p.clone().add(points[i+1].clone().sub(p).normalize().multiplyScalar(Math.min(bend,p.distanceTo(points[i+1])*.35)));
+      if(current.distanceTo(before)>.00001)path.add(new THREE.LineCurve3(current,before));
+      path.add(new THREE.QuadraticBezierCurve3(before,p,after));current=after;
+    }
+    path.add(new THREE.LineCurve3(current,points.at(-1)));path.points=points;return path;
+  }
+  function cable(group,color,radius,pts,name='',options={}){
+    const routePoints=pts.map(p=>p.isVector3?p:new THREE.Vector3(...p));
+    const curve=options.ordered?orderedCurve(routePoints):new THREE.CatmullRomCurve3(routePoints,false,'centripetal',.45);
     const geo=new THREE.TubeGeometry(curve,Math.max(48,pts.length*14),radius,12,false);
     const material=new THREE.MeshPhysicalMaterial({color,roughness:.48,metalness:.01,clearcoat:.2,clearcoatRoughness:.38});
-    const mesh=new THREE.Mesh(geo,material);mesh.castShadow=true;mesh.userData.cableName=name;group.add(mesh);return mesh;
+    const mesh=new THREE.Mesh(geo,material);mesh.castShadow=true;mesh.userData.cableName=name;group.add(mesh);
+    mesh.userData.cablePoints=routePoints.map(p=>p.toArray());mesh.userData.orderedRoute=!!options.ordered;
+    if(options.outline){
+      // Back faces draw only the edge, keeping the jacket black. Depth testing
+      // stays enabled so this never shows a hidden wire through a device.
+      const edge=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(48,pts.length*14),radius+.006,12,false),new THREE.MeshBasicMaterial({color:0xa6b1b9,side:THREE.BackSide,transparent:true,opacity:.60,depthWrite:false}));
+      edge.userData.cableOutline=true;group.add(edge);
+    }
+    const meta=new THREE.Object3D();meta.userData=cableProfile(name,`cable-${pickables.length}`,options);
+    mesh.userData.deviceRoot=meta;pickables.push(mesh);
+    const hit=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(48,pts.length*14),Math.max(radius+.022,.045),8,false),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false}));
+    hit.userData.deviceRoot=meta;hit.userData.isCableHit=true;group.add(hit);pickables.push(hit);
+    return mesh;
   }
   const R=0xa91e27,K=0x101417,O=0xc67328;
   function endBoot(group,p,color,r=.08){const m=color===R?mat.red:color===O?mat.orange:mat.blackRubber;group.add(cylinder(r,.14,m,p.x,p.y,p.z-.03));}
@@ -668,7 +771,7 @@ try{
   const mgn=mgBattery.minus.clone().add(mg.position),mgc=mgBattery.can.clone().add(mg.position);
   cable(flowGroups.battery,R,.068,[bp,[bp.x+.12,4.23,1.78],[-1.38,4.50,1.52],[-1.36,4.76,1.22],[-6.42,4.76,1.10],[-6.48,5.48,1.10],mgLeftLower], 'Battery +（右上端）→ MG 左下端子');
   cable(flowGroups.battery,K,.068,[bn,[bn.x-.12,4.20,1.72],[-6.25,4.42,1.32],[-6.30,5.05,1.08],[-5.72,5.12,1.02],mgn], 'Battery −（左侧独立）→ MG Batteries −');
-  cable(flowGroups.battery,O,.036,[bc,[bc.x+.10,4.14,1.65],[-3.92,4.52,1.28],mgc], 'Battery CAN');
+  cable(flowGroups.battery,O,.036,[bc,[bc.x+.10,4.14,1.65],[-3.92,4.52,1.28],mgc], 'MG HE 300 Battery CAN → MG Master LV Battery CAN');
   [bp,bn,bc,mgLeftLower,mgn,mgc].forEach((p,i)=>endBoot(flowGroups.battery,p,i%3===2?O:i%3===0?R:K,i%3===2?.055:.08));
 
   // LOAD to busbars: positive leaves from the upper MG side terminal; negative leaves
@@ -686,60 +789,85 @@ try{
   cable(flowGroups.drive,R,.06,[bo,[-.52,4.58,.86],[-.78,4.92,.9],mgPairs[3].plus],'Buck OUT+ → MG 第4组');
   cable(flowGroups.drive,K,.06,[bg,[.02,4.45,.72],[-.34,4.85,.8],mgPairs[3].minus],'Buck GND → MG 第4组');
 
-  // V1.1 power orientation follows the approved installation drawing:
-  // left OUT bends downward to MG groups 1–3; right IN bends upward to the PV sources.
+  // Left OUT: axial straight exit, then downward. Each channel uses its
+  // own pair of parallel lanes, then rises beside the battery into MG.
   [cc1,cc2,cc3].forEach((board,i)=>{
-    const t=board.userData.terminals, target=mgPairs[i];
-    const outP=mc4Connector(flowGroups.pv,t.outP.x-.15,t.outP.y,t.outP.z,-1,true,false);
-    const outN=mc4Connector(flowGroups.pv,t.outN.x-.15,t.outN.y,t.outN.z,-1,false,true);
-    const bottom=.52+i*.19,riseX=-1.30+i*.16,z=.96+i*.05,downX=4.28+i*.10,clearY=3.02+i*.11;
-    const redRoute=[outP,[downX,t.outP.y,.68],[downX,clearY,z],[.34,clearY-.04,z],[.30,bottom+.14,z],[riseX+.10,bottom,z],[riseX,3.72,z],[riseX,4.66,.86],target.plus];
-    const blackRoute=[outN,[downX+.12,t.outN.y,.61],[downX+.12,clearY-.09,z-.12],[.18,clearY-.13,z-.12],[.16,bottom-.06,z-.12],[riseX-.08,bottom-.08,z-.12],[riseX-.16,3.62,z-.10],[riseX-.12,4.58,.74],target.minus];
-    cable(flowGroups.pv,R,.055,redRoute,`${board.userData.title} OUT+ → 左侧下行 → MG第${i+1}组`);
-    cable(flowGroups.pv,K,.055,blackRoute,`${board.userData.title} OUT− → 左侧下行 → MG第${i+1}组`);
+    const t=board.userData.terminals,target=mgPairs[i];
+    const outP=matedMC4Lead(flowGroups.pv,t.outP,-1,true,true);
+    const outN=matedMC4Lead(flowGroups.pv,t.outN,-1,false,false);
+    const yP=3.38-i*.20,yN=yP-.09,z=.92+i*.16;
+    const leadX=outP.x-.16,returnX=outN.x-.28,riseX=-.94-i*.24;
+    const firstP=i===0?[[leadX,outP.y,z],[leadX,5.35,z],[.88,5.35,z],[.88,yP,z]]:[[leadX,outP.y,z],[leadX,yP,z]];
+    const firstN=i===0?[[returnX,outN.y,z+.08],[returnX,5.23,z+.08],[1.02,5.23,z+.08],[1.02,yN,z+.08]]:[[returnX,outN.y,z+.08],[returnX,yN,z+.08]];
+    cable(flowGroups.pv,R,.032,[outP,...firstP,[riseX,yP,z],[riseX,4.46+i*.18,z],[target.plus.x,4.46+i*.18,z],[target.plus.x,target.plus.y-.10,z],target.plus],`恒流板 ${i+1} OUT+ → MG第${i+1}组 +`,{ordered:true,nameEn:`Board ${i+1} OUT+ → MG pair ${i+1} +`});
+    cable(flowGroups.pv,K,.032,[outN,...firstN,[riseX-.10,yN,z+.08],[riseX-.10,4.55+i*.18,z+.08],[target.minus.x,4.55+i*.18,z+.08],[target.minus.x,target.minus.y-.10,z+.08],target.minus],`恒流板 ${i+1} OUT− → MG第${i+1}组 −`,{ordered:true,outline:true,nameEn:`Board ${i+1} OUT− → MG pair ${i+1} −`});
   });
 
-  // RS485 exits the top gland, turns right, drops in three separate lanes, passes
-  // through three RS485→USB adapters, then enters the powered USB hub.
+  // Three gray cable jackets; exposed RGB cores terminate in actual CH0–CH2 contacts.
+  const rs485Breakouts=[];
   [cc1,cc2,cc3].forEach((board,i)=>{
-    const s=board.userData.signal,target=hubPorts[i],adapterX=6.07+i*.36,adapterY=2.43,laneX=6.83+i*.18;
-    const adapterIn=new THREE.Vector3(adapterX,adapterY+.12,.50),adapterOut=new THREE.Vector3(adapterX,adapterY-.12,.50);
-    cable(flowGroups.signal,0x090b0d,.022,[s,[s.x,s.y+.12,.56],[laneX,s.y+.12,.62],[laneX,adapterY+.28,.60],adapterIn],`RS485 ${i+1} → RS485→USB ${i+1}`);
-    cable(flowGroups.signal,0x090b0d,.022,[adapterOut,[adapterX,2.23,.48],[target.x,target.y+.12,.42],target],`RS485→USB ${i+1} → 有源USB集线器`);
-    const adapter=box(.30,.20,.10,new THREE.MeshPhysicalMaterial({color:0x22282c,roughness:.5,metalness:.18}),adapterX,adapterY,.48,.025);flowGroups.signal.add(adapter);
-    const adapterLabel=canvasTexture(320,120,(ctx,w,h)=>{ctx.clearRect(0,0,w,h);ctx.fillStyle='#dfe7ea';ctx.textAlign='center';ctx.font='600 38px Arial';ctx.fillText(`RS485→USB ${i+1}`,w/2,76)});
-    texturePlane(flowGroups.signal,adapterLabel,.26,.10,.545,adapterX,adapterY);
-    flowGroups.signal.add(box(.18,.12,.075,new THREE.MeshPhysicalMaterial({color:0x191d20,roughness:.55}),target.x,target.y+.06,target.z,.018));
-    flowGroups.signal.add(box(.08,.08,.042,new THREE.MeshPhysicalMaterial({color:0x9aa4aa,roughness:.2,metalness:.9}),target.x,target.y-.015,target.z+.02,.008));
+    const s=board.userData.signal,pins=cm5Terminals[i],z=1.40+i*.07;
+    const split=new THREE.Vector3(i===2?3.12:3.91,i===1?2.17:1.94,1.32);
+    rs485Breakouts.push(split);
+    const route=i===2?[s,[s.x,s.y+.13,z],[.74,s.y+.13,z],[.74,2.68,z],[split.x,2.68,z],split]:[s,[s.x,s.y+.13,z],[6.96+i*.09,s.y+.13,z],[6.96+i*.09,2.76+i*.09,z],[split.x,2.76+i*.09,z],split];
+    const name=`恒流板 ${i+1} RS485 → CM5 CH${i}`;
+    const options={ordered:true,category:'rs485',nameEn:`Board ${i+1} RS485 → CM5 CH${i}`,status:'CM5接法及配色已确认；板端防水针序、屏蔽接地点待确认',statusEn:'CM5 mapping and project colors confirmed; board connector pin order and shield bonding pending'};
+    const jacket=cable(flowGroups.signal,0xbfc1bb,.027,route,name,options);
+    jacket.userData.rs485Jacket=true;jacket.userData.cm5Channel=i;
+    // Short silver braid sleeve, with an insulated cap rather than a false PE connection.
+    const braidMat=new THREE.MeshStandardMaterial({color:0xdde2e7,metalness:.92,roughness:.24});
+    for(let h=0;h<8;h++)for(const direction of [-1,1]){
+      const pts=[];for(let k=0;k<=22;k++){const t=k/22,theta=h*Math.PI/4+direction*t*Math.PI*2;pts.push(new THREE.Vector3(split.x+Math.cos(theta)*.030,split.y+.082-t*.072,split.z+Math.sin(theta)*.030));}
+      const strand=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,.0025,4,false),braidMat);strand.userData.shieldBraid=true;flowGroups.signal.add(strand);
+    }
+    flowGroups.signal.add(box(.071,.016,.071,mat.blackRubber,split.x,split.y+.004,split.z,.008));
+    [['a',0xb02730],['b',0x121719],['gnd',0x268ce0]].forEach(([key,color],j)=>{
+      const p=pins[key],stem=new THREE.Vector3(split.x,split.y-.04-(2-j)*.052,split.z);
+      const start=split.clone();start.x+=(j-1)*.019;
+      const firstPick=pickables.length;const wire=cable(flowGroups.signal,color,.010,[start,stem,[p.x,p.y,1.22],p],name,{...options,ordered:true});
+      pickables.slice(firstPick).forEach(m=>m.userData.deviceRoot=jacket.userData.deviceRoot);wire.userData.rs485Core=key;wire.userData.cm5Channel=i;
+      axisCylinder(flowGroups.signal,.019,.042,new THREE.MeshStandardMaterial({color,roughness:.62}),p.x,p.y,p.z+.040,'z');
+      axisCylinder(flowGroups.signal,.010,.022,mat.silver,p.x,p.y,p.z+.015,'z');
+    });
+  });
+  const ethLinks=[
+    {a:cm5Eth1.clone().add(cm5.position),b:switchPorts[4],name:'CM5 ETH1 → MOXA Port 5',points:[[4.07,.80,1.22],[4.42,.80,1.18]]},
+    {a:switchPorts[0],b:cerboEth,name:'MOXA Port 1 → Cerbo Ethernet',points:[[4.52,2.68,1.0],[7.25,2.68,.72],[7.32,1.01,.66]]},
+    {a:switchPorts[1],b:usrLan,name:'MOXA Port 2 → USR-G806w LAN',points:[[4.61,1.58,.95],[4.72,.86,.57],[4.97,.86,.30]]}
+  ];
+  ethLinks.forEach(({a,b,name,points})=>{
+    cable(flowGroups.signal,0x397f9f,.023,[a,...points,b],name,{category:'ethernet',nameEn:name});
+    [a,b].forEach(p=>flowGroups.signal.add(box(.12,.095,.06,new THREE.MeshPhysicalMaterial({color:0x608293,roughness:.35,metalness:.26}),p.x,p.y,p.z,.008)));
   });
 
-  // Hub uplink and Ethernet topology are physically separated from the RS485 lanes.
-  cable(flowGroups.signal,0x171b1d,.026,[hubUplink,[5.70,1.63,.48],[5.45,1.78,.50],pcUsb],'USB HUB upstream → Windows industrial PC');
-  cable(flowGroups.signal,0x397f9f,.026,[pcEth,[5.12,.92,.62],[2.66,.92,.65],[2.55,1.10,.68],switchPorts[4]],'Windows PC LAN1 → MOXA EDS-205A Port 5');
-  const gxEthernetPoints=[switchPorts[0],[1.86,1.97,.72],[1.82,1.50,.60],gxEth];
-  const gxEthernetCable=cable(flowGroups.signal,0x397f9f,.024,gxEthernetPoints,'MOXA EDS-205A Port 1 → Ekrano GX');
-  const gxEthernetMeta=new THREE.Object3D();
-  gxEthernetMeta.userData={
-    id:'gx-ethernet-link',
-    title:'连接至GX显示屏',
-    titleEn:'Connects to GX display',
-    text:'Moxa EDS-205A Port 1（RJ45） → Cat5e／Cat6 网线 → Ekrano GX 背部 Ethernet（RJ45）以太网口。',
-    textEn:'Moxa EDS-205A Port 1 (RJ45) → Cat5e/Cat6 cable → Ekrano GX rear Ethernet (RJ45) port.',
-    flow:'signal'
-  };
-  gxEthernetCable.userData.deviceRoot=gxEthernetMeta;
-  pickables.push(gxEthernetCable);
-  const gxEthernetCurve=new THREE.CatmullRomCurve3(gxEthernetPoints.map(p=>p.isVector3?p:new THREE.Vector3(...p)),false,'centripetal',.45);
-  const gxEthernetHit=new THREE.Mesh(
-    new THREE.TubeGeometry(gxEthernetCurve,Math.max(48,gxEthernetPoints.length*14),.085,8,false),
-    new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false,colorWrite:false})
-  );
-  gxEthernetHit.userData.deviceRoot=gxEthernetMeta;
-  flowGroups.signal.add(gxEthernetHit);
-  pickables.push(gxEthernetHit);
-  [hubUplink,pcUsb,pcEth,switchPorts[4],switchPorts[0],gxEth].forEach((p,i)=>{
-    const plug=box(.14,.10,.06,new THREE.MeshPhysicalMaterial({color:i<2?0x252a2e:0x537f91,roughness:.38,metalness:.48}),p.x,p.y,p.z,.012);flowGroups.signal.add(plug);
-    if(i===5){plug.userData.deviceRoot=gxEthernetMeta;pickables.push(plug)}
+  // Red supply enters the four-way fuse holder. Black common return enters
+  // the separate LT-14; the two devices have no shared internal bus.
+  const auxP=new THREE.Vector3(-4.65,8.25,.44),auxN=new THREE.Vector3(-3.38,8.25,.44);
+  cable(flowGroups.signal,R,.022,[auxP,[-4.52,7.94,.61],[.85,7.94,.64],[.85,.79,.30],[4.61,.79,.30],[4.61,fusePositiveInput.y,.11],fusePositiveInput],'辅助正母线 → 保险座唯一 + IN',{category:'aux',ordered:true,nameEn:'Auxiliary positive bus → fuse box single + IN'});
+  cable(flowGroups.signal,K,.022,[auxN,[-3.24,7.81,.60],[.70,7.81,.64],[.70,.94,.32],[4.40,.94,.32],[4.40,negativeInput.y,.12],negativeInput],'辅助负母线 → LT-14 单口',{category:'aux',ordered:true,outline:true,nameEn:'Auxiliary negative bus → LT-14 single port'});
+  [cm5Dc,moxaDc,usrDc,cerboDc].forEach((p,i)=>{
+    const name=['CM5','MOXA','USR-G806w','Cerbo'][i],n=p.clone();if(i===3)n.y+=.06;else n.x+=[.08,.10,.05][i];
+    const negativeExits=[{x:cm5.position.x-.32,y:n.y-.15},{x:netSwitch.position.x+.39,y:n.y+.17},{x:usr.position.x+.38,y:n.y-.16},{x:cerbo.position.x-.63,y:n.y}];
+    const exit=negativeExits[i],positiveX=exit.x-.10;
+    const positiveLead=i===3?[p.x-.10,p.y,p.z]:[p.x,i===1?p.y+.17:p.y-.15,p.z];
+    const negativeLead=i===3?[n.x-.10,n.y,n.z]:[n.x,exit.y,n.z];
+    const pa=fusePorts[i],na=negativePorts[i];
+    // Fan left/right in two rows instead of piling all four branches above
+    // the box or dropping loops below the aluminium plate.
+    const positiveRoutes=[
+      [pa,[pa.x,.43,.23],[3.12,.43,.23],[3.12,p.y-.15,1.06],positiveLead,p],
+      [pa,[pa.x,.52,.23],[4.45,.52,.23],[4.45,p.y+.17,.96],positiveLead,p],
+      [pa,[pa.x,.44,.23],[5.84,.44,.23],[5.84,p.y-.09,.23],[p.x,p.y-.09,p.z],p],
+      [pa,[pa.x,.53,.23],[6.00,.53,.23],[6.00,p.y,.36],positiveLead,p]
+    ];
+    const negativeRoutes=[
+      [na,[na.x,.32,.08],[3.08,.32,.18],[3.08,.96,.27],[3.22,.96,1.08],[3.22,n.y-.15,1.08],negativeLead,n],
+      [na,[na.x,.39,.08],[4.26,.39,.18],[4.26,1.06,.28],[4.56,1.06,.97],[4.56,n.y+.17,.97],negativeLead,n],
+      [na,[na.x,.35,.08],[4.40,.35,.12],[4.40,.94,.26],[n.x,.94,.26],[n.x,n.y-.04,n.z],n],
+      [na,[na.x,.41,.08],[4.55,.41,.12],[4.55,.99,.28],[5.76,.99,.28],[5.76,1.01,.36],[6.04,1.01,.36],[6.04,n.y,.78],negativeLead,n]
+    ];
+    cable(flowGroups.signal,R,.016,positiveRoutes[i],`保险座 + OUT ${i+1} → ${name} DC+`,{category:'aux',ordered:true,nameEn:`Fuse box + OUT ${i+1} → ${name} DC+`});
+    cable(flowGroups.signal,K,.019,negativeRoutes[i],`LT-14 负极口 ${i+1} → ${name} DC−`,{category:'aux',ordered:true,outline:true,nameEn:`LT-14 return port ${i+1} → ${name} DC−`});
   });
 
   // Roof module indicators and protected PV paths.
@@ -749,8 +877,8 @@ try{
     const plate=box(.92,.28,.08,new THREE.MeshPhysicalMaterial({color:i?0x354553:0x742a1d,roughness:.45,metalness:.25}),0,0,.08,.08);g.add(plate);
     addDecal(g,name,'PV SOURCE',.82,.23,.135,i?'#e6f3fb':'#ff805d');
     const inP=new THREE.Vector3(6.37+i*.18,9.28,.72),inN=new THREE.Vector3(6.47+i*.18,9.28,.66);
-    cable(flowGroups.pv,R,.035,[[x-.12,10.04,.42],[x-.1,9.72,.58],inP],`${name} PV+`);
-    cable(flowGroups.pv,K,.035,[[x+.12,10.04,.4],[x+.13,9.68,.52],inN],`${name} PV−`);
+    cable(flowGroups.pv,R,.035,[[x-.12,10.04,.42],[x-.1,9.72,.58],inP],`${name} PV+ → 光伏保护第${i+1}路 IN+`,{nameEn:`${name} PV+ → protection input ${i+1}+`});
+    cable(flowGroups.pv,K,.035,[[x+.12,10.04,.4],[x+.13,9.68,.52],inN],`${name} PV− → 光伏保护第${i+1}路 IN−`,{nameEn:`${name} PV− → protection input ${i+1}−`});
   });
   const protOut=[
     {p:new THREE.Vector3(6.37,8.21,.64),n:new THREE.Vector3(6.46,8.21,.58),board:cc1},
@@ -758,11 +886,12 @@ try{
     {p:new THREE.Vector3(6.87,8.21,.64),n:new THREE.Vector3(6.96,8.21,.58),board:cc3}
   ];
   protOut.forEach((o,i)=>{
-    const t=o.board.userData.terminals,rightX=7.02+i*.13;
-    const inP=mc4Connector(flowGroups.pv,t.inP.x+.15,t.inP.y,t.inP.z,1,true,true);
-    const inN=mc4Connector(flowGroups.pv,t.inN.x+.15,t.inN.y,t.inN.z,1,false,false);
-    cable(flowGroups.pv,R,.038,[o.p,[rightX,7.86-i*.10,.96],[rightX,t.inP.y,.86],[inP.x+.08,t.inP.y,.70],inP],`保护输出${i+1} PV+ → ${o.board.userData.title} IN+`);
-    cable(flowGroups.pv,K,.038,[o.n,[rightX+.10,7.74-i*.10,.82],[rightX+.10,t.inN.y,.74],[inN.x+.08,t.inN.y,.62],inN],`保护输出${i+1} PV− → ${o.board.userData.title} IN−`);
+    const t=o.board.userData.terminals;
+    const inP=matedMC4Lead(flowGroups.pv,t.inP,1,true,false),inN=matedMC4Lead(flowGroups.pv,t.inN,1,false,true);
+    const laneP=i===2?inP.x+.14:7.20+i*.24,laneN=laneP+.12;
+    const topP=i===2?7.20:7.80+i*.15,topN=topP+.11,depthP=i===2?.64:.90,depthN=i===2?.54:.78;
+    cable(flowGroups.pv,R,.032,[o.p,[o.p.x,o.p.y,depthP],[o.p.x,topP,depthP],[laneP,topP,depthP],[laneP,inP.y,.80],inP],`光伏保护 ${i+1} + → 恒流板 ${i+1} IN+`,{ordered:true,nameEn:`PV protection ${i+1} + → board ${i+1} IN+`});
+    cable(flowGroups.pv,K,.032,[o.n,[o.n.x,o.n.y,depthN],[o.n.x,topN,depthN],[laneN,topN,depthN],[laneN,inN.y,.70],inN],`光伏保护 ${i+1} − → 恒流板 ${i+1} IN−`,{ordered:true,outline:true,nameEn:`PV protection ${i+1} − → board ${i+1} IN−`});
   });
 
   // Harness ties as true 3D clamps.
@@ -775,15 +904,19 @@ try{
   const selection={id:root.querySelector('.a3-selection-id'),title:root.querySelector('.a3-selection strong'),text:root.querySelector('.a3-selection p')};
   const dimensionPanel=root.querySelector('.a3-dimension-panel');
   const modeInfo={
-    all:['NEW V1.0','新电路系统基准装配','三块恒流板按图纸细化；采用Original MC4外形、MOXA EDS-205A、无风扇工业主机及无路由器静态控制网。'],
+    all:['UPDATE 2026.09','L 型三路恒流与原生 RS485','1号在 Orion 右方，2号在1号下方，3号在2号左方、Orion 下方；悬停线缆看类型，点击看规格。GX Touch 50 暂缓。'],
     pv:['FLOW 01','主功率与光伏线路','右侧IN向上连接三路组件；左侧OUT向下接MG第1～3组，四个电源端均配置MC4插接。'],
-    signal:['FLOW 02','完整通讯链路','顶部三路RS485分别经隔离RS485转USB适配器和有源USB集线器进入Windows工业主机；PC与Ekrano GX经MOXA EDS-205A组成静态IP隔离网，不使用路由器。'],
-    dimension:['CHECK 01','转接板与安装孔位','新孔146 × 73、4×Ø4.5 / Ø7.5深3；转接板196 × 120 × 3；旧孔176 × 71.5。'],
+    signal:['FLOW 02','原生三路通讯链路','恒流板1/2/3 → CM5 CH0/CH1/CH2；CM5、Cerbo、USR-G806w 经 MOXA 有线互联。CH3 RS485 与交换机 Port 3/4 备用。'],
+    dimension:['CHECK 01','转接板与安装孔位','新孔146 × 73、4×Ø4.5 / Ø7.5深3；转接板196 × 150 × 4；旧孔132 × 122。'],
     replacement:['BASELINE V1.0','旧件位置对比','仅用于核对原三台BlueSolar MPPT的位置；V1.0锁定备份本身未被修改。']
   };
+  const modeInfoEn={"all": ["UPDATE 2026.09", "L-layout constant-current system", "Board 1 right of Orion; board 2 below board 1; board 3 left of board 2 and below Orion. Select a cable for details."], "pv": ["FLOW 01", "Power and PV circuits", "Right IN from PV; left OUT to MG. MC4 cable plugs mate with panel sockets."], "signal": ["FLOW 02", "RS485 and Ethernet", "Boards 1/2/3 → CM5 CH0/CH1/CH2; CH3 spare. Red A+, black B−, blue signal GND; shield bonding pending."], "dimension": ["CHECK 01", "Adapter and mounting holes", "New pitch 146 × 73; adapter 196 × 150 × 4; original MPPT pitch 132 × 122."], "replacement": ["BASELINE V1.0", "Original-part comparison", "Original MPPT positions only; preserved baseline geometry."]};
+  let currentMode='all',selectedDevice=null;
+  function refreshInterface(){navigationLabel();if(selectedDevice)setInfo(['DEVICE',interfaceLanguage==='en'?selectedDevice.titleEn:selectedDevice.title,interfaceLanguage==='en'?selectedDevice.textEn:selectedDevice.text]);else setInfo((interfaceLanguage==='en'?modeInfoEn:modeInfo)[currentMode]);}
+  window.aikoSceneInterface={refresh:refreshInterface};
   function setInfo(arr){selection.id.textContent=arr[0];selection.title.textContent=arr[1];selection.text.textContent=arr[2]}
-  function setOpacity(obj,value){obj.traverse(o=>{if(o.material){if(!o.userData.baseOpacity)o.userData.baseOpacity=o.material.opacity;o.material.transparent=value<.99||o.material.transparent;o.material.opacity=o.userData.baseOpacity*value;o.material.depthWrite=value>.55}})}
-  function setMode(mode){
+  function setOpacity(obj,value){obj.traverse(o=>{if(o.material&&!o.userData.isCableHit){if(o.userData.baseOpacity===undefined)o.userData.baseOpacity=o.material.opacity;o.material.transparent=value<.99||o.material.transparent;o.material.opacity=o.userData.baseOpacity*value;o.material.depthWrite=!o.userData.cableOutline&&value>.55}})}
+  function setMode(mode){currentMode=mode;selectedDevice=null;
     Object.entries(flowGroups).forEach(([key,g])=>{
       let on=mode==='all'||(mode==='pv'&&key!=='signal')||key===mode;
       if(mode==='replacement'||mode==='dimension')on=false;
@@ -798,9 +931,12 @@ try{
     dimensions.visible=mode==='dimension';
     dimensionPanel.hidden=mode!=='dimension';
     root.querySelectorAll('.a3-mode').forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle('is-active',on);b.setAttribute('aria-pressed',String(on))});
-    setInfo(modeInfo[mode]||modeInfo.all);
+    refreshInterface();
   }
   root.querySelectorAll('.a3-mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+  root.querySelector('[data-action="communication"]').addEventListener('click',()=>{camera.position.set(8.6,3.9,8.0);controls.target.set(5.05,1.6,.2);controls.update();setMode('signal')});
+  root.querySelector('[data-action="cm5-wiring"]').addEventListener('click',()=>{camera.position.set(3.54,2.06,2.75);controls.target.set(3.54,2.06,1.04);controls.update();setMode('signal')});
+  window.addEventListener('message',event=>{if(event.origin===location.origin&&event.data?.type==='aiko-focus-communication')root.querySelector('[data-action="communication"]').click()});
   root.querySelector('[data-action="reset"]').addEventListener('click',()=>{camera.position.copy(home.position);controls.target.copy(home.target);controls.update();setMode('all')});
   setMode('all');
 
@@ -812,22 +948,25 @@ try{
     for(let current=object;current;current=current.parent){if(current.visible===false)return false;}
     return true;
   }
-  function visibleDeviceHit(){return raycaster.intersectObjects(pickables,false).find(hit=>isActuallyVisible(hit.object));}
+  function visibleDeviceHit(){
+    const hits=raycaster.intersectObjects(pickables,false).filter(hit=>isActuallyVisible(hit.object));
+    return hits.find(hit=>!hit.object.userData.isCableHit)||hits[0];
+  }
   function deviceAt(e){
     const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);
     const hit=visibleDeviceHit();return hit?.object?.userData?.deviceRoot?.userData||null;
   }
   canvas.addEventListener('pointermove',e=>{
-    const d=deviceAt(e);canvas.style.cursor=d?'pointer':'';
+    const d=deviceAt(e);canvas.style.cursor=panMode?'grab':d?'pointer':'';
     if(!d){deviceTooltip.style.display='none';return;}
-    const r=canvas.getBoundingClientRect();deviceTooltip.textContent=interfaceLanguage==='en'?(d.titleEn||d.title):d.title;deviceTooltip.style.left=(e.clientX-r.left)+'px';deviceTooltip.style.top=(e.clientY-r.top)+'px';deviceTooltip.style.display='block';
+    const r=canvas.getBoundingClientRect();deviceTooltip.textContent=interfaceLanguage==='en'?d.titleEn:d.title;deviceTooltip.style.display='block';deviceTooltip.style.left=Math.max(8,Math.min(e.clientX-r.left+12,r.width-deviceTooltip.offsetWidth-8))+'px';deviceTooltip.style.top=Math.max(8,Math.min(e.clientY-r.top+12,r.height-deviceTooltip.offsetHeight-8))+'px';
   });
   canvas.addEventListener('pointerleave',()=>{canvas.style.cursor='';deviceTooltip.style.display='none'});
   canvas.addEventListener('pointerup',e=>{
-    if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;
+    if(panMode||(e.button!=null&&e.button!==0)||Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;
     const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);
     const hit=visibleDeviceHit();if(!hit)return;
-    const d=hit.object.userData.deviceRoot?.userData;if(d){setInfo(['DEVICE',interfaceLanguage==='en'?(d.titleEn||d.title):d.title,interfaceLanguage==='en'?(d.textEn||d.text):d.text]);parent.postMessage({type:'aiko-device',version:'new',id:d.id,title:d.title,text:d.text,titleEn:d.titleEn,textEn:d.textEn},location.origin);}
+    const d=hit.object.userData.deviceRoot?.userData;if(d){selectedDevice=d;setInfo(['DEVICE',interfaceLanguage==='en'?d.titleEn:d.title,interfaceLanguage==='en'?d.textEn:d.text]);parent.postMessage({...d,type:'aiko-device',version:'new'},location.origin);}
   });
 
   const resize=()=>{const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()};
@@ -836,7 +975,7 @@ try{
   document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false}else if(!running){running=true;animate()}});
   loading.classList.add('is-done');
 }catch(err){
-  if(loading)loading.hidden=true;if(error){error.hidden=false;error.textContent='三维资源加载失败：'+(err?.message||'unknown error')}
+  if(loading)loading.hidden=true;if(error){error.hidden=false;error.dataset.errorMessage=err?.message||'unknown error';error.textContent=(interfaceLanguage==='en'?'3D resource loading failed: ':'三维资源加载失败：')+error.dataset.errorMessage}
 }
 </script>
 

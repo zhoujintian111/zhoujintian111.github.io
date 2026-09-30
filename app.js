@@ -1,9 +1,11 @@
+import { hardware, deviceMessage } from './assets/upgrade-data.js';
+
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
   electricalNew: 'assets/views/electrical-new.html',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/gx-new.html'
+  gxNew: 'assets/views/electrical-new.html'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
@@ -11,34 +13,34 @@ const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 
 const ui = {
   zh: {
     pageTitle:'AIKO 展车升级改装系统', mainNav:'主导航', workspace:'三维交互工作区', inspector:'设备信息',
-    brandSubtitle:'欧洲展车数字孪生', navGuide:'升级改装导览', navGuideSub:'2 项核心升级', navExterior:'全车外观', navExteriorSub:'车身与光伏组件', navInterior:'车内总览', navInteriorSub:'固定镜头与关键设备', navElectrical:'电路舱', navElectricalSub:'原电路／改装电路', navGx:'GX 与玻璃门', navGxSub:'旧版／新版安装比较', navCatalog:'设备资料', navCatalogSub:'规格、连接与注意事项',
+    brandSubtitle:'欧洲展车数字孪生', navGuide:'升级改装导览', navGuideSub:'2 项核心升级', navExterior:'全车外观', navExteriorSub:'车身与光伏组件', navInterior:'车内总览', navInteriorSub:'固定镜头与关键设备', navElectrical:'电路舱', navElectricalSub:'原电路／改装电路', navGx:'GX 控制器', navGxSub:'原车基准／Cerbo 升级', navCatalog:'设备资料', navCatalogSub:'规格、连接与注意事项',
     baselineTitle:'锁定母版已接入', baselineSub:'只读引用 · 不覆盖源版本', versionOld:'旧车系统', versionNew:'改装后系统', compare:'轮廓对比', stepOverview:'定位改装区域', stepElectrical:'电路舱升级', stepGx:'GX 升级', stepCommunication:'通讯检查', coverLabel:'电路舱展示覆盖面', loading:'正在装入锁定视图…',
-    commBoards:'恒流板 ×3', commBoardsSub:'三路 RS485 A／B → 隔离 RS485 转 USB', commHub:'有源 USB 集线器', commHubSub:'3 路独立输入，上行 USB 接电脑', commPc:'工业电脑', commPcSub:'RS485 采集、MQTT 发布、固定 IP', commSwitchSub:'5 口工业交换机', commGxSub:'固定 IP 接收与显示',
+    commBoards:'恒流板 ×3', commBoardsSub:'三路独立 RS485 → CM5 原生串口', commHub:'CM5 原生采集', commHubSub:'RS485 CH0–CH2 使用；CH3 备用', commPc:'USR-G806w', commPcSub:'LAN 接 MOXA；Wi-Fi 本地访问', commSwitchSub:'5 口工业交换机', commGxSub:'能源数据汇集；数据集成待联调',
     tabOverview:'概览', tabSpecs:'规格尺寸', tabConnections:'连接结构', tabNotes:'安装注意', headingOverview:'改装逻辑', headingSpecs:'规格尺寸', headingConnections:'连接结构', headingNotes:'安装注意',
-    lockedView:'锁定三维视图', sourceNew:'改装后锁定资产', sourceOld:'原车锁定资产', deviceDetail:'设备详情', genericDevice:'设备', genericDeviceSummary:'当前锁定三维场景中的设备对象。', objectId:'对象标识', genericConnection:'连接关系以当前锁定场景和已确认线路拓扑为准。', genericNote:'未确认的端子、线号和安装数据必须现场复测，不作推定。',
+    lockedView:'锁定三维视图', sourceNew:'2026.09 安装方案', sourceOld:'原车锁定资产', deviceDetail:'设备详情', genericDevice:'设备', genericDeviceSummary:'当前锁定三维场景中的设备对象。', objectId:'对象标识', genericConnection:'连接关系以当前锁定场景和已确认线路拓扑为准。', genericNote:'未确认的端子、线号和安装数据必须现场复测，不作推定。',
     backGx:'← 返回 GX 安装位置', catalogStatus:'锁定设备资料索引', catalogHint:'选择设备查看规格、连接与安装注意',
-    outlineElectricalOld:'旧：MPPT 186 × 132 × 71 mm', outlineElectricalNew:'新：恒流板 158 × 104 × 58.8 mm', outlineBracket:'支架总宽 257 mm', outlineGxOld:'旧 GX 130 × 120 × 28 mm', outlineGxNew:'Ekrano 正面 187 × 124 mm', outlineDisclaimer:'尺寸概念示意，非等比例安装图；开孔与安装以官方尺寸图及现场复测为准。',
-    statusRearForward:'后部向前固定镜头', hintGuide:'展示面将自动上掀，请选择高亮改装区域', statusCommunication:'通讯连接检查', hintStaticIp:'固定 IP · 无需路由器', statusElectricalNew:'新电路系统 v1.0', statusElectricalOld:'旧车系统 v1.0', hintElectricalNew:'三块恒流板、MC4 与通讯汇聚', hintElectricalOld:'三台 MPPT 与原车线路基准', statusGxNew:'新版 GX v01', statusGxOld:'旧版 GX v01', hintGxNew:'Ekrano GX 官方尺寸与安装包络', hintGxOld:'Color Control GX 拆换基准', statusExterior:'外观固定镜头', hintExterior:'点击高亮组件查看规格与安装信息', statusInterior:'车内固定镜头', hintInterior:'点击电路舱、组件或 GX 查看资料', statusGxLocation:'GX 安装位置', hintGxLocation:'点击 GX 高亮标记进入毫米级近景'
+    outlineElectricalOld:'旧：MPPT 186 × 132 × 71 mm', outlineElectricalNew:'新：恒流板 158 × 104 × 58.8 mm', outlineBracket:'GX Touch 50 本轮暂缓', outlineGxOld:'旧 GX 130 × 120 × 28 mm', outlineGxNew:'Cerbo 机身 154 × 78 mm', outlineDisclaimer:'尺寸概念示意，非等比例安装图；开孔与安装以官方尺寸图及现场复测为准。',
+    statusRearForward:'后部向前固定镜头', hintGuide:'展示面将自动上掀，请选择高亮改装区域', statusCommunication:'通讯连接检查', hintStaticIp:'CM5 · MOXA · USR-G806w · Cerbo', statusElectricalNew:'新电路系统 · 2026.09', statusElectricalOld:'旧车系统 v1.0', hintElectricalNew:'三块恒流板、MC4 与通讯汇聚', hintElectricalOld:'三台 MPPT 与原车线路基准', statusGxNew:'Cerbo GX MK2', statusGxOld:'旧版 GX v01', hintGxNew:'Cerbo GX MK2；GX Touch 50 位置暂缓', hintGxOld:'Color Control GX 拆换基准', statusExterior:'外观固定镜头', hintExterior:'点击高亮组件查看规格与安装信息', statusInterior:'车内固定镜头', hintInterior:'点击电路舱、组件或 GX 查看资料', statusGxLocation:'GX 安装位置', hintGxLocation:'原车位置保留为拆换基准；点击查看控制器升级'
   },
   en: {
     pageTitle:'AIKO Show Vehicle Upgrade System', mainNav:'Main navigation', workspace:'Interactive 3D workspace', inspector:'Device information',
-    brandSubtitle:'Europe Show Vehicle Digital Twin', navGuide:'Upgrade Guide', navGuideSub:'2 core upgrades', navExterior:'Vehicle Exterior', navExteriorSub:'Body and PV modules', navInterior:'Interior Overview', navInteriorSub:'Fixed views and key devices', navElectrical:'Electrical Bay', navElectricalSub:'Original / upgraded circuits', navGx:'GX & Glass Door', navGxSub:'Original / new installation', navCatalog:'Device Data', navCatalogSub:'Specs, wiring and notes',
+    brandSubtitle:'Europe Show Vehicle Digital Twin', navGuide:'Upgrade Guide', navGuideSub:'2 core upgrades', navExterior:'Vehicle Exterior', navExteriorSub:'Body and PV modules', navInterior:'Interior Overview', navInteriorSub:'Fixed views and key devices', navElectrical:'Electrical Bay', navElectricalSub:'Original / upgraded circuits', navGx:'GX Controller', navGxSub:'Original baseline / Cerbo upgrade', navCatalog:'Device Data', navCatalogSub:'Specs, wiring and notes',
     baselineTitle:'Locked masters connected', baselineSub:'Read-only references · originals preserved', versionOld:'Original System', versionNew:'Upgraded System', compare:'Outline Compare', stepOverview:'Locate Upgrade Areas', stepElectrical:'Electrical Bay', stepGx:'GX Upgrade', stepCommunication:'Communication Check', coverLabel:'Electrical-bay display cover', loading:'Loading locked view…',
-    commBoards:'Constant-current boards ×3', commBoardsSub:'3 × RS485 A/B → isolated RS485-to-USB', commHub:'Powered USB Hub', commHubSub:'3 independent inputs; upstream USB to PC', commPc:'Industrial PC', commPcSub:'RS485 acquisition, MQTT publishing, static IP', commSwitchSub:'5-port industrial Ethernet switch', commGxSub:'Static-IP data receiver and display',
+    commBoards:'Constant-current boards ×3', commBoardsSub:'3 independent RS485 → CM5 native ports', commHub:'CM5 Native Acquisition', commHubSub:'RS485 CH0–CH2 used; CH3 spare', commPc:'USR-G806w', commPcSub:'LAN to MOXA; local Wi-Fi access', commSwitchSub:'5-port industrial Ethernet switch', commGxSub:'Energy monitoring; integration pending',
     tabOverview:'Overview', tabSpecs:'Specifications', tabConnections:'Connections', tabNotes:'Installation', headingOverview:'Upgrade Logic', headingSpecs:'Specifications', headingConnections:'Connection Structure', headingNotes:'Installation Notes',
-    lockedView:'Locked 3D view', sourceNew:'Locked upgraded asset', sourceOld:'Locked original asset', deviceDetail:'Device Details', genericDevice:'Device', genericDeviceSummary:'Device object in the currently locked 3D scene.', objectId:'Object ID', genericConnection:'Connection data follows the locked scene and confirmed wiring topology.', genericNote:'Any unconfirmed terminal, wire ID or installation dimension must be verified on the vehicle.',
+    lockedView:'Locked 3D view', sourceNew:'2026.09 mounting design', sourceOld:'Locked original asset', deviceDetail:'Device Details', genericDevice:'Device', genericDeviceSummary:'Device object in the currently locked 3D scene.', objectId:'Object ID', genericConnection:'Connection data follows the locked scene and confirmed wiring topology.', genericNote:'Any unconfirmed terminal, wire ID or installation dimension must be verified on the vehicle.',
     backGx:'← Back to GX Installation', catalogStatus:'Locked Device Index', catalogHint:'Select a device for specifications, connections and installation notes',
-    outlineElectricalOld:'Original: MPPT 186 × 132 × 71 mm', outlineElectricalNew:'New: board 158 × 104 × 58.8 mm', outlineBracket:'Bracket width 257 mm', outlineGxOld:'Original GX 130 × 120 × 28 mm', outlineGxNew:'Ekrano front 187 × 124 mm', outlineDisclaimer:'Conceptual size comparison, not a scaled installation drawing. Use official drawings and on-vehicle measurements for installation.',
-    statusRearForward:'Rear-to-front fixed view', hintGuide:'The display cover opens automatically; select a highlighted upgrade area', statusCommunication:'Communication Connection Check', hintStaticIp:'Static IP · no router required', statusElectricalNew:'New Electrical System v1.0', statusElectricalOld:'Original Vehicle System v1.0', hintElectricalNew:'Three constant-current boards, MC4 and communication aggregation', hintElectricalOld:'Three MPPT units and original wiring baseline', statusGxNew:'New GX v01', statusGxOld:'Original GX v01', hintGxNew:'Official Ekrano GX dimensions and installation envelope', hintGxOld:'Color Control GX replacement baseline', statusExterior:'Exterior Fixed View', hintExterior:'Select a highlighted module for specifications and installation data', statusInterior:'Interior Fixed View', hintInterior:'Select the electrical bay, PV module or GX for details', statusGxLocation:'GX Installation Position', hintGxLocation:'Select the highlighted GX to open the millimetre-level close-up'
+    outlineElectricalOld:'Original: MPPT 186 × 132 × 71 mm', outlineElectricalNew:'New: board 158 × 104 × 58.8 mm', outlineBracket:'GX Touch 50 deferred', outlineGxOld:'Original GX 130 × 120 × 28 mm', outlineGxNew:'Cerbo body 154 × 78 mm', outlineDisclaimer:'Conceptual size comparison, not a scaled installation drawing. Use official drawings and on-vehicle measurements for installation.',
+    statusRearForward:'Rear-to-front fixed view', hintGuide:'The display cover opens automatically; select a highlighted upgrade area', statusCommunication:'Communication Connection Check', hintStaticIp:'CM5 · MOXA · USR-G806w · Cerbo', statusElectricalNew:'Electrical Update · 2026.09', statusElectricalOld:'Original Vehicle System v1.0', hintElectricalNew:'Three constant-current boards, MC4 and communication aggregation', hintElectricalOld:'Three MPPT units and original wiring baseline', statusGxNew:'Cerbo GX MK2', statusGxOld:'Original GX v01', hintGxNew:'Cerbo GX MK2; GX Touch 50 installation deferred', hintGxOld:'Color Control GX replacement baseline', statusExterior:'Exterior Fixed View', hintExterior:'Select a highlighted module for specifications and installation data', statusInterior:'Interior Fixed View', hintInterior:'Select the electrical bay, PV module or GX for details', statusGxLocation:'GX Installation Position', hintGxLocation:'Select the highlighted GX to open the millimetre-level close-up'
   }
 };
 
 const routeSets = {
   zh: {
-    guide: { title: '升级改装导览', eyebrow: 'UPGRADE GUIDANCE' }, exterior: { title: '全车外观', eyebrow: 'VEHICLE EXTERIOR' }, interior: { title: '车内总览', eyebrow: 'INTERIOR VIEWS' }, electrical: { title: '电路舱', eyebrow: 'ELECTRICAL COMPARTMENT' }, gx: { title: 'GX 与玻璃门', eyebrow: 'GX INSTALLATION' }, catalog: { title: '设备资料', eyebrow: 'COMPONENT INDEX' }
+    guide: { title: '升级改装导览', eyebrow: 'UPGRADE GUIDANCE' }, exterior: { title: '全车外观', eyebrow: 'VEHICLE EXTERIOR' }, interior: { title: '车内总览', eyebrow: 'INTERIOR VIEWS' }, electrical: { title: '电路舱', eyebrow: 'ELECTRICAL COMPARTMENT' }, gx: { title: 'GX 控制器', eyebrow: 'GX INSTALLATION' }, catalog: { title: '设备资料', eyebrow: 'COMPONENT INDEX' }
   },
   en: {
-    guide: { title: 'Upgrade Guide', eyebrow: 'UPGRADE GUIDANCE' }, exterior: { title: 'Vehicle Exterior', eyebrow: 'VEHICLE EXTERIOR' }, interior: { title: 'Interior Overview', eyebrow: 'INTERIOR VIEWS' }, electrical: { title: 'Electrical Bay', eyebrow: 'ELECTRICAL COMPARTMENT' }, gx: { title: 'GX & Glass Door', eyebrow: 'GX INSTALLATION' }, catalog: { title: 'Device Data', eyebrow: 'COMPONENT INDEX' }
+    guide: { title: 'Upgrade Guide', eyebrow: 'UPGRADE GUIDANCE' }, exterior: { title: 'Vehicle Exterior', eyebrow: 'VEHICLE EXTERIOR' }, interior: { title: 'Interior Overview', eyebrow: 'INTERIOR VIEWS' }, electrical: { title: 'Electrical Bay', eyebrow: 'ELECTRICAL COMPARTMENT' }, gx: { title: 'GX Controller', eyebrow: 'GX INSTALLATION' }, catalog: { title: 'Device Data', eyebrow: 'COMPONENT INDEX' }
   }
 };
 
@@ -76,12 +78,12 @@ const recordsZh = {
     notes: ['这是只读旧车基准，后续改装不得覆盖。', '原孔位、线长与现场固定方式在拆机前记录。']
   },
   electricalNew: {
-    status: '改装后系统', title: '新电路系统 v1.0', source: '新电路系统v1.0',
+    status: '改装后系统', title: '新电路系统 · 2026.09', source: '新电路系统v1.0',
     summary: '用三块输入恒流板替代三台 MPPT，保持 MG、电池、母排和其他未授权设备不变。',
     overview: ['每一路光伏由独立恒流板控制，禁用 MPPT。', '右侧 IN 接组件输出，左侧 OUT 向下接入 MG。', '上部信号口接工业电脑，实现三路独立采集与设定。'],
-    specs: [['恒流板总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm'],['螺钉孔','4 × Ø4.5 mm'],['输入电流范围','0–10 A（常用 2–3 A）'],['单路功率上限','≤ 400 W']],
+    specs: [['恒流板总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm'],['螺钉孔','4 × Ø4.5 mm'],['输入电流范围','0–10 A（计划工作 7–10 A）'],['单路功率上限','≤ 400 W']],
     connections: ['右侧 IN：接光伏组件 MC4 输出。', '左侧 OUT：向下接 MG Master LV。', '顶部信号：每块板的 RS485 A／B 分别接一只隔离 RS485 转 USB 适配器。', '三只适配器分别进入有源 USB 集线器，集线器上行 USB 接工业电脑。', '三块板分别编号，三路数据不得合并为一个虚拟设备。'],
-    notes: ['三块恒流板为同规格、可命名设备，不与某一品牌组件永久绑定；任一组件均可连接任一恒流板。', '接线完成后，必须按“组件 → 恒流板 IN → RS485／USB 通道”的实际链路统一命名、编号和线标。', '原 MPPT 孔位不能直接视为恒流板孔位，必须使用精确转接板。', 'MC4 正负极、插头方向、最小弯曲半径和检修间距必须在施工图中锁定。', '板卡最终端子高度与线鼻子空间需实物复测。']
+    notes: ['三块恒流板为同规格、可命名设备，不与某一品牌组件永久绑定；任一组件均可连接任一恒流板。', '接线完成后，必须按“组件 → 恒流板 IN → 原生 RS485 通道”的实际链路统一命名、编号和线标。', '原 MPPT 孔位不能直接视为恒流板孔位，必须使用精确转接板。', 'MC4 正负极、插头方向、最小弯曲半径和检修间距必须在施工图中锁定。', '板卡最终端子高度与线鼻子空间需实物复测。']
   },
   gxOld: {
     status: '原车基准', title: '旧版 Color Control GX', source: '旧版GXv01',
@@ -91,23 +93,8 @@ const recordsZh = {
     connections: ['接入原车 Victron 通讯系统。'],
     notes: ['拆卸前记录原开孔、紧固件、背部插头方向与可用深度。']
   },
-  gxNew: {
-    status: '改装后设备', title: 'Victron Ekrano GX', source: '新版GXv01',
-    summary: 'Ekrano GX 用于显示三路虚拟太阳能充电器及整车能源数据，安装必须同时满足正面、支架、开孔和背部深度要求。',
-    overview: ['正面主体采用官方尺寸。', '安装支架总宽与正面主体宽度分开核算。', '与玻璃门约 100 mm 的实际间距必须在施工前复核。'],
-    specs: [['正面主体','187 × 124 mm'],['含支架总宽','257 mm'],['最大包络深度','67.1 mm'],['齐平安装开孔','178 × 111 mm（0 / −0.5）'],['最小安装深度','100 mm'],['开孔左右预留','各 42 mm']],
-    connections: ['工业电脑与 Ekrano GX 经工业交换机组成独立有线局域网。', '电脑和 GX 设置静态 IP，不依赖路由器 DHCP。', 'PC 将三路恒流板数据发布为 Virtual MPPT 1／2／3。'],
-    notes: ['不能按旧 GX 正面尺寸直接扩大开孔，先检查厚沿、玻璃门和背部接口空间。', '官方 STEP 是工程几何母文件；网页轻量模型只用于展示。'],
-    docs: [['官方尺寸图','assets/docs/DimensionDrawing-Ekrano-GX.pdf'],['官方开孔图','assets/docs/Cut-Out-Drawing-Ekrano-GX.pdf']]
-  },
-  communication: {
-    status: '通讯检查', title: '固定 IP 通讯结构', source: '已确认拓扑',
-    summary: '路由器不是必要设备。工业电脑、交换机和 Ekrano GX 可组成独立有线局域网，通过静态 IP 保持地址不变。',
-    overview: ['三块恒流板各自输出一路 RS485，不是 TTL。', '三路 RS485 分别经隔离 RS485 转 USB 适配器进入有源 USB 集线器，再由一条上行 USB 接工业电脑。', '工业电脑完成三路采集、协议整理，并通过 MQTT TCP 1883 发布 Virtual MPPT 1／2／3。', 'Moxa EDS-205A 只负责二层有线连接；Ekrano GX 接收并显示数据，整个控制网不需要路由器。'],
-    specs: [['恒流板数据口','RS485 A／B × 3 路'],['串口转换','隔离 RS485 转 USB × 3'],['USB 汇聚','有源 USB Hub：3 路设备输入 + 1 路上行'],['交换机','Moxa EDS-205A，5 口非网管工业以太网交换机'],['工业电脑 IP','192.168.8.52／24'],['Ekrano GX IP','192.168.8.54／24'],['子网掩码','255.255.255.0'],['网关／DNS','留空'],['应用协议','MQTT TCP 1883'],['路由器','不需要']],
-    connections: ['恒流板 1 RS485 A／B → 隔离 RS485 转 USB 1 → 有源 USB Hub 端口 1。', '恒流板 2 RS485 A／B → 隔离 RS485 转 USB 2 → 有源 USB Hub 端口 2。', '恒流板 3 RS485 A／B → 隔离 RS485 转 USB 3 → 有源 USB Hub 端口 3。', '有源 USB Hub 上行口 → 工业电脑 USB。', '工业电脑 LAN1 RJ45 → Cat5e／Cat6 网线 → Moxa EDS-205A。', 'Ekrano GX Ethernet RJ45 → Cat5e／Cat6 网线 → Moxa EDS-205A。'],
-    notes: ['交换机无 DHCP 功能，固定 IP 必须分别在电脑和 GX 中配置。', 'PC 与 GX 必须使用同一 /24 网段，且地址不得重复；网关和 DNS 保持空白。', '施工后依次检查三只 USB 串口、PC 到 GX 的 Ping、MQTT 1883 连接以及 Virtual MPPT 1／2／3 是否分别显示。', 'RS485 波特率、校验位和设备地址必须按恒流板厂家协议确认，不在此处臆定。', '工业电脑最终订货型号、车载供电接口和安装孔位仍以采购确认单及卖方尺寸图为准。']
-  }
+  gxNew: {},
+  communication: {}
 };
 
 const recordsEn = {
@@ -144,12 +131,12 @@ const recordsEn = {
     notes:['This is a read-only original-system baseline and must never be overwritten.','Record original holes, cable lengths and fixing methods before removal.']
   },
   electricalNew: {
-    status:'Upgraded System', title:'New Electrical System v1.0', source:'New Electrical System v1.0',
+    status:'Upgraded System', title:'Electrical Update · 2026.09', source:'Electrical Update · 2026.09',
     summary:'Replaces the three MPPT units with three input constant-current boards while preserving MG, battery, busbars and all other non-authorized equipment.',
     overview:['Each PV circuit is controlled by an independent constant-current board; MPPT is disabled.','The right-side IN connects to the PV module output; the left-side OUT turns down toward MG.','The upper signal port connects to the industrial PC for independent acquisition and setting of all three channels.'],
-    specs:[['Board assembly','158 × 104 × 58.8 mm'],['Mounting-hole pattern','146 × 73 mm'],['Screw holes','4 × Ø4.5 mm'],['Input-current range','0–10 A (typically 2–3 A)'],['Per-channel power limit','≤ 400 W']],
+    specs:[['Board assembly','158 × 104 × 58.8 mm'],['Mounting-hole pattern','146 × 73 mm'],['Screw holes','4 × Ø4.5 mm'],['Input-current range','0–10 A (planned operation 7–10 A)'],['Per-channel power limit','≤ 400 W']],
     connections:['Right-side IN: PV module MC4 output.','Left-side OUT: routes downward to MG Master LV.','Upper signal: RS485 A/B from each board connects to one isolated RS485-to-USB adapter.','The three adapters connect to a powered USB hub; the hub upstream USB connects to the industrial PC.','Give every board a permanent ID; do not merge the channels into one virtual device.'],
-    notes:['The three boards are identical, nameable devices and are not permanently bound to a PV brand; any module may be assigned to any board.','After wiring, use one consistent name and label for the actual Module → Board IN → RS485/USB channel chain.','The MPPT holes cannot be treated as direct board mounting holes; use the dimensioned adapter plate.','Lock MC4 polarity, connector direction, minimum bend radius and service clearance in the installation drawing.','Final terminal height and cable-lug space require physical measurement.']
+    notes:['The three boards are identical, nameable devices and are not permanently bound to a PV brand; any module may be assigned to any board.','After wiring, use one consistent name and label for the actual Module → Board IN → native RS485 channel chain.','The MPPT holes cannot be treated as direct board mounting holes; use the dimensioned adapter plate.','Lock MC4 polarity, connector direction, minimum bend radius and service clearance in the installation drawing.','Final terminal height and cable-lug space require physical measurement.']
   },
   gxOld: {
     status:'Original Baseline', title:'Original Color Control GX', source:'Original GX v01',
@@ -159,24 +146,30 @@ const recordsEn = {
     connections:['Connected to the original Victron communication system.'],
     notes:['Before removal, record the cut-out, fasteners, rear connector directions and available depth.']
   },
-  gxNew: {
-    status:'Upgraded Device', title:'Victron Ekrano GX', source:'New GX v01',
-    summary:'Ekrano GX displays the three virtual solar chargers and vehicle energy data. Installation must satisfy front-face, bracket, cut-out and rear-depth requirements together.',
-    overview:['The front body follows the official dimensions.','Bracket total width is checked separately from the front body width.','The approximately 100 mm clearance to the glass door must be verified before installation.'],
-    specs:[['Front body','187 × 124 mm'],['Total width with bracket','257 mm'],['Maximum envelope depth','67.1 mm'],['Flush-mount cut-out','178 × 111 mm (0 / −0.5)'],['Minimum installation depth','100 mm'],['Cut-out side allowance','42 mm each side']],
-    connections:['The industrial PC and Ekrano GX form an isolated wired LAN through the industrial switch.','The PC and GX use static IP addresses and do not rely on router DHCP.','The PC publishes the three channels as Virtual MPPT 1/2/3.'],
-    notes:['Do not enlarge the old GX opening from face dimensions alone; first check the projecting trim, glass door and rear connector space.','The official STEP file is the engineering geometry master; the lightweight web model is for presentation only.'],
-    docs:[['Official dimension drawing','assets/docs/DimensionDrawing-Ekrano-GX.pdf'],['Official cut-out drawing','assets/docs/Cut-Out-Drawing-Ekrano-GX.pdf']]
-  },
-  communication: {
-    status:'Communication Check', title:'Static-IP Communication Structure', source:'Confirmed Topology',
-    summary:'A router is not required. The industrial PC, Ethernet switch and Ekrano GX form an isolated wired LAN with static IP addresses.',
-    overview:['Each constant-current board outputs one RS485 channel, not TTL.','Three isolated RS485-to-USB adapters connect independently to a powered USB hub, whose upstream USB connects to the industrial PC.','The PC acquires the three channels, normalizes the protocol and publishes Virtual MPPT 1/2/3 over MQTT TCP 1883.','Moxa EDS-205A provides Layer-2 Ethernet only; Ekrano GX receives and displays the data. No router is required on the control LAN.'],
-    specs:[['Board data ports','RS485 A/B × 3'],['Serial conversion','Isolated RS485-to-USB × 3'],['USB aggregation','Powered USB hub: 3 device inputs + 1 upstream'],['Switch','Moxa EDS-205A, 5-port unmanaged industrial Ethernet switch'],['Industrial PC IP','192.168.8.52/24'],['Ekrano GX IP','192.168.8.54/24'],['Subnet mask','255.255.255.0'],['Gateway / DNS','Leave blank'],['Application protocol','MQTT TCP 1883'],['Router','Not required']],
-    connections:['Board 1 RS485 A/B → isolated RS485-to-USB 1 → powered USB hub port 1.','Board 2 RS485 A/B → isolated RS485-to-USB 2 → powered USB hub port 2.','Board 3 RS485 A/B → isolated RS485-to-USB 3 → powered USB hub port 3.','Powered USB hub upstream port → industrial PC USB.','Industrial PC LAN1 RJ45 → Cat5e/Cat6 cable → Moxa EDS-205A Port 5.','Moxa EDS-205A Port 1 (RJ45) → Cat5e/Cat6 cable → Ekrano GX rear Ethernet (RJ45) port.'],
-    notes:['The switch has no DHCP service. Configure static IP separately on the PC and GX.','PC and GX must use the same /24 subnet with unique addresses; leave gateway and DNS blank.','After installation, verify all three USB serial devices, PC-to-GX ping, MQTT 1883 and the separate Virtual MPPT 1/2/3 entries.','Confirm RS485 baud rate, parity and device addresses from the board protocol; do not infer them here.','Final PC model, vehicle power input and mounting holes remain subject to the purchase specification and seller dimension drawing.']
-  }
+  gxNew: {},
+  communication: {}
 };
+
+for (const [collection, language] of [[recordsZh,'zh'],[recordsEn,'en']]) {
+  const en=language==='en';
+  const d=hardware.cerbo[language];
+  collection.gxNew={status:en?'Controller Upgrade':'控制器升级',title:'Cerbo GX MK2',source:en?'2026.09 design':'2026.09 安装方案',summary:d.summary,overview:[d.summary],specs:d.specs,connections:d.connections,notes:d.notes};
+  collection.communication={status:en?'Communication Design':'通讯连接方案',title:en?'Native RS485 + Wired LAN':'原生 RS485 ＋ 有线局域网',source:en?'2026.09 update':'2026.09 更新',
+    summary:en?'Three boards use CM5 native RS485 CH0–CH2. MOXA connects CM5, Cerbo and USR-G806w; Wi-Fi provides local access.':'三块恒流板直接接入 CM5 原生 RS485 CH0–CH2；MOXA 连接 CM5、Cerbo 和 USR-G806w，Wi-Fi 提供本地访问。',
+    overview:en?['Four native isolated RS485 channels; CH3 spare.','Three independent channels require the manufacturer protocol and software commissioning.','USR-G806w provides Wi-Fi access; internet access is optional.','GX Touch 50 installation is deferred.']:['四路原生隔离 RS485；CH3备用。','三块板分别采集；厂家协议、CM5程序及GX数据集成尚需联调。','USR-G806w 提供 Wi-Fi 本地接入，4G联网按现场需要配置。','GX Touch 50 的位置、支架和线缆本轮暂缓。'],
+    specs:en?[['RS485','3 × independent native channels'],['Cable','3 × 0.5 mm² shielded; Cat6 Ethernet'],['Switch','MOXA EDS-205A, 5 × 10/100M'],['Controller','Cerbo GX MK2'],['Router','USR-G806w'],['Plate','450 × 250 × 4 mm; first article'],['Network addresses','Configure one subnet; addresses and DHCP range pending']]:[['RS485','3 路独立原生串口'],['线材','3 × 0.5 mm² 屏蔽线；Cat6 网线'],['交换机','MOXA EDS-205A，5 × 10/100M'],['GX控制器','Cerbo GX MK2'],['路由器','USR-G806w'],['底板','450 × 250 × 4 mm；首件方案'],['网络地址','统一网段；静态地址与DHCP范围待配置']],
+    connections:en?['Board 1/2/3 → CM5 RS485 CH0/CH1/CH2.','CM5 ETH1 → MOXA Port 5.','MOXA Port 1 → Cerbo Ethernet.','MOXA Port 2 → USR-G806w LAN.','Ports 3/4 spare; port allocation is the wiring plan.']:['恒流板 1/2/3 → CM5 RS485 CH0/CH1/CH2。','CM5 ETH1 → MOXA Port 5。','MOXA Port 1 → Cerbo Ethernet。','MOXA Port 2 → USR-G806w LAN。','Port 3/4 备用；上述端口编号为本次布线方案。'],
+    notes:en?['Confirm board protocol, pinout and termination.','Verify mounting, antennas and cable lengths on the actual vehicle.','Software data transfer and vehicle commissioning are not validated by this model.']:['恒流板针脚、协议及终端电阻按厂家资料确认。','底板、天线、线长和固定点须首件实装复核。','模型不代表采集软件、GX数据上报或实车联调已经通过。']};
+  collection.guide.overview[1]=en?'GX controller: Cerbo GX MK2; GX Touch 50 installation is deferred.':'GX控制器：Cerbo GX MK2；GX Touch 50 位置和安装方案暂缓。';
+  collection.guide.overview[2]=en?'Existing vehicle and original-system models remain the preserved baseline.':'保留全车与旧车母版；本轮只更新已授权设备和直属线路。';
+  collection.guide.connections[2]=collection.communication.summary;
+  collection.electricalNew.overview[2]=en?'Native CM5 RS485 CH0–CH2 collect the three channels independently.':'上部 RS485 独立进入 CM5 原生串口 CH0–CH2。';
+  collection.electricalNew.specs.push([en?'Adapter plate':'转接板','196 × 150 × 4 mm'],[en?'Original hole pitch':'旧孔距','132 × 122 mm']);
+  collection.electricalNew.connections=[...collection.electricalNew.connections.slice(0,2),collection.communication.connections[0],en?'CM5, Cerbo and USR-G806w connect through MOXA.':'CM5、Cerbo和USR-G806w通过MOXA有线互联。'];
+  collection.electricalNew.overview.push(en?'L layout: board 1 directly right of Orion, board 2 directly below board 1, board 3 directly left of board 2 and below Orion.':'L 型布局：1号在 Orion 正右方，2号在1号正下方，3号在2号正左方、Orion 正下方。');
+  collection.electricalNew.connections.push(en?'Red → CM5 R/A (A+); black → T/B (B−); blue → signal GND. Silver braid remains separately insulated pending a bonding point.':'红 → CM5 R/A（A+）；黑 → T/B（B−）；蓝 → 信号GND；银色屏蔽网单独绝缘，接地点待确认。');
+  collection.electricalNew.notes.push(en?'The confirmed L layout is shown. Exact vehicle fixing coordinates, cable bend space and this-batch enclosure photos require field verification.':'已按确认关系显示 L 型布局；现场固定坐标、接头弯线空间和本批次外壳实物照仍需复核。');
+}
 
 let records = initialLanguage === 'en' ? recordsEn : recordsZh;
 let routes = routeSets[initialLanguage];
@@ -194,16 +187,12 @@ const deviceDetailsZh = {
   'mppt-1': { specs:[['设备','BlueSolar MPPT 100／50'],['外形','186 × 132 × 71 mm']], connections:['BAT+／BAT−／PV−／PV+；右下 VE.Direct。'], notes:['具体组件通道名称尚未确认。'] },
   'mppt-2': { specs:[['设备','BlueSolar MPPT 100／50'],['外形','186 × 132 × 71 mm']], connections:['BAT+／BAT−／PV−／PV+；右下 VE.Direct。'], notes:['具体组件通道名称尚未确认。'] },
   'mppt-3': { specs:[['设备','BlueSolar MPPT 100／50'],['外形','186 × 132 × 71 mm']], connections:['BAT+／BAT−／PV−／PV+；右下 VE.Direct。'], notes:['具体组件通道名称尚未确认。'] },
-  'usb-hub': { specs:[['设备','有源 USB 集线器']], connections:['三只隔离 RS485 转 USB 适配器分别接入，单独上行 USB 接电脑。'], notes:['有源供电、端口编号和线缆应力释放必须固定。'] },
-  'windows-pc': { specs:[['设备','无风扇工业主机'],['当前配置','i7-1165G7／16 GB／512 GB'],['控制网 IP','192.168.8.52／24']], connections:['USB 接三路 RS485 数据；LAN1 经交换机连接 Ekrano GX。'], notes:['车载供电版本、整机外形和安装孔位以卖方尺寸图确认。'] },
   'ethernet-switch': { specs:[['设备','Moxa EDS-205A'],['外形','30 × 115 × 70 mm'],['端口','5 × 10／100BaseT(X) RJ45']], connections:['工业电脑和 Ekrano GX 分别接入 RJ45 端口。'], notes:['非网管交换机不分配 IP，也不提供 DHCP。'] },
-  'constant-aiko': { specs:[['设备','恒流板 1'],['总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm']], connections:['右侧 IN 接组件；左侧 OUT 接 MG；顶部 RS485 接隔离转换器。'], notes:['经 196 × 120 × 3 mm 转接板固定。', '安装位置不绑定组件品牌；完工后按实际组件、IN 端和通讯通道统一命名。'] },
-  'constant-ja': { specs:[['设备','恒流板 2'],['总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm']], connections:['右侧 IN 接组件；左侧 OUT 接 MG；顶部 RS485 接隔离转换器。'], notes:['经 196 × 120 × 3 mm 转接板固定。', '安装位置不绑定组件品牌；完工后按实际组件、IN 端和通讯通道统一命名。'] },
-  'constant-jk': { specs:[['设备','恒流板 3'],['总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm']], connections:['右侧 IN 接组件；左侧 OUT 接 MG；顶部 RS485 接隔离转换器。'], notes:['经 196 × 120 × 3 mm 转接板固定。', '安装位置不绑定组件品牌；完工后按实际组件、IN 端和通讯通道统一命名。'] },
+  'constant-aiko': { specs:[['设备','恒流板 1'],['总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm']], connections:['右侧 IN 接组件；左侧 OUT 接 MG；顶部 RS485 接 CM5 原生串口。'], notes:['经 196 × 150 × 4 mm 转接板固定。', '安装位置不绑定组件品牌；完工后按实际组件、IN 端和通讯通道统一命名。'] },
+  'constant-ja': { specs:[['设备','恒流板 2'],['总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm']], connections:['右侧 IN 接组件；左侧 OUT 接 MG；顶部 RS485 接 CM5 原生串口。'], notes:['经 196 × 150 × 4 mm 转接板固定。', '安装位置不绑定组件品牌；完工后按实际组件、IN 端和通讯通道统一命名。'] },
+  'constant-jk': { specs:[['设备','恒流板 3'],['总成','158 × 104 × 58.8 mm'],['安装孔距','146 × 73 mm']], connections:['右侧 IN 接组件；左侧 OUT 接 MG；顶部 RS485 接 CM5 原生串口。'], notes:['经 196 × 150 × 4 mm 转接板固定。', '安装位置不绑定组件品牌；完工后按实际组件、IN 端和通讯通道统一命名。'] },
   'vehicle-source': { specs:[['设备','原车电源侧']], connections:['发电机／启动电池母线接入行车充电回路。'], notes:['原车接口与保护参数保持不变。'] },
   'gx-old': { specs:[['设备','Color Control GX'],['外形','130 × 120 × 28 mm']], connections:['接入原车 Victron 通讯系统。'], notes:['拆卸前记录开孔、紧固件、背部插头方向和可用深度。'] },
-  'gx-new': { specs:[['设备','Victron Ekrano GX'],['正面','187 × 124 mm'],['含支架总宽','257 mm'],['最大包络深度','67.1 mm']], connections:['RJ45 经 Moxa EDS-205A 与工业电脑组成静态 IP 控制网。'], notes:['开孔 178 × 111 mm；最小安装深度 100 mm。'] },
-  'gx-ethernet-link': { specs:[['线路','GX 以太网通讯线'],['线缆','Cat5e／Cat6'],['交换机端','Moxa EDS-205A Port 1（RJ45）'],['GX 端','Ekrano GX 背部 Ethernet（RJ45）以太网口']], connections:['Moxa EDS-205A Port 1（RJ45） → Cat5e／Cat6 网线 → Ekrano GX 背部 Ethernet（RJ45）以太网口。'], notes:['该接口不是 VE.Direct、VE.Can、VE.Bus 或 USB。', 'PC 与 Ekrano GX 使用同一 /24 静态网段，地址不得重复。'] }
 };
 
 const deviceDetailsEn = {
@@ -219,40 +208,51 @@ const deviceDetailsEn = {
   'mppt-1': { specs:[['Device','BlueSolar MPPT 100/50'],['Size','186 × 132 × 71 mm']], connections:['BAT+ / BAT− / PV− / PV+; VE.Direct at lower right.'], notes:['The specific PV-channel name is not confirmed.'] },
   'mppt-2': { specs:[['Device','BlueSolar MPPT 100/50'],['Size','186 × 132 × 71 mm']], connections:['BAT+ / BAT− / PV− / PV+; VE.Direct at lower right.'], notes:['The specific PV-channel name is not confirmed.'] },
   'mppt-3': { specs:[['Device','BlueSolar MPPT 100/50'],['Size','186 × 132 × 71 mm']], connections:['BAT+ / BAT− / PV− / PV+; VE.Direct at lower right.'], notes:['The specific PV-channel name is not confirmed.'] },
-  'usb-hub': { specs:[['Device','Powered USB hub']], connections:['Three isolated RS485-to-USB adapters connect independently; one upstream USB connects to the PC.'], notes:['Secure powered input, port IDs and strain relief.'] },
-  'windows-pc': { specs:[['Device','Fanless industrial PC'],['Current configuration','i7-1165G7 / 16 GB / 512 GB'],['Control-LAN IP','192.168.8.52/24']], connections:['USB receives three RS485 channels; LAN1 connects to Ekrano GX through the switch.'], notes:['Confirm vehicle power version, enclosure and mounting holes from the seller drawing.'] },
   'ethernet-switch': { specs:[['Device','Moxa EDS-205A'],['Size','30 × 115 × 70 mm'],['Ports','5 × 10/100BaseT(X) RJ45']], connections:['PC LAN1 connects to Port 5; Port 1 connects to the Ekrano GX rear Ethernet RJ45 port.'], notes:['This unmanaged switch does not assign IP addresses and has no DHCP service.'] },
-  'constant-aiko': { specs:[['Device','Constant-current board 1'],['Assembly','158 × 104 × 58.8 mm'],['Mounting pattern','146 × 73 mm']], connections:['Right IN to PV module; left OUT to MG; upper RS485 to isolated converter.'], notes:['Mounted through a 196 × 120 × 3 mm adapter plate.','Installation position is not tied to a PV brand; name the board from the actual module, IN cable and communication channel after wiring.'] },
-  'constant-ja': { specs:[['Device','Constant-current board 2'],['Assembly','158 × 104 × 58.8 mm'],['Mounting pattern','146 × 73 mm']], connections:['Right IN to PV module; left OUT to MG; upper RS485 to isolated converter.'], notes:['Mounted through a 196 × 120 × 3 mm adapter plate.','Installation position is not tied to a PV brand; name the board from the actual module, IN cable and communication channel after wiring.'] },
-  'constant-jk': { specs:[['Device','Constant-current board 3'],['Assembly','158 × 104 × 58.8 mm'],['Mounting pattern','146 × 73 mm']], connections:['Right IN to PV module; left OUT to MG; upper RS485 to isolated converter.'], notes:['Mounted through a 196 × 120 × 3 mm adapter plate.','Installation position is not tied to a PV brand; name the board from the actual module, IN cable and communication channel after wiring.'] },
+  'constant-aiko': { specs:[['Device','Constant-current board 1'],['Assembly','158 × 104 × 58.8 mm'],['Mounting pattern','146 × 73 mm']], connections:['Right MC4 panel IN to PV; left MC4 panel OUT to MG; upper RS485 to CM5 native channel.'], notes:['Mounted through a 196 × 150 × 4 mm adapter plate.','Installation position is not tied to a PV brand; name the board from the actual module, IN cable and communication channel after wiring.'] },
+  'constant-ja': { specs:[['Device','Constant-current board 2'],['Assembly','158 × 104 × 58.8 mm'],['Mounting pattern','146 × 73 mm']], connections:['Right MC4 panel IN to PV; left MC4 panel OUT to MG; upper RS485 to CM5 native channel.'], notes:['Mounted through a 196 × 150 × 4 mm adapter plate.','Installation position is not tied to a PV brand; name the board from the actual module, IN cable and communication channel after wiring.'] },
+  'constant-jk': { specs:[['Device','Constant-current board 3'],['Assembly','158 × 104 × 58.8 mm'],['Mounting pattern','146 × 73 mm']], connections:['Right MC4 panel IN to PV; left MC4 panel OUT to MG; upper RS485 to CM5 native channel.'], notes:['Mounted through a 196 × 150 × 4 mm adapter plate.','Installation position is not tied to a PV brand; name the board from the actual module, IN cable and communication channel after wiring.'] },
   'vehicle-source': { specs:[['Device','Original vehicle power side']], connections:['Alternator / starter-battery bus feeds the driving-charge circuit.'], notes:['Keep the original interface and protection settings unchanged.'] },
   'gx-old': { specs:[['Device','Color Control GX'],['Size','130 × 120 × 28 mm']], connections:['Connected to the original Victron communication system.'], notes:['Before removal, record cut-out, fasteners, rear plug directions and depth.'] },
-  'gx-new': { specs:[['Device','Victron Ekrano GX'],['Front','187 × 124 mm'],['Total width with bracket','257 mm'],['Maximum envelope depth','67.1 mm']], connections:['RJ45 forms a static-IP control LAN with the industrial PC through Moxa EDS-205A.'], notes:['Cut-out 178 × 111 mm; minimum installation depth 100 mm.'] },
-  'gx-ethernet-link': { specs:[['Link','GX Ethernet communication cable'],['Cable','Cat5e / Cat6'],['Switch end','Moxa EDS-205A Port 1 (RJ45)'],['GX end','Ekrano GX rear Ethernet (RJ45) port']], connections:['Moxa EDS-205A Port 1 (RJ45) → Cat5e/Cat6 cable → Ekrano GX rear Ethernet (RJ45) port.'], notes:['This is not a VE.Direct, VE.Can, VE.Bus or USB connection.','PC and Ekrano GX use unique addresses on the same static /24 subnet.'] }
 };
 
 let deviceDetails = initialLanguage === 'en' ? deviceDetailsEn : deviceDetailsZh;
+
+for (const key of Object.keys(hardware)) {
+  const d=hardware[key];
+  deviceDetailsZh[d.id]=d.zh;deviceDetailsEn[d.id]=d.en;
+  recordsZh[key]={status:'设备资料',title:d.title,source:'2026.09 安装方案',summary:d.zh.summary,overview:[d.zh.summary],...d.zh};
+  recordsEn[key]={status:'Device Data',title:d.titleEn||d.title,source:'2026.09 design',summary:d.en.summary,overview:[d.en.summary],...d.en};
+}
+for (const id of ['constant-aiko','constant-ja','constant-jk']) {
+  deviceDetailsZh[id].connections=['右侧 IN 接组件；左侧 OUT 向下接 MG；顶部 RS485 接 CM5 原生独立通道。'];
+  deviceDetailsEn[id].connections=['Right IN receives PV; left OUT routes down to MG; top RS485 uses one native CM5 channel.'];
+  deviceDetailsZh[id].specs.push(['转接板','196 × 150 × 4 mm'],['旧孔距','132 × 122 mm'],['范围 / 工作点','0–10 A / 7–10 A']);
+  deviceDetailsEn[id].specs.push(['Adapter','196 × 150 × 4 mm'],['Old hole pitch','132 × 122 mm'],['Range / operating point','0–10 A / 7–10 A']);
+}
 
 const catalogSets = {
   zh: [
   ['body','车身与光伏组件','7200 × 2150 × 3000 mm；组件 1762 × 1134 × 30 mm'],
   ['interiorModule','内壁光伏组件','车厢内壁悬挂，全黑组件表面'],
   ['electricalOld','旧车系统 v1.0','三台 MPPT、MG、电池与原线路'],
-  ['electricalNew','新电路系统 v1.0','三块恒流板、MC4 与新通讯'],
+  ['electricalNew','新电路系统 · 2026.09','三块恒流板、MC4 与新通讯'],
   ['gxOld','旧版 Color Control GX','130 × 120 × 28 mm'],
-  ['gxNew','新版 Ekrano GX','187 × 124 mm；开孔 178 × 111 mm'],
-  ['communication','通讯系统','恒流板 ×3 → PC → 交换机 → Ekrano GX']
+  ['gxNew','Cerbo GX MK2','154 × 78 × 48 mm；屏幕位置暂缓'],
+  ['communication','通讯系统','恒流板 ×3 → CM5 → MOXA → Cerbo / USR']
   ],
   en: [
     ['body','Vehicle Body and PV Modules','7200 × 2150 × 3000 mm; module 1762 × 1134 × 30 mm'],
     ['interiorModule','Interior-mounted PV Module','Mounted on the interior wall; all-black surface'],
     ['electricalOld','Original Vehicle System v1.0','Three MPPT units, MG, battery and original cables'],
-    ['electricalNew','New Electrical System v1.0','Three constant-current boards, MC4 and new communication'],
+    ['electricalNew','Electrical Update · 2026.09','Three constant-current boards, MC4 and new communication'],
     ['gxOld','Original Color Control GX','130 × 120 × 28 mm'],
-    ['gxNew','New Ekrano GX','187 × 124 mm; cut-out 178 × 111 mm'],
-    ['communication','Communication System','Boards ×3 → PC → switch → Ekrano GX']
+    ['gxNew','Cerbo GX MK2','154 × 78 × 48 mm; screen deferred'],
+    ['communication','Communication System','Boards ×3 → CM5 → MOXA → Cerbo / USR']
   ]
 };
+
+for (const [key,d] of Object.entries(hardware)) {if(key==='cerbo')continue;catalogSets.zh.push([key,d.title,d.zh.specs[1][1]]);catalogSets.en.push([key,d.title,d.en.specs[1][1]]);}
 
 const hotspotMap = {
   'rear-left': [
@@ -334,9 +334,9 @@ function buildDeviceRecord(message,language=state.lang) {
     source:message.version==='new'?copy.sourceNew:copy.sourceOld,
     summary:localizedSummary,
     overview:[localizedSummary],
-    specs:detail.specs||[[copy.objectId,message.id||'—']],
-    connections:detail.connections||[copy.genericConnection],
-    notes:detail.notes||[copy.genericNote]
+    specs:message[language==='en'?'specsEn':'specsZh']||detail.specs||[[copy.objectId,message.id||'—']],
+    connections:message[language==='en'?'connectionsEn':'connectionsZh']||detail.connections||[copy.genericConnection],
+    notes:message[language==='en'?'notesEn':'notesZh']||detail.notes||[copy.genericNote]
   };
 }
 
@@ -559,8 +559,8 @@ function loadGx() {
   el.coverSheet.hidden=true; el.communicationCard.hidden=true;
   setStageCopy(isNew?'statusGxNew':'statusGxOld',isNew?'hintGxNew':'hintGxOld');
   el.viewStrip.innerHTML='';
-  loadFrame(isNew?paths.gxNew:paths.gxOld,{title:isNew?'新版GXv01':'旧版GXv01'});
-  showRecord(isNew?'gxNew':'gxOld'); setVersionVisible(true); renderHotspots([]);
+  loadFrame(isNew?paths.gxNew:paths.gxOld,{title:isNew?'Cerbo GX MK2':'旧版GXv01',onLoad:frame=>{if(isNew)frame.contentWindow?.postMessage({type:'aiko-focus-communication'},location.origin)}});
+  showRecord(isNew?'gxNew':'gxOld'); setVersionVisible(true,false); renderHotspots([]);
 }
 
 function openGxDetail() {
@@ -623,7 +623,7 @@ window.addEventListener('message',event=>{
   state.deviceMessage=message;
   recordsZh.__device=buildDeviceRecord(message,'zh');
   recordsEn.__device=buildDeviceRecord(message,'en');
-  state.detailTab=message.id==='gx-ethernet-link'?'connections':'overview';
+  state.detailTab=message.isCable?'specs':'overview';
   showRecord('__device');
 });
 

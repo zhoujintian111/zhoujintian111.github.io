@@ -41,10 +41,10 @@
       selection:{all:['SCENE 00','旧系统实车装配','Original-system assembly'],pv:['FLOW 01','主功率与光伏线路','Power and PV circuits'],signal:['FLOW 02','MPPT通信线路','MPPT communication'],dimension:['CHECK 01','外形与安装孔位','Dimensions and mounting holes'],replacement:['TARGET 01','三块恒流板预装','Three-board installation preview']}
     },
     'electrical-new.html':{
-      title:['新电路系统 V1.0 · 三路恒流充电系统','New Electrical System V1.0 · Three-channel constant-current charging'],
-      status:['基准已锁定 · 后续修改须另建分支','Baseline locked · later changes require a separate branch'],
+      title:['三路恒流 · CM5 原生 RS485','Three-channel constant current · CM5 native RS485'],
+      status:['安装方案 · GX Touch 50 暂缓','Mounting design · GX Touch 50 deferred'],
       modes:{all:['改造后系统','Upgraded system'],pv:['主线路','Power circuits'],signal:['RS485 / 通讯链路','RS485 / communication'],dimension:['尺寸 / 孔位','Dimensions / holes'],replacement:['V1.0旧件对比','V1.0 original-part comparison']},
-      selection:{all:['NEW V1.0','改造后完整装配','Complete upgraded assembly'],pv:['FLOW 01','主功率与光伏线路','Power and PV circuits'],signal:['FLOW 02','完整通讯链路','Complete communication link'],dimension:['CHECK 01','转接板与安装孔位','Adapter plate and mounting holes'],replacement:['BASELINE V1.0','旧件位置对比','Original-part position comparison']}
+      selection:{all:['UPDATE 2026.09','改造后完整装配','Complete upgraded assembly'],pv:['FLOW 01','主功率与光伏线路','Power and PV circuits'],signal:['FLOW 02','完整通讯链路','Complete communication link'],dimension:['CHECK 01','转接板与安装孔位','Adapter plate and mounting holes'],replacement:['BASELINE V1.0','旧件位置对比','Original-part position comparison']}
     }
   };
 
@@ -61,14 +61,31 @@
     const toggle=q('[data-toggle-open]');if(toggle)toggle.textContent=index?(toggle.getAttribute('aria-pressed')==='true'?'Switch to travel mode':'Switch to display mode'):(toggle.getAttribute('aria-pressed')==='true'?'切换为行驶收合态':'切换为展示展开态');
   }
 
+
+  const electricalText={"安装基准 / mm": "Installation dimensions / mm", "恒流板总成": "Board assembly", "外壳主体": "Enclosure body", "电源 / 信号孔": "Power / signal holes", "Ø16.5 · 电源孔距33": "Ø16.5 · power pitch 33", "恒流板孔距": "Board mounting pitch", "恒流板安装孔": "Board mounting holes", "4×Ø4.5 / Ø7.5深3": "4×Ø4.5 / Ø7.5 depth 3", "转接板": "Adapter plate", "旧MPPT孔位": "Original MPPT pitch", "CM5 机身": "CM5 enclosure", "通讯底板": "Communication plate", "450 × 250 × 4 · 首件方案": "450 × 250 × 4 · first article", "原生串口": "Native serial ports", "RS485 1–3 使用；4 备用": "RS485 CH0–CH2 used; CH3 spare", "结论：旧孔与新孔不直接复用；三块恒流板均通过196 × 150 × 4 mm转接板固定。": "The hole patterns differ; each board uses a 196 × 150 × 4 mm adapter.", "恒流板外壳和MC4按已有图纸显示；本批次实物外形、接头和针脚需复核。": "Enclosure and MC4 follow the available drawing; verify actual connector parts and pin order.", "L 型排布：1号在 Orion 正右方，2号在1号正下方，3号在2号正左方、Orion 正下方。实际孔位和线束长度须首件复核。": "L layout: board 1 right of Orion, board 2 below it, board 3 left of board 2 and below Orion. Verify vehicle fixing points and cable lengths.", "结论：MPPT侧挂槽与恒流板四孔不构成直接复用孔型，预留转接板方案。": "MPPT slots do not match the four-hole board pattern; use an adapter plate.", "正极 / PV＋": "Positive / PV+", "负极 / GND / PV−": "Negative / GND / PV−", "RS485 屏蔽信号": "RS485 shielded data", "VE.Direct 信号": "VE.Direct data", "2026.09 更新 · 首件安装方案": "2026.09 revision · first-article mounting design", "柜体基准 1520 × 1080 mm：现场复测项": "Cabinet reference 1520 × 1080 mm: measure on vehicle", "三维资源加载失败，请重新打开此视图。": "3D resources failed to load. Reopen this view.", "AIKO展车电器仓毫米级三维数字孪生": "AIKO vehicle electrical bay 3D model", "装配显示模式": "Assembly display modes", "可旋转的三维电器仓模型": "Interactive 3D electrical bay"};
+  const electricalReverse=Object.fromEntries(Object.entries(electricalText).map(([zh,en])=>[en,zh]));
+  function translateElectricalStatic(index){
+    const tree=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    while(tree.nextNode()){
+      const node=tree.currentNode;if(node.parentElement?.closest('script,style,.a3-selection,.a3-device-tooltip'))continue;
+      const current=node.textContent.trim(),copy=index?electricalText[current]:electricalReverse[current];
+      if(copy)node.textContent=node.textContent.replace(current,copy);
+    }
+    qa('[aria-label]').forEach(node=>{const current=node.getAttribute('aria-label'),copy=index?electricalText[current]:electricalReverse[current];if(copy)node.setAttribute('aria-label',copy)});
+    const error=q('.a3-error');if(error?.dataset.errorMessage)error.textContent=(index?'3D resource loading failed: ':'三维资源加载失败：')+error.dataset.errorMessage;
+  }
+
   function applyElectrical(index){
     const copy=electrical[page];if(!copy)return;
     set('.a3-head h2',copy.title[index]);set('.a3-status small',copy.status[index]);
     qa('.a3-mode').forEach(button=>{const item=copy.modes[button.dataset.mode];if(item)button.textContent=item[index]});
     const reset=q('[data-action="reset"]');if(reset)direct(reset,index?'Reset view':'复位镜头');
-    set('.a3-loading b',index?'Building 3D scene':'正在建立三维场景');set('.a3-guide span',index?'Drag to rotate · wheel to zoom · select a device for details':'拖动旋转 · 滚轮缩放 · 点击设备查看端口');
-    const active=q('.a3-mode.is-active');const selection=active&&copy.selection[active.dataset.mode];
-    if(selection){set('.a3-selection-id',selection[0]);set('.a3-selection strong',index?selection[2]:selection[1]);}
+    const focus=q('[data-action="communication"]');if(focus)focus.textContent=index?'Communication close-up':'通讯区近景';
+    const wiring=q('[data-action="cm5-wiring"]');if(wiring)wiring.textContent=index?'CM5 wiring close-up':'CM5 接线近景';
+    set('.a3-loading b',index?'Building 3D scene':'正在建立三维场景');set('.a3-guide span',index?'Pan button: drag to move · right-drag / two fingers: pan · wheel / pinch: zoom':'点平移后拖动移画面 · 右键拖动/双指平移 · 滚轮/捏合缩放');
+    translateElectricalStatic(index);
+    window.aikoSceneInterface?.refresh();
+
   }
 
   function applyGx(index){
@@ -91,4 +108,5 @@
     language=event.data.language==='en'?'en':'zh';apply();
   });
   document.addEventListener('click',()=>setTimeout(apply,0));
+  apply();
 })();

@@ -109,6 +109,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
 <script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.min.js","three/addons/":"../vendor/three/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
+import { deviceEnglish } from '../upgrade-data.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -117,6 +118,12 @@ const root=document.getElementById('aiko-old-system-routing-fix');
 const canvas=root?.querySelector('.a3-canvas');
 const loading=root?.querySelector('.a3-loading');
 const error=root?.querySelector('.a3-error');
+
+let interfaceLanguage='zh';
+window.addEventListener('message',event=>{
+  if(event.origin!==location.origin||event.data?.type!=='aiko-language')return;
+  interfaceLanguage=event.data.language==='en'?'en':'zh';window.aikoSceneInterface?.refresh();
+});
 
 try{
   if(!root||!canvas) throw new Error('Canvas unavailable');
@@ -146,7 +153,13 @@ try{
   controls.maxDistance=30;
   controls.minPolarAngle=.42;
   controls.maxPolarAngle=1.68;
-  controls.enablePan=true;
+  controls.enablePan=true;controls.screenSpacePanning=true;
+  let panMode=false;
+  const navigation=document.createElement('button');navigation.type='button';navigation.className='a3-focus';navigation.dataset.action='pan';
+  root.querySelector('.a3-toolbar').appendChild(navigation);
+  function navigationLabel(){navigation.textContent=interfaceLanguage==='en'?(panMode?'Pan ON · switch to rotate':'Pan · move the view'):(panMode?'平移中 · 切回旋转':'平移 · 移动画面');navigation.setAttribute('aria-pressed',String(panMode));}
+  navigation.addEventListener('click',()=>{panMode=!panMode;controls.mouseButtons.LEFT=panMode?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;canvas.style.cursor=panMode?'grab':'';navigationLabel();});
+  navigationLabel();
 
   const hemi=new THREE.HemisphereLight(0x748996,0x100d0b,.34);scene.add(hemi);
   const key=new THREE.SpotLight(0xffd8b8,58,34,.58,.68,1.25);key.position.set(-6.5,13.2,12.8);key.target.position.set(-1.2,5.7,.1);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.00022;scene.add(key,key.target);
@@ -269,7 +282,7 @@ try{
     return new THREE.Vector3(x,y,z+.08);
   }
   function deviceMeta(group,id,title,text,flow='all'){
-    group.userData={id,title,text,flow};
+    const [titleEn,textEn]=deviceEnglish(id,title,text);group.userData={id,title,text,titleEn,textEn,flow};
     group.traverse(o=>{if(o.isMesh){o.userData.deviceRoot=group;pickables.push(o)}});
   }
   function addMountingScrews(parent,w,h,z){[[-w/2+.11,-h/2+.11],[w/2-.11,-h/2+.11],[-w/2+.11,h/2-.11],[w/2-.11,h/2-.11]].forEach(([x,y])=>screw(x,y,z,parent,.75));}
@@ -390,7 +403,7 @@ try{
   const mppt1=makeMPPT(5.34,6.28,'mppt-1');
   const mppt2=makeMPPT(5.34,4.02,'mppt-2');
   const mppt3=makeMPPT(.02,3.55,'mppt-3',.34);mppt3.position.z=-.14;
-  mppt3.userData.title='MPPT 03（受遮挡）';mppt3.userData.text='位于Buck Boost下方；设备本体弱化，线束保持实体显示。';
+  mppt3.userData.titleEn='MPPT 03 (partly obscured)';mppt3.userData.textEn='Below Buck Boost; body subdued, harness visible.';mppt3.userData.title='MPPT 03（受遮挡）';mppt3.userData.text='位于Buck Boost下方；设备本体弱化，线束保持实体显示。';
 
   const usbHub=new THREE.Group();usbHub.position.set(6.64,1.15,.06);equipment.add(usbHub);
   const hubBody=box(.62,.86,.22,new THREE.MeshPhysicalMaterial({color:0x171b1d,roughness:.58,metalness:.25}),0,0,.16,.06);usbHub.add(hubBody);
@@ -528,9 +541,13 @@ try{
     dimension:['CHECK 01','外形与安装孔位','MPPT与恒流板孔型不同；尺寸层按毫米统一标定。'],
     replacement:['TARGET 01','三块恒流板预装','AIKO / JA / JK竖向排列，单体158 × 104 × 58.8 mm，板间净距30 mm。']
   };
+  const modeInfoEn={"all": ["SCENE 00", "Original-system assembly", "Preserved original installation. MPPT size 186 × 132 × 71 mm; cables follow the vehicle routes."], "pv": ["FLOW 01", "Power and PV circuits", "Three PV circuits, three MPPT charging pairs, Buck Boost, LOAD and battery circuits."], "signal": ["FLOW 02", "MPPT communication", "Three VE.Direct cables route down to three independent USB sockets at the lower right."], "dimension": ["CHECK 01", "Dimensions and mounting holes", "MPPT and constant-current board hole patterns differ; dimensions in millimetres."], "replacement": ["TARGET 01", "Original upgrade preview", "Original vertical AIKO / JA / JK preview; this is not the revised L layout."]};
+  let currentMode='all',selectedDevice=null;
+  function refreshInterface(){navigationLabel();if(selectedDevice)setInfo(['DEVICE',interfaceLanguage==='en'?selectedDevice.titleEn:selectedDevice.title,interfaceLanguage==='en'?selectedDevice.textEn:selectedDevice.text]);else setInfo((interfaceLanguage==='en'?modeInfoEn:modeInfo)[currentMode]);}
+  window.aikoSceneInterface={refresh:refreshInterface};
   function setInfo(arr){selection.id.textContent=arr[0];selection.title.textContent=arr[1];selection.text.textContent=arr[2]}
   function setOpacity(obj,value){obj.traverse(o=>{if(o.material){if(!o.userData.baseOpacity)o.userData.baseOpacity=o.material.opacity;o.material.transparent=value<.99||o.material.transparent;o.material.opacity=o.userData.baseOpacity*value;o.material.depthWrite=value>.55}})}
-  function setMode(mode){
+  function setMode(mode){currentMode=mode;selectedDevice=null;
     Object.entries(flowGroups).forEach(([key,g])=>{
       let on=mode==='all'||(mode==='pv'&&key!=='signal')||key===mode;
       if(mode==='replacement'||mode==='dimension')on=false;
@@ -541,11 +558,12 @@ try{
     [mppt1,mppt2,mppt3].forEach(m=>m.visible=!replacementMode);
     dimensionPanel.hidden=mode!=='dimension';
     root.querySelectorAll('.a3-mode').forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle('is-active',on);b.setAttribute('aria-pressed',String(on))});
-    setInfo(modeInfo[mode]||modeInfo.all);
+    refreshInterface();
   }
   root.querySelectorAll('.a3-mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
   root.querySelector('[data-action="reset"]').addEventListener('click',()=>{camera.position.copy(home.position);controls.target.copy(home.target);controls.update();setMode('all')});
 
+  setMode('all');
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down={x:0,y:0};
   canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
   const deviceTooltip=document.createElement('div');deviceTooltip.className='a3-device-tooltip';
@@ -555,16 +573,16 @@ try{
     const hit=raycaster.intersectObjects(pickables,false)[0];return hit?.object?.userData?.deviceRoot?.userData||null;
   }
   canvas.addEventListener('pointermove',e=>{
-    const d=deviceAt(e);canvas.style.cursor=d?'pointer':'';
+    const d=deviceAt(e);canvas.style.cursor=panMode?'grab':d?'pointer':'';
     if(!d){deviceTooltip.style.display='none';return;}
-    const r=canvas.getBoundingClientRect();deviceTooltip.textContent=d.title;deviceTooltip.style.left=(e.clientX-r.left)+'px';deviceTooltip.style.top=(e.clientY-r.top)+'px';deviceTooltip.style.display='block';
+    const r=canvas.getBoundingClientRect();deviceTooltip.textContent=interfaceLanguage==='en'?d.titleEn:d.title;deviceTooltip.style.left=(e.clientX-r.left)+'px';deviceTooltip.style.top=(e.clientY-r.top)+'px';deviceTooltip.style.display='block';
   });
   canvas.addEventListener('pointerleave',()=>{canvas.style.cursor='';deviceTooltip.style.display='none'});
   canvas.addEventListener('pointerup',e=>{
-    if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;
+    if(panMode||(e.button!=null&&e.button!==0)||Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;
     const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);
     const hit=raycaster.intersectObjects(pickables,false)[0];if(!hit)return;
-    const d=hit.object.userData.deviceRoot?.userData;if(d){setInfo(['DEVICE',d.title,d.text]);parent.postMessage({type:'aiko-device',version:'old',id:d.id,title:d.title,text:d.text},location.origin);}
+    const d=hit.object.userData.deviceRoot?.userData;if(d){selectedDevice=d;refreshInterface();parent.postMessage({...d,type:'aiko-device',version:'old'},location.origin);}
   });
 
   const resize=()=>{const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()};
@@ -573,7 +591,7 @@ try{
   document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false}else if(!running){running=true;animate()}});
   loading.classList.add('is-done');
 }catch(err){
-  if(loading)loading.hidden=true;if(error){error.hidden=false;error.textContent='三维资源加载失败：'+(err?.message||'unknown error')}
+  if(loading)loading.hidden=true;if(error){error.hidden=false;error.dataset.errorMessage=err?.message||'unknown error';error.textContent=(interfaceLanguage==='en'?'3D resource loading failed: ':'三维资源加载失败：')+error.dataset.errorMessage}
 }
 </script>
 

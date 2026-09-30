@@ -41,7 +41,7 @@
         </div>
         <div class="top-actions">
           <div class="segmented language-switch" id="languageSwitch" role="group" aria-label="语言 / Language">
-            <button type="button" data-language="zh" aria-pressed="true">中文</button>
+            <button type="button" data-language="zh" aria-pressed="true">ZH</button>
             <button type="button" data-language="en" aria-pressed="false">EN</button>
           </div>
           <div class="segmented" id="versionSwitch" role="group" aria-label="系统版本" hidden>
@@ -79,11 +79,11 @@
 
           <div class="view-strip" id="viewStrip" aria-label="固定镜头快捷入口"></div>
           <div class="communication-card" id="communicationCard" hidden>
-            <div class="comm-node"><strong data-i18n="commBoards">恒流板 ×3</strong><small data-i18n="commBoardsSub">三路 RS485 A／B → 隔离 RS485 转 USB</small></div><i>→</i>
-            <div class="comm-node"><strong data-i18n="commHub">有源 USB 集线器</strong><small data-i18n="commHubSub">3 路独立输入，上行 USB 接电脑</small></div><i>→</i>
-            <div class="comm-node"><strong data-i18n="commPc">工业电脑</strong><small data-i18n="commPcSub">RS485 采集、MQTT 发布、固定 IP</small></div><i>→</i>
+            <div class="comm-node"><strong data-i18n="commBoards">恒流板 ×3</strong><small data-i18n="commBoardsSub">三路独立 RS485 → CM5 原生串口</small></div><i>→</i>
+            <div class="comm-node"><strong data-i18n="commHub">CM5 原生采集</strong><small data-i18n="commHubSub">RS485 1–3 使用；4 备用</small></div><i>→</i>
             <div class="comm-node"><strong>Moxa EDS-205A</strong><small data-i18n="commSwitchSub">5 口工业交换机</small></div><i>→</i>
-            <div class="comm-node"><strong>Ekrano GX</strong><small data-i18n="commGxSub">固定 IP 接收与显示</small></div>
+            <div class="comm-node"><strong>Cerbo GX MK2</strong><small data-i18n="commGxSub">固定 IP 接收与显示</small></div>
+            <div class="comm-node comm-access"><strong data-i18n="commPc">USR-G806w</strong><small data-i18n="commPcSub">LAN 接 MOXA；Wi-Fi 本地访问</small></div>
           </div>
         </div>
 
