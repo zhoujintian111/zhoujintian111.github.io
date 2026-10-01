@@ -190,7 +190,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
 
     const start = async () => {
       const { THREE, OrbitControls } = window.__AIKO_THREE_OFFLINE__;
-      const {makeGxTouch,gxTouchSpec}=await import('../gx-touch-model.js');
+      const {makeGxTouch,gxTouchSpec}=await import('../gx-touch-model.js?v=gx-frontwall-20261001');
       const gxPhoto=await new THREE.TextureLoader().loadAsync('../images/gx-touch-50-official.png');
       gxPhoto.colorSpace=THREE.SRGBColorSpace;
       gxPhoto.offset.set(49/1925,48/1307);gxPhoto.repeat.set(1804/1925,1210/1307);
@@ -911,7 +911,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       addBox(0.026, 0.024, 0.47, material.ledBlue, -3.30, 1.035, 0.815);
 
       // 中央通道采用低反光防滑地板，宽度按真实车厢保持克制。
-      addBox(4.20, 0.012, 1.14, material.floor, -1.27, 0.657, 0);
+      const interiorFloor=addBox(4.20, 0.012, 1.14, material.floor, -1.27, 0.657, 0);
 
       // 玻璃门位于右侧靠车头区域，保持车身v01的玻璃区尺度。
       const glass = new THREE.Mesh(new THREE.PlaneGeometry(2.20, 1.90), material.glass);
@@ -944,8 +944,8 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
         });
       });
 
-      // 驾驶室后方电路仓主体向车尾方向凸出；靠玻璃门的GX窄面向车头凹入。
-      // GX右侧至玻璃面固定为100 mm，左侧区域由车内净宽减去GX宽度和该间隙反算。
+      // 保留原车电路仓、靠玻璃门的旧GX凹面和100 mm间隙；新GX安装在电视正面白墙。
+      // 下列旧GX尺寸仅用于保留原车墙体边界。
       const gxDoorGap = 0.100;
       const gxLeftRegionWidth = locked.vehicleWidth - locked.gxWidth - gxDoorGap;
       const gxLeftEdgeZ = -locked.vehicleWidth * 0.5 + gxLeftRegionWidth;
@@ -964,7 +964,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       wallGraphic.rotation.y = -Math.PI / 2;
       wallGraphic.position.set(0.514, 1.65, bayCenterZ);
       world.add(wallGraphic);
-      addBox(0.052, 0.545, 0.970, material.black, 0.482, 2.105, bayCenterZ);
+      const tvBody=addBox(0.052, 0.545, 0.970, material.black, 0.482, 2.105, bayCenterZ);
       const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.925, 0.500), material.screen);
       tvScreen.rotation.y = -Math.PI / 2;
       tvScreen.position.set(0.453, 2.105, bayCenterZ);
@@ -974,22 +974,23 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       [bayLeftEdgeZ, gxLeftEdgeZ].forEach((z) => addBox(0.028, 1.88, 0.028, material.aluminum, 0.498, 1.65, z));
       [0.73, 2.57].forEach((y) => addBox(0.028, 0.028, bayWidth, material.aluminum, 0.498, y, bayCenterZ));
 
-      // Replace only the original GX assembly in this derived upgrade scene.
+      // GX sits on the same front white wall as the TV, centred in its right-hand blank strip.
       const gxTouch=makeGxTouch(THREE,gxPhoto);world.add(gxTouch.group);
       const gxCenterY=gxTouch.group.position.y;
       const gxCenterX=gxTouch.group.position.x;
       const gxFrontX=gxCenterX-gxTouchSpec.depth;
-      gxDetailLight.position.set(.56,gxCenterY+.10,.84);gxDetailLight.lookAt(gxFrontX,gxCenterY,.94);
-      gxEdgeLight.position.set(.65,gxCenterY-.10,1.02);
+      const gxInstalledZ=gxTouch.group.position.z;
+      gxDetailLight.position.set(gxCenterX-.28,gxCenterY+.10,gxInstalledZ-.10);gxDetailLight.lookAt(gxFrontX,gxCenterY,gxInstalledZ);
+      gxEdgeLight.position.set(gxCenterX-.19,gxCenterY-.10,gxInstalledZ+.08);
       const gxDimensions=new THREE.Group();world.add(gxDimensions);
       const gxDimensionMat=new THREE.LineBasicMaterial({color:0xff5a00,depthTest:false});
       const dimLine=(ps)=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(ps.map(p=>new THREE.Vector3(...p))),gxDimensionMat);l.renderOrder=15;gxDimensions.add(l);};
-      const dx=.79,dz=1.032,fy=gxTouchSpec.floorY;
+      const dx=gxCenterX-.034,dz=.79,fy=gxTouchSpec.floorY;
       dimLine([[dx,fy,dz],[dx,gxCenterY,dz]]);
       for(const y of [fy,gxCenterY])dimLine([[dx,y,dz-.035],[dx,y,dz+.035]]);
       const dc=document.createElement('canvas');dc.width=768;dc.height=96;const dctx=dc.getContext('2d');dctx.fillStyle='#10171e';dctx.fillRect(0,0,768,96);dctx.font='bold 42px Arial';dctx.fillStyle='#ffffff';dctx.textAlign='center';dctx.fillText('1450 mm · FLOOR → CENTRE',384,63);
       const dt=new THREE.CanvasTexture(dc);dt.colorSpace=THREE.SRGBColorSpace;
-      const dm=new THREE.Mesh(new THREE.PlaneGeometry(.37,.046),new THREE.MeshBasicMaterial({map:dt,transparent:true,depthTest:false}));dm.rotation.y=-Math.PI/2;dm.position.set(dx-.02,1.48,.79);dm.renderOrder=16;gxDimensions.add(dm);
+      const dm=new THREE.Mesh(new THREE.PlaneGeometry(.37,.046),new THREE.MeshBasicMaterial({map:dt,transparent:true,depthTest:false}));dm.rotation.y=-Math.PI/2;dm.position.set(dx-.02,1.48,.60);dm.renderOrder=16;gxDimensions.add(dm);
       const gxPickRay=new THREE.Raycaster(),gxPointer=new THREE.Vector2();let gxDown=null;
       canvas.addEventListener('pointerdown',e=>{gxDown=[e.clientX,e.clientY]});
       canvas.addEventListener('pointerup',e=>{if(!gxDown||Math.hypot(e.clientX-gxDown[0],e.clientY-gxDown[1])>6)return;const rect=canvas.getBoundingClientRect();gxPointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);gxPickRay.setFromCamera(gxPointer,camera);if(gxPickRay.intersectObject(gxTouch.group,true).length)parent.postMessage({type:'aiko-device',id:'gx-new',version:'new'},location.origin);});
@@ -1656,20 +1657,20 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
           t: [0.69, 1.90, 0.42],
           fov: 46,
           label: '镜头 4 · GX与玻璃门',
-          note: '查看电视右侧的 GX Touch 50，屏幕中心距车内地板1450 mm。'
+          note: '查看与电视同一正面白墙上的 GX Touch 50，位于电视右侧，屏幕中心距车内地板1450 mm。'
         },
         'gx-front': {
           mode: 'interior',
-          p: [0.430, 2.113, 0.940],
-          t: [0.828, 2.113, 0.940],
+          p: [gxFrontX-.398, gxCenterY, gxInstalledZ],
+          t: [gxFrontX, gxCenterY, gxInstalledZ],
           fov: 28,
           label: '镜头 5 · GX正面',
           note: '标准版 GX Touch 50：128.2 × 87.1 × 12.4 mm；屏幕中心距车内地板1450 mm。'
         }
       };
 
-      cameraViews['gx-installation']={mode:'interior',p:[-1.70,1.90,.88],t:[.75,1.66,.36],fov:46,label:'GX Touch 50 · 电视右侧',note:'屏幕中心距车内地板1450 mm；屏幕与电视同侧可近距查看。'};
-      cameraViews['gx-mount']={mode:'interior',p:[.37,2.24,1.025],t:[.79,2.113,.94],fov:36,label:'原厂固定方式',note:'标准版随附固定框：4点固定，屏幕贴面；孔位及穿线槽按官方模板。'};
+      cameraViews['gx-installation']={mode:'interior',p:[-1.70,1.90,0],t:[.514,1.66,.05],fov:46,label:'GX Touch 50 · 电视右侧同一正面白墙',note:'与电视安装于同一正面白墙；屏幕中心距车内完成地板1450 mm。'};
+      cameraViews['gx-mount']={mode:'interior',p:[gxCenterX-.47,gxCenterY+.127,gxInstalledZ+.085],t:[gxCenterX-.05,gxCenterY,gxInstalledZ],fov:36,label:'原厂固定方式',note:'标准版随附固定框：4点固定，屏幕贴面；孔位及穿线槽按官方模板。'};
       let selectedView = 'gx-installation';
       let cameraTween = null;
       const moveCamera = (name, instant = false) => {
@@ -1699,7 +1700,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
         scene.fog.density = exteriorMode ? 0.026 : 0.018;
         status.textContent = exteriorMode
           ? `车身v01 · ${expanded ? '展示展开态' : '行驶收合态'}；尺寸与对象位置保持锁定。`
-          : '车内v1 · 双侧展台、中央通道、凸出电路仓、凹入GX安装面及四固定镜头保持锁定。';
+          : 'GX Touch 50位于电视右侧同一正面白墙，屏幕中心距车内完成地板1450 mm。';
         cameraTween = {
           start: performance.now(),
           duration: instant ? 1 : 720,
@@ -1770,7 +1771,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
         requestAnimationFrame(render);
       };
 
-      window.aikoGxScene={scene,camera,world,controls,gxTouch,gxDimensions,moveCamera,cameraViews};
+      window.aikoGxScene={scene,camera,world,controls,gxTouch,gxDimensions,moveCamera,cameraViews,installationReferences:{wallGraphic,tvBody,interiorFloor}};
       loading.hidden = true;
       moveCamera('gx-installation', true);
       window.dispatchEvent(new Event('aiko-scene-ready'));
@@ -1787,6 +1788,6 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
   </script>
 </div>
 
-<script src="../view-language.js?v=gx-20261001"></script>
+<script src="../view-language.js?v=gx-frontwall-20261001"></script>
 </body>
 </html>

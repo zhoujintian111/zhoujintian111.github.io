@@ -100,12 +100,12 @@
     const root=q('#aiko-interior-four-cameras-v02');if(root)root.setAttribute('aria-label',index?'GX Touch 50 installation':'GX Touch 50升级安装');
     const loading=q('[data-loading]');if(loading?.dataset.errorMessage)loading.textContent=(index?'3D view unavailable: ':'三维视图不可用：')+loading.dataset.errorMessage;
     const labels={
-      'gx-installation':['GX 安装位置','GX installation','GX Touch 50 · 电视右侧','GX Touch 50 · right of TV'],
+      'gx-installation':['GX 安装位置','GX installation','GX Touch 50 · 电视右侧同一正面白墙','GX Touch 50 · same front wall, right of TV'],
       'gx-front':['GX屏幕近景','GX screen close-up','标准版薄屏 · 128.2 × 87.1 × 12.4 mm','Standard slim display · 128.2 × 87.1 × 12.4 mm'],
       'gx-mount':['固定件展开','Mounting detail','原厂固定框 · 展开示意','Included fixing frame · exploded view'],
       'front-diagonal':['GX与玻璃门','GX and glass door','电视右侧 · 车内站立观看','Right of TV · viewed from inside']};
     set('.viz-title',index?'GX Touch 50 · TV-side installation':'GX Touch 50 · 电视右侧安装');
-    set('.viz-meta',index?'Standard model · centre 1450 mm above interior floor · official fixing frame':'标准版 · 中心距车内地板1450 mm · 原厂固定方式');
+    set('.viz-meta',index?'Same front white wall as TV · centre 1450 mm above interior floor · official fixing frame':'与电视同一正面白墙 · 中心距车内地板1450 mm · 原厂固定方式');
     set('.viz-badge',index?'Upgraded installation':'升级安装');
     set('.scene-key',index?'Drag to rotate · Pan button / right-drag to pan · scroll to zoom':'拖动旋转 · 平移按钮／右键拖动平移 · 滚轮缩放');
     set('[data-status]',index?'Manufacturer illustration; not live data. Verify wall and cable route on the vehicle.':'屏幕读数为厂家产品示意，非实时数据；墙面及走线须现场复测。');

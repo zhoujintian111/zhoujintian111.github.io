@@ -1,5 +1,5 @@
 // Standard GX Touch 50, BPP900455050. Geometry: official Rev02 drawing, metres.
-export const gxTouchSpec=Object.freeze({width:.1282,height:.0871,depth:.0124,floorY:.663,centerAboveFloor:1.45,wallX:.840,centerZ:.940,frameHoleWidth:.116,frameHoleHeight:.0526});
+export const gxTouchSpec=Object.freeze({width:.1282,height:.0871,depth:.0124,floorY:.663,centerAboveFloor:1.45,wallX:.514,centerZ:.663,frameHoleWidth:.116,frameHoleHeight:.0526});
 export function makeGxTouch(THREE,texture){
  const spec=gxTouchSpec,group=new THREE.Group(),display=new THREE.Group(),mount=new THREE.Group();
  group.name='GX Touch 50 installation';display.name='GX Touch 50 display';mount.name='Included fixing frame';group.add(mount,display);
