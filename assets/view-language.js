@@ -42,7 +42,7 @@
     },
     'electrical-new.html':{
       title:['三路恒流 · CM5 原生 RS485','Three-channel constant current · CM5 native RS485'],
-      status:['安装方案 · GX Touch 50 暂缓','Mounting design · GX Touch 50 deferred'],
+      status:['安装方案 · GX屏幕位于电视右侧','Mounting design · GX display right of TV'],
       modes:{all:['改造后系统','Upgraded system'],pv:['主线路','Power circuits'],signal:['RS485 / 通讯链路','RS485 / communication'],dimension:['尺寸 / 孔位','Dimensions / holes'],replacement:['V1.0旧件对比','V1.0 original-part comparison']},
       selection:{all:['UPDATE 2026.09','改造后完整装配','Complete upgraded assembly'],pv:['FLOW 01','主功率与光伏线路','Power and PV circuits'],signal:['FLOW 02','完整通讯链路','Complete communication link'],dimension:['CHECK 01','转接板与安装孔位','Adapter plate and mounting holes'],replacement:['BASELINE V1.0','旧件位置对比','Original-part position comparison']}
     }
@@ -50,7 +50,6 @@
 
   const gx={
     'gx-old.html':{title:['Color Control GX · 独立质量样机','Color Control GX · Independent quality model'],meta:['实物正面纹理 + 毫米级硬表面模型','Physical face texture + millimetre hard-surface model'],badge:['未并入全车','Not installed in vehicle'],views:{front:['正面','Front'],left:['左侧 30°','Left 30°'],right:['右侧 30°','Right 30°'],side:['侧面厚度','Side depth']}},
-    'gx-new.html':{title:['Ekrano GX · 独立质量样机','Ekrano GX · Independent quality model'],meta:['官方 STEP 几何基准 + 官方正反面实物纹理','Official STEP geometry + official front/rear textures'],badge:['未并入全车','Not installed in vehicle'],views:{hero:['产品视角','Product view'],front:['正面','Front'],left:['左侧 30°','Left 30°'],right:['右侧 30°','Right 30°'],rear:['背面接口','Rear ports'],mount:['安装外廓','Installation envelope']}}
   };
 
   function applyVehicle(index){
@@ -96,17 +95,40 @@
     if(active){const label=copy.views[active.dataset.view]?.[index];set('[data-note]',index?`${label}: inspect the locked dimensions, finish and installation envelope`:`${label}：核对锁定尺寸、质感与安装外廓`)}
   }
 
+  function applyGxInstallation(index){
+    document.title=index?'GX Touch 50 installation':'GX Touch 50升级安装';
+    const labels={
+      'gx-installation':['GX 安装位置','GX installation','GX Touch 50 · 电视右侧','GX Touch 50 · right of TV'],
+      'gx-front':['GX屏幕近景','GX screen close-up','标准版薄屏 · 128.2 × 87.1 × 12.4 mm','Standard slim display · 128.2 × 87.1 × 12.4 mm'],
+      'gx-mount':['固定件展开','Mounting detail','原厂固定框 · 展开示意','Included fixing frame · exploded view'],
+      'front-diagonal':['GX与玻璃门','GX and glass door','电视右侧 · 车内站立观看','Right of TV · viewed from inside']};
+    set('.viz-title',index?'GX Touch 50 · TV-side installation':'GX Touch 50 · 电视右侧安装');
+    set('.viz-meta',index?'Standard model · centre 1450 mm above interior floor · official fixing frame':'标准版 · 中心距车内地板1450 mm · 原厂固定方式');
+    set('.viz-badge',index?'Upgraded installation':'升级安装');
+    set('.scene-key',index?'Drag to rotate · Pan button / right-drag to pan · scroll to zoom':'拖动旋转 · 平移按钮／右键拖动平移 · 滚轮缩放');
+    set('[data-status]',index?'Manufacturer illustration; not live data. Verify wall and cable route on the vehicle.':'屏幕读数为厂家产品示意，非实时数据；墙面及走线须现场复测。');
+    set('[data-pan]',index?'Pan':'平移');
+    qa('[data-view]').forEach(b=>{if(labels[b.dataset.view])b.textContent=labels[b.dataset.view][index]});
+    const active=q('[data-view][aria-selected="true"]');
+    if(active&&labels[active.dataset.view]){set('[data-view-name]',labels[active.dataset.view][index+2]);set('[data-view-note]',index?'Centre height: 1450 mm from the finished interior floor. HDMI → video; USB → power.':'中心高以车内完成地板为基准：1450 mm。HDMI接视频，USB供电。')}
+    if(index&&active&&!labels[active.dataset.view])set('[data-view-note]','Explore the vehicle layout; choose GX screen close-up to inspect the upgraded display.');
+    set('[data-canvas]',null);const canvas=q('[data-canvas]');if(canvas)canvas.setAttribute('aria-label',index?'Interactive GX Touch 50 installation':'GX Touch 50升级安装三维图');
+    const tabs=q('[role="tablist"]');if(tabs)tabs.setAttribute('aria-label',index?'Installation views':'安装视角');
+  }
+
   function apply(){
     const index=language==='en'?1:0;document.documentElement.lang=index?'en':'zh-CN';
-    if(page==='vehicle-master.html')applyVehicle(index);
+    if(page==='vehicle-master.html'||page==='gx-new.html')applyVehicle(index);
     if(electrical[page])applyElectrical(index);
-    if(gx[page])applyGx(index);
+    if(gx[page]&&page!=='gx-new.html')applyGx(index);
+    if(page==='gx-new.html')applyGxInstallation(index);
   }
 
   window.addEventListener('message',event=>{
     if(event.origin!==location.origin||event.data?.type!=='aiko-language')return;
     language=event.data.language==='en'?'en':'zh';apply();
   });
+  window.addEventListener('aiko-gx-view',apply);
   document.addEventListener('click',()=>setTimeout(apply,0));
   apply();
 })();

@@ -5,7 +5,7 @@ const paths = {
   electricalOld: 'assets/views/electrical-old.html',
   electricalNew: 'assets/views/electrical-new.html',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/electrical-new.html'
+  gxNew: 'assets/views/gx-new.html'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
@@ -13,25 +13,25 @@ const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 
 const ui = {
   zh: {
     pageTitle:'AIKO 展车升级改装系统', mainNav:'主导航', workspace:'三维交互工作区', inspector:'设备信息',
-    brandSubtitle:'欧洲展车数字孪生', navGuide:'升级改装导览', navGuideSub:'2 项核心升级', navExterior:'全车外观', navExteriorSub:'车身与光伏组件', navInterior:'车内总览', navInteriorSub:'固定镜头与关键设备', navElectrical:'电路舱', navElectricalSub:'原电路／改装电路', navGx:'GX 控制器', navGxSub:'原车基准／Cerbo 升级', navCatalog:'设备资料', navCatalogSub:'规格、连接与注意事项',
+    brandSubtitle:'欧洲展车数字孪生', navGuide:'升级改装导览', navGuideSub:'2 项核心升级', navExterior:'全车外观', navExteriorSub:'车身与光伏组件', navInterior:'车内总览', navInteriorSub:'固定镜头与关键设备', navElectrical:'电路舱', navElectricalSub:'原电路／改装电路', navGx:'GX 屏幕与控制器', navGxSub:'电视右侧／原厂安装', navCatalog:'设备资料', navCatalogSub:'规格、连接与注意事项',
     baselineTitle:'锁定母版已接入', baselineSub:'只读引用 · 不覆盖源版本', versionOld:'旧车系统', versionNew:'改装后系统', compare:'轮廓对比', stepOverview:'定位改装区域', stepElectrical:'电路舱升级', stepGx:'GX 升级', stepCommunication:'通讯检查', coverLabel:'电路舱展示覆盖面', loading:'正在装入锁定视图…',
     commBoards:'恒流板 ×3', commBoardsSub:'三路独立 RS485 → CM5 原生串口', commHub:'CM5 原生采集', commHubSub:'RS485 CH0–CH2 使用；CH3 备用', commPc:'USR-G806w', commPcSub:'LAN 接 MOXA；Wi-Fi 本地访问', commSwitchSub:'5 口工业交换机', commGxSub:'能源数据汇集；数据集成待联调',
     tabOverview:'概览', tabSpecs:'规格尺寸', tabConnections:'连接结构', tabNotes:'安装注意', headingOverview:'改装逻辑', headingSpecs:'规格尺寸', headingConnections:'连接结构', headingNotes:'安装注意',
     lockedView:'锁定三维视图', sourceNew:'2026.09 安装方案', sourceOld:'原车锁定资产', deviceDetail:'设备详情', genericDevice:'设备', genericDeviceSummary:'当前锁定三维场景中的设备对象。', objectId:'对象标识', genericConnection:'连接关系以当前锁定场景和已确认线路拓扑为准。', genericNote:'未确认的端子、线号和安装数据必须现场复测，不作推定。',
     backGx:'← 返回 GX 安装位置', catalogStatus:'锁定设备资料索引', catalogHint:'选择设备查看规格、连接与安装注意',
-    outlineElectricalOld:'旧：MPPT 186 × 132 × 71 mm', outlineElectricalNew:'新：恒流板 158 × 104 × 58.8 mm', outlineBracket:'GX Touch 50 本轮暂缓', outlineGxOld:'旧 GX 130 × 120 × 28 mm', outlineGxNew:'Cerbo 机身 154 × 78 mm', outlineDisclaimer:'尺寸概念示意，非等比例安装图；开孔与安装以官方尺寸图及现场复测为准。',
-    statusRearForward:'后部向前固定镜头', hintGuide:'展示面将自动上掀，请选择高亮改装区域', statusCommunication:'通讯连接检查', hintStaticIp:'CM5 · MOXA · USR-G806w · Cerbo', statusElectricalNew:'新电路系统 · 2026.09', statusElectricalOld:'旧车系统 v1.0', hintElectricalNew:'三块恒流板、MC4 与通讯汇聚', hintElectricalOld:'三台 MPPT 与原车线路基准', statusGxNew:'Cerbo GX MK2', statusGxOld:'旧版 GX v01', hintGxNew:'Cerbo GX MK2；GX Touch 50 位置暂缓', hintGxOld:'Color Control GX 拆换基准', statusExterior:'外观固定镜头', hintExterior:'点击高亮组件查看规格与安装信息', statusInterior:'车内固定镜头', hintInterior:'点击电路舱、组件或 GX 查看资料', statusGxLocation:'GX 安装位置', hintGxLocation:'原车位置保留为拆换基准；点击查看控制器升级'
+    outlineElectricalOld:'旧：MPPT 186 × 132 × 71 mm', outlineElectricalNew:'新：恒流板 158 × 104 × 58.8 mm', outlineBracket:'GX Touch 50 · 原厂贴面固定', outlineGxOld:'旧 GX 130 × 120 × 28 mm', outlineGxNew:'GX Touch 50 · 128.2 × 87.1 mm', outlineDisclaimer:'尺寸概念示意，非等比例安装图；开孔与安装以官方尺寸图及现场复测为准。',
+    statusRearForward:'后部向前固定镜头', hintGuide:'展示面将自动上掀，请选择高亮改装区域', statusCommunication:'通讯连接检查', hintStaticIp:'CM5 · MOXA · USR-G806w · Cerbo', statusElectricalNew:'新电路系统 · 2026.09', statusElectricalOld:'旧车系统 v1.0', hintElectricalNew:'三块恒流板、MC4 与通讯汇聚', hintElectricalOld:'三台 MPPT 与原车线路基准', statusGxNew:'GX Touch 50', statusGxOld:'旧版 GX v01', hintGxNew:'电视右侧 · 中心距车内地板 1450 mm', hintGxOld:'Color Control GX 拆换基准', statusExterior:'外观固定镜头', hintExterior:'点击高亮组件查看规格与安装信息', statusInterior:'车内固定镜头', hintInterior:'点击电路舱、组件或 GX 查看资料', statusGxLocation:'GX 安装位置', hintGxLocation:'原车位置保留为拆换基准；点击查看控制器升级'
   },
   en: {
     pageTitle:'AIKO Show Vehicle Upgrade System', mainNav:'Main navigation', workspace:'Interactive 3D workspace', inspector:'Device information',
-    brandSubtitle:'Europe Show Vehicle Digital Twin', navGuide:'Upgrade Guide', navGuideSub:'2 core upgrades', navExterior:'Vehicle Exterior', navExteriorSub:'Body and PV modules', navInterior:'Interior Overview', navInteriorSub:'Fixed views and key devices', navElectrical:'Electrical Bay', navElectricalSub:'Original / upgraded circuits', navGx:'GX Controller', navGxSub:'Original baseline / Cerbo upgrade', navCatalog:'Device Data', navCatalogSub:'Specs, wiring and notes',
+    brandSubtitle:'Europe Show Vehicle Digital Twin', navGuide:'Upgrade Guide', navGuideSub:'2 core upgrades', navExterior:'Vehicle Exterior', navExteriorSub:'Body and PV modules', navInterior:'Interior Overview', navInteriorSub:'Fixed views and key devices', navElectrical:'Electrical Bay', navElectricalSub:'Original / upgraded circuits', navGx:'GX Screen & Controller', navGxSub:'TV-side / factory mounting', navCatalog:'Device Data', navCatalogSub:'Specs, wiring and notes',
     baselineTitle:'Locked masters connected', baselineSub:'Read-only references · originals preserved', versionOld:'Original System', versionNew:'Upgraded System', compare:'Outline Compare', stepOverview:'Locate Upgrade Areas', stepElectrical:'Electrical Bay', stepGx:'GX Upgrade', stepCommunication:'Communication Check', coverLabel:'Electrical-bay display cover', loading:'Loading locked view…',
     commBoards:'Constant-current boards ×3', commBoardsSub:'3 independent RS485 → CM5 native ports', commHub:'CM5 Native Acquisition', commHubSub:'RS485 CH0–CH2 used; CH3 spare', commPc:'USR-G806w', commPcSub:'LAN to MOXA; local Wi-Fi access', commSwitchSub:'5-port industrial Ethernet switch', commGxSub:'Energy monitoring; integration pending',
     tabOverview:'Overview', tabSpecs:'Specifications', tabConnections:'Connections', tabNotes:'Installation', headingOverview:'Upgrade Logic', headingSpecs:'Specifications', headingConnections:'Connection Structure', headingNotes:'Installation Notes',
     lockedView:'Locked 3D view', sourceNew:'2026.09 mounting design', sourceOld:'Locked original asset', deviceDetail:'Device Details', genericDevice:'Device', genericDeviceSummary:'Device object in the currently locked 3D scene.', objectId:'Object ID', genericConnection:'Connection data follows the locked scene and confirmed wiring topology.', genericNote:'Any unconfirmed terminal, wire ID or installation dimension must be verified on the vehicle.',
     backGx:'← Back to GX Installation', catalogStatus:'Locked Device Index', catalogHint:'Select a device for specifications, connections and installation notes',
-    outlineElectricalOld:'Original: MPPT 186 × 132 × 71 mm', outlineElectricalNew:'New: board 158 × 104 × 58.8 mm', outlineBracket:'GX Touch 50 deferred', outlineGxOld:'Original GX 130 × 120 × 28 mm', outlineGxNew:'Cerbo body 154 × 78 mm', outlineDisclaimer:'Conceptual size comparison, not a scaled installation drawing. Use official drawings and on-vehicle measurements for installation.',
-    statusRearForward:'Rear-to-front fixed view', hintGuide:'The display cover opens automatically; select a highlighted upgrade area', statusCommunication:'Communication Connection Check', hintStaticIp:'CM5 · MOXA · USR-G806w · Cerbo', statusElectricalNew:'Electrical Update · 2026.09', statusElectricalOld:'Original Vehicle System v1.0', hintElectricalNew:'Three constant-current boards, MC4 and communication aggregation', hintElectricalOld:'Three MPPT units and original wiring baseline', statusGxNew:'Cerbo GX MK2', statusGxOld:'Original GX v01', hintGxNew:'Cerbo GX MK2; GX Touch 50 installation deferred', hintGxOld:'Color Control GX replacement baseline', statusExterior:'Exterior Fixed View', hintExterior:'Select a highlighted module for specifications and installation data', statusInterior:'Interior Fixed View', hintInterior:'Select the electrical bay, PV module or GX for details', statusGxLocation:'GX Installation Position', hintGxLocation:'Select the highlighted GX to open the millimetre-level close-up'
+    outlineElectricalOld:'Original: MPPT 186 × 132 × 71 mm', outlineElectricalNew:'New: board 158 × 104 × 58.8 mm', outlineBracket:'GX Touch 50 · standard surface mount', outlineGxOld:'Original GX 130 × 120 × 28 mm', outlineGxNew:'GX Touch 50 · 128.2 × 87.1 mm', outlineDisclaimer:'Conceptual size comparison, not a scaled installation drawing. Use official drawings and on-vehicle measurements for installation.',
+    statusRearForward:'Rear-to-front fixed view', hintGuide:'The display cover opens automatically; select a highlighted upgrade area', statusCommunication:'Communication Connection Check', hintStaticIp:'CM5 · MOXA · USR-G806w · Cerbo', statusElectricalNew:'Electrical Update · 2026.09', statusElectricalOld:'Original Vehicle System v1.0', hintElectricalNew:'Three constant-current boards, MC4 and communication aggregation', hintElectricalOld:'Three MPPT units and original wiring baseline', statusGxNew:'GX Touch 50', statusGxOld:'Original GX v01', hintGxNew:'Right of TV · centre 1450 mm above interior floor', hintGxOld:'Color Control GX replacement baseline', statusExterior:'Exterior Fixed View', hintExterior:'Select a highlighted module for specifications and installation data', statusInterior:'Interior Fixed View', hintInterior:'Select the electrical bay, PV module or GX for details', statusGxLocation:'GX Installation Position', hintGxLocation:'Select the highlighted GX to open the millimetre-level close-up'
   }
 };
 
@@ -152,15 +152,15 @@ const recordsEn = {
 
 for (const [collection, language] of [[recordsZh,'zh'],[recordsEn,'en']]) {
   const en=language==='en';
-  const d=hardware.cerbo[language];
-  collection.gxNew={status:en?'Controller Upgrade':'控制器升级',title:'Cerbo GX MK2',source:en?'2026.09 design':'2026.09 安装方案',summary:d.summary,overview:[d.summary],specs:d.specs,connections:d.connections,notes:d.notes};
+  const d=hardware.gxTouch[language];
+  collection.gxNew={status:en?'GX Screen Installation':'GX 屏幕升级安装',title:'GX Touch 50 + Cerbo GX MK2',source:en?'2026.10 mounting design':'2026.10 安装方案',summary:d.summary,overview:[d.summary],specs:d.specs,connections:d.connections,notes:d.notes,docs:d.docs};
   collection.communication={status:en?'Communication Design':'通讯连接方案',title:en?'Native RS485 + Wired LAN':'原生 RS485 ＋ 有线局域网',source:en?'2026.09 update':'2026.09 更新',
     summary:en?'Three boards use CM5 native RS485 CH0–CH2. MOXA connects CM5, Cerbo and USR-G806w; Wi-Fi provides local access.':'三块恒流板直接接入 CM5 原生 RS485 CH0–CH2；MOXA 连接 CM5、Cerbo 和 USR-G806w，Wi-Fi 提供本地访问。',
-    overview:en?['Four native isolated RS485 channels; CH3 spare.','Three independent channels require the manufacturer protocol and software commissioning.','USR-G806w provides Wi-Fi access; internet access is optional.','GX Touch 50 installation is deferred.']:['四路原生隔离 RS485；CH3备用。','三块板分别采集；厂家协议、CM5程序及GX数据集成尚需联调。','USR-G806w 提供 Wi-Fi 本地接入，4G联网按现场需要配置。','GX Touch 50 的位置、支架和线缆本轮暂缓。'],
+    overview:en?['Four native isolated RS485 channels; CH3 spare.','Three independent channels require the manufacturer protocol and software commissioning.','USR-G806w provides Wi-Fi access; internet access is optional.','GX Touch 50 is mounted right of the TV, 1450 mm above the interior floor.']:['四路原生隔离 RS485；CH3备用。','三块板分别采集；厂家协议、CM5程序及GX数据集成尚需联调。','USR-G806w 提供 Wi-Fi 本地接入，4G联网按现场需要配置。','GX Touch 50 安装在电视右侧，中心距车内地板1450 mm；组合线接Cerbo HDMI与USB。'],
     specs:en?[['RS485','3 × independent native channels'],['Cable','3 × 0.5 mm² shielded; Cat6 Ethernet'],['Switch','MOXA EDS-205A, 5 × 10/100M'],['Controller','Cerbo GX MK2'],['Router','USR-G806w'],['Plate','450 × 250 × 4 mm; first article'],['Network addresses','Configure one subnet; addresses and DHCP range pending']]:[['RS485','3 路独立原生串口'],['线材','3 × 0.5 mm² 屏蔽线；Cat6 网线'],['交换机','MOXA EDS-205A，5 × 10/100M'],['GX控制器','Cerbo GX MK2'],['路由器','USR-G806w'],['底板','450 × 250 × 4 mm；首件方案'],['网络地址','统一网段；静态地址与DHCP范围待配置']],
     connections:en?['Board 1/2/3 → CM5 RS485 CH0/CH1/CH2.','CM5 ETH1 → MOXA Port 5.','MOXA Port 1 → Cerbo Ethernet.','MOXA Port 2 → USR-G806w LAN.','Ports 3/4 spare; port allocation is the wiring plan.']:['恒流板 1/2/3 → CM5 RS485 CH0/CH1/CH2。','CM5 ETH1 → MOXA Port 5。','MOXA Port 1 → Cerbo Ethernet。','MOXA Port 2 → USR-G806w LAN。','Port 3/4 备用；上述端口编号为本次布线方案。'],
     notes:en?['Confirm board protocol, pinout and termination.','Verify mounting, antennas and cable lengths on the actual vehicle.','Software data transfer and vehicle commissioning are not validated by this model.']:['恒流板针脚、协议及终端电阻按厂家资料确认。','底板、天线、线长和固定点须首件实装复核。','模型不代表采集软件、GX数据上报或实车联调已经通过。']};
-  collection.guide.overview[1]=en?'GX controller: Cerbo GX MK2; GX Touch 50 installation is deferred.':'GX控制器：Cerbo GX MK2；GX Touch 50 位置和安装方案暂缓。';
+  collection.guide.overview[1]=en?'GX controller: Cerbo GX MK2; GX Touch 50 is mounted right of the TV, 1450 mm above the interior floor.':'GX Touch 50 位于电视右侧；Cerbo GX MK2 保持在电路舱通讯板。';
   collection.guide.overview[2]=en?'Existing vehicle and original-system models remain the preserved baseline.':'保留全车与旧车母版；本轮只更新已授权设备和直属线路。';
   collection.guide.connections[2]=collection.communication.summary;
   collection.electricalNew.overview[2]=en?'Native CM5 RS485 CH0–CH2 collect the three channels independently.':'上部 RS485 独立进入 CM5 原生串口 CH0–CH2。';
@@ -238,7 +238,7 @@ const catalogSets = {
   ['electricalOld','旧车系统 v1.0','三台 MPPT、MG、电池与原线路'],
   ['electricalNew','新电路系统 · 2026.09','三块恒流板、MC4 与新通讯'],
   ['gxOld','旧版 Color Control GX','130 × 120 × 28 mm'],
-  ['gxNew','Cerbo GX MK2','154 × 78 × 48 mm；屏幕位置暂缓'],
+  ['gxNew','GX Touch 50 + Cerbo GX MK2','GX Touch 50 · 中心高1450 mm；Cerbo位于电路舱'],
   ['communication','通讯系统','恒流板 ×3 → CM5 → MOXA → Cerbo / USR']
   ],
   en: [
@@ -247,12 +247,12 @@ const catalogSets = {
     ['electricalOld','Original Vehicle System v1.0','Three MPPT units, MG, battery and original cables'],
     ['electricalNew','Electrical Update · 2026.09','Three constant-current boards, MC4 and new communication'],
     ['gxOld','Original Color Control GX','130 × 120 × 28 mm'],
-    ['gxNew','Cerbo GX MK2','154 × 78 × 48 mm; screen deferred'],
+    ['gxNew','GX Touch 50 + Cerbo GX MK2','GX Touch 50 · 1450 mm centre height; Cerbo in electrical bay'],
     ['communication','Communication System','Boards ×3 → CM5 → MOXA → Cerbo / USR']
   ]
 };
 
-for (const [key,d] of Object.entries(hardware)) {if(key==='cerbo')continue;catalogSets.zh.push([key,d.title,d.zh.specs[1][1]]);catalogSets.en.push([key,d.title,d.en.specs[1][1]]);}
+for (const [key,d] of Object.entries(hardware)) {if(key==='cerbo'||key==='gxTouch')continue;catalogSets.zh.push([key,d.title,d.zh.specs[1][1]]);catalogSets.en.push([key,d.title,d.en.specs[1][1]]);}
 
 const hotspotMap = {
   'rear-left': [
@@ -282,6 +282,7 @@ const interiorViews = [
   ['rear-forward','后部向前','Rear to front'],['module-side','组件侧','Module side'],['tv-side','电视侧','TV side'],['front-diagonal','GX与玻璃门','GX & glass door'],['gx-front','GX正面','GX front']
 ];
 
+const gxViews=[['gx-installation','安装位置','Installation'],['gx-front','屏幕近景','Screen close-up'],['gx-mount','固定件展开','Mounting detail']];
 const state = { route:'guide', guideStep:'overview', version:'old', detailTab:'overview', record:'guide', camera:'rear-forward', compare:false, gxDetail:false, lang:initialLanguage, deviceMessage:null };
 const el = Object.fromEntries(['frameStack','hotspots','coverSheet','outlineLayer','loading','stageStatus','stageHint','routeTitle','routeEyebrow','versionSwitch','compareButton','guideSteps','viewStrip','communicationCard','detailStatus','detailTitle','sourceChip','detailSummary','detailBody','languageSwitch'].map(id => [id,document.getElementById(id)]));
 let sceneGeneration=0;
@@ -342,7 +343,7 @@ function buildDeviceRecord(message,language=state.lang) {
 
 function refreshViewStripLanguage() {
   el.viewStrip.querySelectorAll('[data-camera]').forEach(button=>{
-    const allViews=[...externalViews,...interiorViews];
+    const allViews=[...externalViews,...interiorViews,...gxViews];
     const view=allViews.find(item=>item[0]===button.dataset.camera);
     if(view) button.textContent=viewLabel(view);
   });
@@ -410,6 +411,7 @@ function loadFrame(src, options={}) {
       setTimeout(() => old.remove(), 680);
     });
     if (options.camera) activateCamera(frame, options.camera);
+    if(src===paths.gxNew&&!frame.contentWindow?.aikoGxScene)frame.contentWindow?.addEventListener('aiko-scene-ready',()=>{if(generation===sceneGeneration){if(options.camera)activateCamera(frame,options.camera);frame.contentWindow.postMessage({type:'aiko-language',language:state.lang},location.origin);}}, {once:true});
     try{frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin)}catch(_){}
     setLoading(false);
     if (options.onLoad) options.onLoad(frame,generation);
@@ -425,11 +427,11 @@ function activateCamera(frame, camera) {
     if (button) button.click();
     doc?.querySelectorAll('[data-view]').forEach(btn => btn.addEventListener('click', () => {
       state.camera = btn.dataset.view;
-      renderHotspots(hotspotMap[state.camera] || []);
+      renderHotspots(frame.src.includes('gx-new.html')?[]:(hotspotMap[state.camera] || []));
       setActiveViewButton(state.camera);
     }));
   } catch (_) {}
-  renderHotspots(hotspotMap[camera] || []);
+  renderHotspots(frame.src.includes('gx-new.html')?[]:(hotspotMap[camera] || []));
   setActiveViewButton(camera);
 }
 
@@ -537,7 +539,7 @@ function setGuideStep(step) {
     showRecord('guide');
   }
   if(step==='electrical') { state.version='old'; setVersionVisible(true); loadElectrical(); }
-  if(step==='gx') { state.version='old'; setVersionVisible(true); loadGx(); }
+  if(step==='gx') { state.version='new'; setVersionVisible(true); loadGx(); }
   if(step==='communication') {
     state.version='new'; setVersionVisible(false); el.communicationCard.hidden=false;
     setStageCopy('statusCommunication','hintStaticIp');
@@ -558,16 +560,16 @@ function loadGx() {
   const isNew=state.version==='new';
   el.coverSheet.hidden=true; el.communicationCard.hidden=true;
   setStageCopy(isNew?'statusGxNew':'statusGxOld',isNew?'hintGxNew':'hintGxOld');
-  el.viewStrip.innerHTML='';
-  loadFrame(isNew?paths.gxNew:paths.gxOld,{title:isNew?'Cerbo GX MK2':'旧版GXv01',onLoad:frame=>{if(isNew)frame.contentWindow?.postMessage({type:'aiko-focus-communication'},location.origin)}});
+  setViewStrip(isNew?gxViews:[]);
+  loadFrame(isNew?paths.gxNew:paths.gxOld,{title:isNew?'GX Touch 50':'旧版GXv01',camera:isNew?'gx-installation':undefined});
   showRecord(isNew?'gxNew':'gxOld'); setVersionVisible(true,false); renderHotspots([]);
 }
 
 function openGxDetail() {
-  state.gxDetail=true; state.version='old';
+  state.gxDetail=true; state.version='new';
   if(state.route==='guide'){state.guideStep='gx';document.querySelectorAll('[data-guide-step]').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.guideStep==='gx'));}
   loadGx();
-  setViewStrip([], {labelZh:ui.zh.backGx,labelEn:ui.en.backGx,action:()=>{
+  setViewStrip(gxViews, {labelZh:ui.zh.backGx,labelEn:ui.en.backGx,action:()=>{
     if(state.route==='guide') setGuideStep('overview'); else {state.gxDetail=false;renderRoute();}
   }});
 }
@@ -585,9 +587,9 @@ function renderRoute() {
   el.guideSteps.hidden=state.route!=='guide'; el.communicationCard.hidden=true; el.coverSheet.hidden=true; state.compare=false; showOutline();
   if(state.route==='guide') return setGuideStep(state.guideStep||'overview');
   if(state.route==='exterior') {setVersionVisible(false);state.camera='rear-left';setViewStrip(externalViews);loadFrame(paths.vehicle,{title:routes.exterior.title,camera:'rear-left'});showRecord('body');setStageCopy('statusExterior','hintExterior');}
-  if(state.route==='interior') {setVersionVisible(false);state.camera='rear-forward';setViewStrip(interiorViews);loadFrame(paths.vehicle,{title:routes.interior.title,camera:'rear-forward'});showRecord('interiorModule');setStageCopy('statusInterior','hintInterior');}
+  if(state.route==='interior') {setVersionVisible(false);state.camera='rear-forward';setViewStrip(interiorViews);loadFrame(paths.gxNew,{title:routes.interior.title,camera:'rear-forward'});showRecord('interiorModule');setStageCopy('statusInterior','hintInterior');}
   if(state.route==='electrical') {state.version='old';loadElectrical();}
-  if(state.route==='gx') {setVersionVisible(false);state.gxDetail=false;state.camera='gx-front';setViewStrip(interiorViews);loadFrame(paths.vehicle,{title:routes.gx.title,camera:'gx-front'});showRecord('gxOld');setStageCopy('statusGxLocation','hintGxLocation');}
+  if(state.route==='gx') {state.version='new';state.gxDetail=true;loadGx();}
   if(state.route==='catalog') {setVersionVisible(false);renderCatalog();}
 }
 
