@@ -1778,7 +1778,9 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
     };
 
     start().catch((error) => {
-      loading.textContent = `全车总装母版加载失败：${error?.message || error}`;
+      loading.dataset.errorMessage=String(error?.message || error);
+      loading.textContent = `GX Touch 50: ${loading.dataset.errorMessage}`;
+      window.dispatchEvent(new Event('aiko-gx-view'));
       loading.setAttribute('role', 'alert');
       console.error(error);
     });

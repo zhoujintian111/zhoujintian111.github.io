@@ -372,6 +372,8 @@ function applyLanguage(language,{persist=true}={}) {
   if(persist) localStorage.setItem('aiko-language',state.lang);
   document.documentElement.lang=state.lang==='en'?'en':'zh-CN';
   document.title=text('pageTitle');
+  const ariaLabels={'#languageSwitch':['语言','Language'],'#versionSwitch':['系统版本','System version'],'#guideSteps':['改装步骤','Upgrade steps'],'#viewStrip':['固定镜头快捷入口','View shortcuts'],'.detail-tabs':['资料分类','Information tabs']};
+  for(const [selector,labels]of Object.entries(ariaLabels))document.querySelector(selector)?.setAttribute('aria-label',labels[state.lang==='en'?1:0]);
   document.querySelectorAll('[data-i18n]').forEach(node=>{const value=text(node.dataset.i18n);if(value)node.textContent=value});
   document.querySelectorAll('[data-i18n-aria]').forEach(node=>{const value=text(node.dataset.i18nAria);if(value)node.setAttribute('aria-label',value)});
   el.languageSwitch.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.language===state.lang)));

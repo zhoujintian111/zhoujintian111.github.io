@@ -97,6 +97,8 @@
 
   function applyGxInstallation(index){
     document.title=index?'GX Touch 50 installation':'GX Touch 50升级安装';
+    const root=q('#aiko-interior-four-cameras-v02');if(root)root.setAttribute('aria-label',index?'GX Touch 50 installation':'GX Touch 50升级安装');
+    const loading=q('[data-loading]');if(loading?.dataset.errorMessage)loading.textContent=(index?'3D view unavailable: ':'三维视图不可用：')+loading.dataset.errorMessage;
     const labels={
       'gx-installation':['GX 安装位置','GX installation','GX Touch 50 · 电视右侧','GX Touch 50 · right of TV'],
       'gx-front':['GX屏幕近景','GX screen close-up','标准版薄屏 · 128.2 × 87.1 × 12.4 mm','Standard slim display · 128.2 × 87.1 × 12.4 mm'],
