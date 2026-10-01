@@ -1,11 +1,11 @@
-import { hardware, deviceMessage } from './assets/upgrade-data.js';
+import { hardware, deviceMessage } from './assets/upgrade-data.js?v=gx-20261001';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
   electricalNew: 'assets/views/electrical-new.html',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/gx-new.html'
+  gxNew: 'assets/views/gx-new.html?v=gx-20261001'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
