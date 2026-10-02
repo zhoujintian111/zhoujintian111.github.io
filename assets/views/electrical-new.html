@@ -125,7 +125,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
 <script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.min.js","three/addons/":"../vendor/three/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
-import { hardware, deviceMessage, cableProfile, deviceEnglish } from '../upgrade-data.js';
+import { hardware, deviceMessage, cableProfile, deviceEnglish } from '../upgrade-data.js?v=din150-20261002';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -520,11 +520,11 @@ try{
   [[15,15],[15,125],[15,235],[435,15],[435,125],[435,235]].forEach(([x,y])=>{
     const p=commAt(x,y,-8);communication.add(cylinder(.06,.12,mat.frame,p.x,p.y,p.z));mountAt(x,y);
   });
-  const commRail=new THREE.Group();commRail.position.copy(commAt(95,125,7));communication.add(commRail);
-  commRail.add(box(1.40,.35,.015,mat.frame,0,0,0,.005));
-  [-.175,.175].forEach(y=>{commRail.add(box(1.40,.018,.065,mat.frame,0,y,.032,.003));commRail.add(box(1.40,.045,.014,mat.frame,0,y*1.10,.070,.003));});
+  const commRail=new THREE.Group();commRail.name='communication-din-rail';commRail.position.copy(commAt(100,125,7));communication.add(commRail);
+  commRail.add(box(1.50,.35,.015,mat.frame,0,0,0,.005));
+  [-.175,.175].forEach(y=>{commRail.add(box(1.50,.018,.065,mat.frame,0,y,.032,.003));commRail.add(box(1.50,.045,.014,mat.frame,0,y*1.10,.070,.003));});
   [31,159].forEach(x=>mountAt(x,125,.023));
-  [38,94,105,151].forEach(x=>{const p=commAt(x,125,12);communication.add(box(.05,.46,.10,mat.blackRubber,p.x,p.y,p.z,.008));});
+  [27.5,77.5,130,172.5].forEach(x=>{const p=commAt(x,125,12);communication.add(box(.05,.46,.10,mat.blackRubber,p.x,p.y,p.z,.008));});
   const commTitle=textPlate(communication,['CM5 · MOXA · USR-G806w · CERBO GX MK2'],4.05,.14,5.12,2.72,-.14,'#ffffff',null,44);
   const plateMeta=new THREE.Object3D();plateMeta.userData=deviceMessage('plate');commBack.userData.deviceRoot=plateMeta;pickables.push(commBack);
 
@@ -630,24 +630,32 @@ try{
   textPlate(fuse,['+ IN / 4 FUSED OUT'],.77,.065,0,.095,.31,'#ffffff',null,48);
   [-.33,.33].forEach(x=>screw(x,0,.225,fuse,.43));attachMeta(fuse,'fuse');
   fuse.userData.powerTopology={positiveInput:fusePositiveInput,positiveOutputs:fusePorts};
-  // Supplied LT-14 39.3×23.3×15.43 mm, adhered beside the holder.
-  const negativeDistributor=new THREE.Group();negativeDistributor.position.copy(commAt(...hardware.negative.xy,3));communication.add(negativeDistributor);
-  const lt=negativeDistributor,ltGray=new THREE.MeshStandardMaterial({color:0x858b8d,roughness:.68});
-  lt.add(box(.233,.393,.008,mat.blackRubber,0,0,.004,.006));
-  lt.add(box(.233,.25,.1543,ltGray,0,-.0715,.085,.018));
-  lt.add(box(.09,.143,.1543,ltGray,0,.125,.085,.014));
-  const negativePorts=[];
-  [-.084,-.028,.028,.084].forEach(x=>{
-    lt.add(box(.037,.15,.018,mat.orange,x,-.069,.172,.005));
-    axisCylinder(lt,.018,.032,mat.blackRubber,x,-.205,.080,'y');
-    negativePorts.push(new THREE.Vector3(x,-.2215,.080).add(lt.position));
+  // User's DIN-foot model: 41.1 × 45.9 × 30.5 mm (3046.jpg).
+  // The hidden clip profile is illustrative; the specified outside envelope is retained.
+  const negativeDistributor=new THREE.Group();negativeDistributor.position.copy(commAt(...hardware.negative.xy,7));communication.add(negativeDistributor);
+  const lt=negativeDistributor,ltGray=new THREE.MeshStandardMaterial({color:0xbcc1c4,roughness:.64}),ltOrange=new THREE.MeshStandardMaterial({color:0xf47721,roughness:.48}),ltDark=mat.blackRubber.clone();
+  const terminalHousing=new THREE.Group();lt.add(terminalHousing);
+  const terminalShell=(w,h,d,x,y,z)=>{const m=box(w,h,d,ltGray,x,y,z,.007);terminalHousing.add(m);return m;};
+  terminalShell(.411,.459,.025,0,0,.1025);
+  [-.1715,.1715].forEach(x=>terminalShell(.068,.459,.175,x,0,.1975));
+  terminalShell(.272,.263,.175,0,-.079,.1975);
+  terminalShell(.112,.169,.175,0,.126,.1975);
+  // Opposed feet wrap around the horizontal rail; no adhesive pad remains.
+  [-.194,.194].forEach(y=>{
+    terminalShell(.365,.039,.083,0,y,.0445);
+    terminalShell(.365,.068,.014,0,y>0?.178:-.178,.007);
   });
-  lt.add(box(.041,.094,.018,mat.orange,0,.137,.172,.005));
-  axisCylinder(lt,.019,.032,mat.blackRubber,0,.205,.080,'y');
-  const negativeInput=new THREE.Vector3(0,.2215,.080).add(lt.position);
-  textPlate(lt,['LT-14'],.21,.055,0,-.078,.188,'#ffffff',null,185);
-  textPlate(lt,['LT-14 · 1 IN / 4 OUT'],.50,.075,.29,.30,1.40,'#ffffff','#111820',150);
-  attachMeta(lt,'negative');lt.userData.powerTopology={input:negativeInput,outputs:negativePorts,mount:'adhesive'};
+  const negativePorts=[];
+  [-.104,-.035,.035,.104].forEach(x=>{
+    lt.add(box(.049,.155,.020,ltOrange,x,-.072,.295,.005));
+    axisCylinder(lt,.020,.018,ltDark,x,-.2205,.185,'y');
+    negativePorts.push(new THREE.Vector3(x,-.2295,.185).add(lt.position));
+  });
+  lt.add(box(.056,.105,.020,ltOrange,0,.137,.295,.005));
+  axisCylinder(lt,.024,.018,ltDark,0,.2205,.185,'y');
+  const negativeInput=new THREE.Vector3(0,.2295,.185).add(lt.position);
+  textPlate(lt,['1 IN / 4 OUT'],.235,.047,0,.052,.306,'#202a30',null,130);
+  attachMeta(lt,'negative');lt.userData.powerTopology={input:negativeInput,outputs:negativePorts,mount:'DIN rail',railId:'communication-din-rail'};
   const v11Comm=[communication];
 
   // Constant-current enclosure and adapter are rebuilt from YG-L04A-1171-000:
@@ -807,7 +815,7 @@ try{
   const rs485Breakouts=[];
   [cc1,cc2,cc3].forEach((board,i)=>{
     const s=board.userData.signal,pins=cm5Terminals[i],z=1.40+i*.07;
-    const split=new THREE.Vector3(i===2?3.12:3.91,i===1?2.17:1.94,1.32);
+    const split=new THREE.Vector3(cm5.position.x+(i===2?-.42:.37),i===1?2.17:1.94,1.32);
     rs485Breakouts.push(split);
     const route=i===2?[s,[s.x,s.y+.13,z],[.74,s.y+.13,z],[.74,2.68,z],[split.x,2.68,z],split]:[s,[s.x,s.y+.13,z],[6.96+i*.09,s.y+.13,z],[6.96+i*.09,2.76+i*.09,z],[split.x,2.76+i*.09,z],split];
     const name=`恒流板 ${i+1} RS485 → CM5 CH${i}`;
@@ -831,9 +839,9 @@ try{
     });
   });
   const ethLinks=[
-    {a:cm5Eth1.clone().add(cm5.position),b:switchPorts[4],name:'CM5 ETH1 → MOXA Port 5',points:[[4.07,.80,1.22],[4.42,.80,1.18]]},
-    {a:switchPorts[0],b:cerboEth,name:'MOXA Port 1 → Cerbo Ethernet',points:[[4.52,2.68,1.0],[7.25,2.68,.72],[7.32,1.01,.66]]},
-    {a:switchPorts[1],b:usrLan,name:'MOXA Port 2 → USR-G806w LAN',points:[[4.61,1.58,.95],[4.72,.86,.57],[4.97,.86,.30]]}
+    {a:cm5Eth1.clone().add(cm5.position),b:switchPorts[4],name:'CM5 ETH1 → MOXA Port 5',points:[[cm5.position.x+.28,.80,1.22],[netSwitch.position.x+.28,.80,1.18]]},
+    {a:switchPorts[0],b:cerboEth,name:'MOXA Port 1 → Cerbo Ethernet',points:[[netSwitch.position.x+.38,2.68,1.0],[7.25,2.68,.72],[7.32,1.01,.66]]},
+    {a:switchPorts[1],b:usrLan,name:'MOXA Port 2 → USR-G806w LAN',points:[[netSwitch.position.x+.39,1.58,.95],[4.83,.86,.57],[4.97,.86,.30]]}
   ];
   ethLinks.forEach(({a,b,name,points})=>{
     cable(flowGroups.signal,0x397f9f,.023,[a,...points,b],name,{category:'ethernet',nameEn:name});
@@ -841,10 +849,10 @@ try{
   });
 
   // Red supply enters the four-way fuse holder. Black common return enters
-  // the separate LT-14; the two devices have no shared internal bus.
+  // the separate DIN distributor; no black wire enters the fuse holder.
   const auxP=new THREE.Vector3(-4.65,8.25,.44),auxN=new THREE.Vector3(-3.38,8.25,.44);
   cable(flowGroups.signal,R,.022,[auxP,[-4.52,7.94,.61],[.85,7.94,.64],[.85,.79,.30],[4.61,.79,.30],[4.61,fusePositiveInput.y,.11],fusePositiveInput],'辅助正母线 → 保险座唯一 + IN',{category:'aux',ordered:true,nameEn:'Auxiliary positive bus → fuse box single + IN'});
-  cable(flowGroups.signal,K,.022,[auxN,[-3.24,7.81,.60],[.70,7.81,.64],[.70,.94,.32],[4.40,.94,.32],[4.40,negativeInput.y,.12],negativeInput],'辅助负母线 → LT-14 单口',{category:'aux',ordered:true,outline:true,nameEn:'Auxiliary negative bus → LT-14 single port'});
+  cable(flowGroups.signal,K,.022,[auxN,[-3.24,7.81,.60],[.70,7.81,.64],[.70,.94,.32],[3.08,.94,.32],[3.08,2.06,.32],[negativeInput.x,2.06,negativeInput.z],negativeInput],'辅助负母线 → 导轨分线端子单口',{category:'aux',ordered:true,outline:true,nameEn:'Auxiliary negative bus → DIN distributor single port'});
   [cm5Dc,moxaDc,usrDc,cerboDc].forEach((p,i)=>{
     const name=['CM5','MOXA','USR-G806w','Cerbo'][i],n=p.clone();if(i===3)n.y+=.06;else n.x+=[.08,.10,.05][i];
     const negativeExits=[{x:cm5.position.x-.32,y:n.y-.15},{x:netSwitch.position.x+.39,y:n.y+.17},{x:usr.position.x+.38,y:n.y-.16},{x:cerbo.position.x-.63,y:n.y}];
@@ -855,19 +863,19 @@ try{
     // Fan left/right in two rows instead of piling all four branches above
     // the box or dropping loops below the aluminium plate.
     const positiveRoutes=[
-      [pa,[pa.x,.43,.23],[3.12,.43,.23],[3.12,p.y-.15,1.06],positiveLead,p],
-      [pa,[pa.x,.52,.23],[4.45,.52,.23],[4.45,p.y+.17,.96],positiveLead,p],
+      [pa,[pa.x,.32,.23],[4.52,.32,.23],[4.52,.68,.99],[p.x,.68,.99],[p.x,.72,p.z],p],
+      [pa,[pa.x,.52,.23],[4.68,.52,.23],[4.68,p.y+.17,.96],positiveLead,p],
       [pa,[pa.x,.44,.23],[5.84,.44,.23],[5.84,p.y-.09,.23],[p.x,p.y-.09,p.z],p],
       [pa,[pa.x,.53,.23],[6.00,.53,.23],[6.00,p.y,.36],positiveLead,p]
     ];
     const negativeRoutes=[
-      [na,[na.x,.32,.08],[3.08,.32,.18],[3.08,.96,.27],[3.22,.96,1.08],[3.22,n.y-.15,1.08],negativeLead,n],
-      [na,[na.x,.39,.08],[4.26,.39,.18],[4.26,1.06,.28],[4.56,1.06,.97],[4.56,n.y+.17,.97],negativeLead,n],
-      [na,[na.x,.35,.08],[4.40,.35,.12],[4.40,.94,.26],[n.x,.94,.26],[n.x,n.y-.04,n.z],n],
-      [na,[na.x,.41,.08],[4.55,.41,.12],[4.55,.99,.28],[5.76,.99,.28],[5.76,1.01,.36],[6.04,1.01,.36],[6.04,n.y,.78],negativeLead,n]
+      [na,[na.x,na.y-.06,na.z],[na.x,.70,.60],[n.x,.70,.60],[n.x,.76,n.z],n],
+      [na,[na.x,na.y-.06,na.z],[na.x,.75,.49],[4.59,.75,.49],[4.59,n.y+.22,.49],[n.x,n.y+.22,.49],negativeLead,n],
+      [na,[na.x,na.y-.06,na.z],[na.x,.80,.35],[4.46,.80,.35],[4.46,.35,.29],[5.82,.35,.29],[5.82,.89,.27],[n.x,.89,.27],[n.x,n.y-.04,n.z],n],
+      [na,[na.x,na.y-.06,na.z],[na.x,.85,.39],[4.17,.85,.39],[4.17,.91,.39],[6.04,.91,.39],[6.04,n.y,.39],negativeLead,n]
     ];
     cable(flowGroups.signal,R,.016,positiveRoutes[i],`保险座 + OUT ${i+1} → ${name} DC+`,{category:'aux',ordered:true,nameEn:`Fuse box + OUT ${i+1} → ${name} DC+`});
-    cable(flowGroups.signal,K,.019,negativeRoutes[i],`LT-14 负极口 ${i+1} → ${name} DC−`,{category:'aux',ordered:true,outline:true,nameEn:`LT-14 return port ${i+1} → ${name} DC−`});
+    cable(flowGroups.signal,K,.019,negativeRoutes[i],`导轨分线端子 负极口 ${i+1} → ${name} DC−`,{category:'aux',ordered:true,outline:true,nameEn:`DIN distributor return port ${i+1} → ${name} DC−`});
   });
 
   // Roof module indicators and protected PV paths.
@@ -934,8 +942,8 @@ try{
     refreshInterface();
   }
   root.querySelectorAll('.a3-mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
-  root.querySelector('[data-action="communication"]').addEventListener('click',()=>{camera.position.set(8.6,3.9,8.0);controls.target.set(5.05,1.6,.2);controls.update();setMode('signal')});
-  root.querySelector('[data-action="cm5-wiring"]').addEventListener('click',()=>{camera.position.set(3.54,2.06,2.75);controls.target.set(3.54,2.06,1.04);controls.update();setMode('signal')});
+  root.querySelector('[data-action="communication"]').addEventListener('click',()=>{camera.position.set(4.0,2.35,9.0);controls.target.set(5.05,1.55,.2);controls.update();setMode('signal')});
+  root.querySelector('[data-action="cm5-wiring"]').addEventListener('click',()=>{camera.position.set(cm5.position.x,2.06,2.75);controls.target.set(cm5.position.x,2.06,1.04);controls.update();setMode('signal')});
   window.addEventListener('message',event=>{if(event.origin===location.origin&&event.data?.type==='aiko-focus-communication')root.querySelector('[data-action="communication"]').click()});
   root.querySelector('[data-action="reset"]').addEventListener('click',()=>{camera.position.copy(home.position);controls.target.copy(home.target);controls.update();setMode('all')});
   setMode('all');

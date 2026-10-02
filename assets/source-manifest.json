@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-01",
+  "updatedAt": "2026-10-02",
   "assets": {
     "vehicle": "assets/views/vehicle-master.html",
     "electricalOld": "assets/views/electrical-old.html",
@@ -22,5 +22,22 @@
       "https://www.victronenergy.com/media/pg/Cerbo_GX/en/installation.html"
     ],
     "mountingLocation": "Same front white wall as TV, to the right of TV"
+  },
+  "negativeDistributor": {
+    "mounting": "Integral DIN feet on shared horizontal rail",
+    "railLengthMm": 150,
+    "leftToRight": [
+      "1-to-4 distributor",
+      "CM5",
+      "MOXA"
+    ],
+    "productEnvelopeMm": [
+      41.1,
+      45.9,
+      30.5
+    ],
+    "productSource": "User-supplied seller dimension image",
+    "ports": "Single input above, four outputs below",
+    "topology": "One common negative bus return; four device returns"
   }
 }

@@ -1,9 +1,9 @@
-import { hardware, deviceMessage } from './assets/upgrade-data.js?v=gx-frontwall-20261001';
+import { hardware, deviceMessage } from './assets/upgrade-data.js?v=din150-20261002';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html',
+  electricalNew: 'assets/views/electrical-new.html?v=din150-20261002',
   gxOld: 'assets/views/gx-old.html',
   gxNew: 'assets/views/gx-new.html?v=gx-frontwall-20261001'
 };
