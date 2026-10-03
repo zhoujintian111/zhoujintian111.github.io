@@ -28,12 +28,11 @@
     ]
   },
   "negativeDistributor": {
-    "mounting": "Integral DIN feet on shared horizontal rail",
+    "mounting": "Integral DIN foot on left horizontal 150mm rail, shared with CM5",
     "railLengthMm": 150,
     "leftToRight": [
       "1-to-4 distributor",
-      "CM5",
-      "MOXA"
+      "CM5"
     ],
     "productEnvelopeMm": [
       41.1,
@@ -86,11 +85,11 @@
     ]
   },
   "communicationAssembly": {
-    "version": "assembly-20261003-r4",
+    "version": "assembly-20261003-r7",
     "boardId": "comm-backplate",
     "data": "assets/communication-guide-data.js",
     "scope": "All communication devices and cables arrive loose and are installed on site; detailed local parts, assembly and wiring sequence",
-    "userConfirmation": "2026-10-03 14:47: all devices and all wiring installed on site; six fixing locations, 12 mm spacers, direct backboard mounting without nuts behind the wall",
+    "userConfirmation": "2026-10-03 14:47: all devices and all wiring installed on site; six fixing locations, 12 mm spacers, direct backboard mounting without nuts behind the wall;2026-10-03 17:19 device clips and USR identity confirmed,17:21 existing-hole adaptation or two new rail holes approved.",
     "spacers": {
       "count": 6,
       "boreMm": 6.2,
@@ -101,7 +100,41 @@
     },
     "railLengthMm": 150,
     "installationSteps": 26,
-    "limits": "Wall screw length and engagement, device M3 screw length, clip latch geometry, grounding/bonding, waterproof pin order, fuse coordination and commissioning require actual-component/site verification. No unverified electrical bond or energization approval is depicted."
+    "limits": "Clip engagement geometry and flex travel illustrate supplied-video actions, not manufacturing dimensions. Actual rail slot/second-rail fixing alignment, wall and device screw length, door clearance, grounding/bonding, waterproof pin order, fuse coordination and commissioning require actual-component/site verification.",
+    "railCount": 2,
+    "railFixingCount": 4,
+    "rails": [
+      {
+        "side": "left",
+        "lengthMm": 150,
+        "devices": [
+          "1-to-4 distributor",
+          "CM5"
+        ]
+      },
+      {
+        "side": "right",
+        "lengthMm": 150,
+        "devices": [
+          "MOXA EDS-205A",
+          "USR-G806w"
+        ]
+      }
+    ],
+    "plateAdaptation": "Reuse original 450×250×4mm plate. Trial-fit existing holes first; if mismatched, mark two right-rail fixing holes from actual rail slots. Layout coordinates are not manufacturing coordinates.",
+    "deviceClips": {
+      "count": 4,
+      "source": "User photos and four assembly videos, clarified2026-10-03 17:19",
+      "types": [
+        "distributor integral gray plastic foot",
+        "CM5 A-20-2 plastic clip",
+        "MOXA metal spring clip",
+        "USR metal spring clip"
+      ],
+      "independentEndStops": 0,
+      "note": "Earlier separate end-stop inference withdrawn; clips are included with devices, not extra supplied parts."
+    },
+    "routerMounting": "Rotate complete102×104×28mm body with ports and antennas to narrow-side DIN orientation:28mm along rail,104mm tall,102mm deep."
   },
   "gxAssembly": {
     "version": "assembly-20261003-r5",
@@ -123,6 +156,6 @@
     "version": "assembly-20261003-r6",
     "scope": "Communications/GX exploded and animation clarity; three constant-current selector labels",
     "appearance": "Neutral light-gray background and camera-relative neutral fill; retain physical black materials; restore normal/exit appearance",
-    "railRevisionStatus": "Two150mm rails requested; device distribution confirmed. Detailed layout not implemented pending end-stop and fixing confirmation."
+    "railRevisionStatus": "r7: confirmed two150mm rails and individual device clip engagement implemented; r6 visibility and labels retained."
   }
 }

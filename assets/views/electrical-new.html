@@ -125,7 +125,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
 <script type="importmap">{"imports":{"three":"../vendor/three/build/three.module.min.js","three/addons/":"../vendor/three/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
-import { hardware, deviceMessage, cableProfile, deviceEnglish } from '../upgrade-data.js?v=assembly-20261003-r4';
+import { hardware, deviceMessage, cableProfile, deviceEnglish } from '../upgrade-data.js?v=assembly-20261003-r7';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -566,11 +566,45 @@ try{
     spacer.add(annularPiece(.075,.031,.12,mat.frame));communication.add(spacer);commParts.spacers.push(spacer);
     captureCommPart('wall-screws',communication,()=>{mountAt(x,y);axisCylinder(communication,.028,.24,mat.silver,p.x,p.y,commOrigin.z-.052);});
   });
-  const commRail=new THREE.Group();commRail.name='communication-din-rail';commRail.userData.lengthMm=150;commRail.position.copy(commAt(100,125,7));communication.add(commRail);commParts.rail.push(commRail);
-  commRail.add(box(1.50,.35,.015,mat.frame,0,0,0,.005));
-  [-.175,.175].forEach(y=>{commRail.add(box(1.50,.018,.065,mat.frame,0,y,.032,.003));commRail.add(box(1.50,.045,.014,mat.frame,0,y*1.10,.070,.003));});
-  [31,159].forEach(x=>{const p=commAt(x,125,0),fixing=new THREE.Group();fixing.position.copy(p);communication.add(fixing);commFixing(fixing,0,0,.09,.66,'rail-fasteners',true);});
-  [27.5,77.5,130,172.5].forEach(x=>{const p=commAt(x,125,12),stop=new THREE.Group();stop.position.copy(p);communication.add(stop);stop.add(box(.05,.46,.10,mat.blackRubber,0,0,0,.008));screw(0,0,.065,stop,.38);stop.userData.commEndStop=true;commParts['end-stops'].push(stop);});
+  // Two user-supplied 150 mm rails. Right-hand fixing positions illustrate
+  // trial fitting only: reuse original holes first; otherwise mark two real slots.
+  const commRails=[100,255].map((x,i)=>{
+    const rail=new THREE.Group();rail.name=i?'communication-din-rail-right':'communication-din-rail';
+    rail.userData={lengthMm:150,railSide:i?'right':'left',fixingMode:i?'reuse-existing-or-mark-two-slots':'existing-P04-slots'};
+    rail.position.copy(commAt(x,125,7));communication.add(rail);commParts.rail.push(rail);
+    rail.add(box(1.50,.27,.015,mat.frame,0,0,0,.005));
+    [-.1425,.1425].forEach(y=>{rail.add(box(1.50,.018,.065,mat.frame,0,y,.032,.003));rail.add(box(1.50,.045,.014,mat.frame,0,Math.sign(y)*.1525,.070,.003));});
+    return rail;
+  });
+  const commRail=commRails[0];
+  [31,159,190,318].forEach((x,i)=>{const p=commAt(x,125,0),fixing=new THREE.Group();fixing.position.copy(p);fixing.userData.fixingBasis=i<2?'existing-slot':'trial-fit-actual-rail-slot';communication.add(fixing);commFixing(fixing,0,0,.09,.66,'rail-fasteners',true);});
+  const commClipRecords=[];
+  function clipProfile(parent,points,width,material,name){
+    const shape=new THREE.Shape();points.forEach(([y,z],i)=>i?shape.lineTo(y,z):shape.moveTo(y,z));shape.closePath();
+    const geometry=new THREE.ExtrudeGeometry(shape,{depth:width,bevelEnabled:false,steps:1});
+    // profile axes: y/z section, extruded across x (the occupied rail width).
+    geometry.applyMatrix4(new THREE.Matrix4().set(0,0,1,-width/2,1,0,0,0,0,1,0,0,0,0,0,1));
+    const mesh=new THREE.Mesh(geometry,material);mesh.name=name;mesh.castShadow=true;parent.add(mesh);return mesh;
+  }
+  function addDeviceClip(device,deviceId,kind,step,railId,depthOffset=0){
+    const root=new THREE.Group();root.name=`${deviceId}-din-clip`;root.position.z=depthOffset;device.add(root);
+    root.userData={deviceClip:true,kind,railId,profileBasis:'user-photo-video; illustrative small dimensions'};
+    const metal=kind==='metal',gray=kind==='integral',width=gray?.32:metal?.19:.21;
+    const material=metal?mat.silver:new THREE.MeshStandardMaterial({color:gray?0xbcc1c4:0x343d43,roughness:.62});
+    const carrier=box(width,gray?.43:.60,.017,material,0,0,.010,.006);carrier.name='device-side-carrier';root.add(carrier);
+    const fixedY=metal?-1:1;
+    const hook=clipProfile(root,[[fixedY*.188,.006],[fixedY*.188,-.063],[fixedY*.143,-.063],[fixedY*.143,-.045],[fixedY*.171,-.045],[fixedY*.171,.006]],width,material,'fixed-hook');
+    const spring=new THREE.Group();spring.name=metal?'metal-spring':'plastic-flex-foot';root.add(spring);
+    const flexY=-fixedY;
+    clipProfile(spring,[[flexY*.218,.008],[flexY*.210,-.018],[flexY*.200,-.056],[flexY*.166,gray?-.090:-.076],[flexY*.142,-.058],[flexY*.143,-.043],[flexY*.167,-.056],[flexY*.184,-.045],[flexY*.192,-.008],[flexY*.208,.023]],width*.78,material,'resilient-latch-profile');
+    if(!metal){[-width*.30,width*.30].forEach(x=>{const rib=box(.020,.26,.024,material,x,0,-.003,.004);root.add(rib);});}
+    const fixings=new THREE.Group();fixings.name='clip-to-device-fixings';root.add(fixings);
+    if(!gray)[-.265,.265].forEach(y=>screw(0,y,.028,fixings,.34));
+    const record={deviceId,device,root,hook,spring,carrier,railId,step,pivot:new THREE.Vector3(0,.1525,depthOffset-.025),springBase:spring.position.clone(),springRotation:spring.quaternion.clone(),flexDirection:flexY};
+    commClipRecords.push(record);commParts['end-stops'].push(root);
+    if(deviceId==='router')commParts['router-fasteners'].push(fixings);
+    return record;
+  }
   const commTitle=textPlate(communication,['CM5 · MOXA · USR-G806w · CERBO GX MK2'],4.05,.14,5.12,2.72,-.14,'#ffffff',null,44);
   const plateMeta=new THREE.Object3D();plateMeta.userData=deviceMessage('plate');communication.userData={...plateMeta.userData};commBack.userData.deviceRoot=plateMeta;pickables.push(commBack);
 
@@ -603,7 +637,7 @@ try{
   [.25,.46,.60,.77].forEach((z,i)=>port(cm5,0,-.69,z,.13,.054,i===0?'HDMI':'USB','-y'));
   const cm5Dc=new THREE.Vector3(cm5.position.x,cm5.position.y-.73,cm5.position.z+.105);
   cm5.add(box(.29,.08,.095,new THREE.MeshStandardMaterial({color:0x397d4c}),0,-.70,.10,.005));
-  cm5.add(box(.10,.64,.065,mat.frame,0,0,-.035,.01));attachMeta(cm5,'cm5');commParts.cm5.push(cm5);
+  addDeviceClip(cm5,'cm5','plastic',7,'communication-din-rail');attachMeta(cm5,'cm5');commParts.cm5.push(cm5);
 
   const netSwitch=new THREE.Group();netSwitch.position.copy(commAt(...hardware.moxa.xy,16));communication.add(netSwitch);
   netSwitch.add(box(.30,1.15,.70,new THREE.MeshStandardMaterial({color:0x747e81,metalness:.78,roughness:.34}),0,0,.35,.018));
@@ -614,24 +648,29 @@ try{
   textPlate(netSwitch,['EDS-205A'],.235,.055,0,-.53,.785,'#ffffff',null,52);
   [-.05,.05].forEach(x=>netSwitch.add(cylinder(.013,.020,mat.green,x,.37,.756)));
   [-.09,-.03,.03,.09].forEach(x=>{netSwitch.add(box(.052,.075,.10,new THREE.MeshStandardMaterial({color:0x377b47}),x,.609,.35,.004));screw(x,.607,.41,netSwitch,.24);});
-  netSwitch.add(box(.12,.68,.088,mat.frame,0,0,-.044,.012));
+  addDeviceClip(netSwitch,'moxa','metal',8,'communication-din-rail-right');
   const moxaDc=new THREE.Vector3(netSwitch.position.x-.05,netSwitch.position.y+.655,netSwitch.position.z+.35);attachMeta(netSwitch,'moxa');commParts.moxa.push(netSwitch);
 
-  const usr=new THREE.Group();usr.position.copy(commAt(...hardware.router.xy,3));communication.add(usr);
-  usr.add(box(1.02,1.04,.28,new THREE.MeshPhysicalMaterial({color:0x181818,metalness:.64,roughness:.49}),0,0,.14,.028));
-  [-.57,.57].forEach(x=>{usr.add(box(.12,.40,.03,mat.frame,x,0,.022,.012));[-.125,.125].forEach(y=>commFixing(usr,x,y,.058,.50,'router-fasteners',true));});
-  for(let i=0;i<9;i++)usr.add(box(.021,.76,.028,mat.blackRubber,-.41+i*.10,0,.286,.002));
-  textPlate(usr,['USR-G806w','4G / Wi-Fi ROUTER'],.83,.26,0,.14,.313,'#ffffff','#181818',51);
-  const usrLan=port(usr,-.26,-.535,.17,.145,.105,'RJ45','-y').add(usr.position);
-  port(usr,0,-.535,.17,.145,.105,'RJ45','-y');
-  const usrDc=new THREE.Vector3(usr.position.x+.31,usr.position.y-.585,usr.position.z+.16);
-  usr.add(box(.145,.08,.10,new THREE.MeshStandardMaterial({color:0x377b47}),.31,-.55,.16,.006));
+  const usr=new THREE.Group();usr.position.copy(commAt(...hardware.router.xy,16));communication.add(usr);
+  // Rotate the complete 102 x 104 x 28 mm shell, ports and antennas together.
+  // The narrow side occupies 28 mm of rail; the 102 mm dimension projects forward.
+  const usrBody=new THREE.Group();usrBody.name='usr-g806w-full-shell';usrBody.rotation.y=Math.PI/2;usrBody.position.set(-.14,0,.51);usr.add(usrBody);
+  usrBody.userData={shellSizeMm:[102,104,28],installedSizeMm:[28,104,102],mount:'narrow-side-DIN-bracket'};
+  usrBody.add(box(1.02,1.04,.28,new THREE.MeshPhysicalMaterial({color:0x181818,metalness:.64,roughness:.49}),0,0,.14,.028));
+  for(let i=0;i<9;i++)usrBody.add(box(.021,.76,.028,mat.blackRubber,-.41+i*.10,0,.286,.002));
+  textPlate(usrBody,['USR-G806w','4G / Wi-Fi ROUTER'],.83,.26,0,.14,.313,'#ffffff','#181818',51);
+  const usrLanLocal=port(usrBody,-.26,-.535,.17,.145,.105,'RJ45','-y');
+  port(usrBody,0,-.535,.17,.145,.105,'RJ45','-y');
+  usrBody.add(box(.145,.08,.10,new THREE.MeshStandardMaterial({color:0x377b47}),.31,-.55,.16,.006));
   [-.36,0,.36].forEach(x=>{
-    usr.add(cylinder(.03,.055,mat.brass,x,.543,.145,0));
-    usr.add(cylinder(.035,.13,mat.blackRubber,x,.63,.145,0));
-    usr.add(cylinder(.027,.64,mat.blackRubber,x,1.015,.145,0));
+    usrBody.add(cylinder(.03,.055,mat.brass,x,.543,.145,0));
+    usrBody.add(cylinder(.035,.13,mat.blackRubber,x,.63,.145,0));
+    usrBody.add(cylinder(.027,.64,mat.blackRubber,x,1.015,.145,0));
   });
-  textPlate(usr,['LAN','WAN/LAN','DC'],.90,.085,0,-.41,.309,'#bebebe',null,49);attachMeta(usr,'router');commParts.router.push(usr);
+  textPlate(usrBody,['LAN','WAN/LAN','DC'],.90,.085,0,-.41,.309,'#bebebe',null,49);
+  usrBody.updateMatrix();const usrLocalPoint=p=>p.clone().applyMatrix4(usrBody.matrix).add(usr.position);
+  const usrLan=usrLocalPoint(usrLanLocal),usrDc=usrLocalPoint(new THREE.Vector3(.285,-.595,.16)),usrDcNegative=usrLocalPoint(new THREE.Vector3(.335,-.595,.16));
+  addDeviceClip(usr,'router','metal',3,'communication-din-rail-right');attachMeta(usr,'router');commParts.router.push(usr);
 
   const cerbo=new THREE.Group();cerbo.position.copy(commAt(...hardware.cerbo.xy,3));communication.add(cerbo);
   const cerboBlue=new THREE.MeshPhysicalMaterial({color:0x0d75a0,roughness:.48,metalness:.03,clearcoat:.10});
@@ -686,11 +725,8 @@ try{
   [-.1715,.1715].forEach(x=>terminalShell(.068,.459,.175,x,0,.1975));
   terminalShell(.272,.263,.175,0,-.079,.1975);
   terminalShell(.112,.169,.175,0,.126,.1975);
-  // Opposed feet wrap around the horizontal rail; no adhesive pad remains.
-  [-.194,.194].forEach(y=>{
-    terminalShell(.365,.039,.083,0,y,.0445);
-    terminalShell(.365,.068,.014,0,y>0?.178:-.178,.007);
-  });
+  // The molded gray foot, not the orange wire levers, flexes over the rail.
+  addDeviceClip(lt,'negative','integral',6,'communication-din-rail',.09);
   const negativePorts=[];
   [-.104,-.035,.035,.104].forEach(x=>{
     lt.add(box(.049,.155,.020,ltOrange,x,-.072,.295,.005));
@@ -899,7 +935,7 @@ try{
   const ethLinks=[
     {a:cm5Eth1.clone().add(cm5.position),b:switchPorts[4],name:'CM5 ETH1 → MOXA Port 5',points:[[cm5.position.x+.28,.80,1.22],[netSwitch.position.x+.28,.80,1.18]]},
     {a:switchPorts[0],b:cerboEth,name:'MOXA Port 1 → Cerbo Ethernet',points:[[netSwitch.position.x+.38,2.68,1.0],[7.25,2.68,.72],[7.32,1.01,.66]]},
-    {a:switchPorts[1],b:usrLan,name:'MOXA Port 2 → USR-G806w LAN',points:[[netSwitch.position.x+.39,1.58,.95],[4.83,.86,.57],[4.97,.86,.30]]}
+    {a:switchPorts[1],b:usrLan,name:'MOXA Port 2 → USR-G806w LAN',points:[[netSwitch.position.x+.30,switchPorts[1].y,.95],[netSwitch.position.x+.30,.84,.95],[usrLan.x,.84,usrLan.z],[usrLan.x,usrLan.y-.13,usrLan.z]]}
   ];
   ethLinks.forEach(({a,b,name,points},i)=>{
     const start=flowGroups.signal.children.length;
@@ -917,7 +953,7 @@ try{
   commWireSets.push({id:'connect-feed',step:12,objects:flowGroups.signal.children.slice(commFeedStart),endpoints:[fusePositiveInput,negativeInput]});
   [cm5Dc,moxaDc,usrDc,cerboDc].forEach((p,i)=>{
     const start=flowGroups.signal.children.length;
-    const name=['CM5','MOXA','USR-G806w','Cerbo'][i],n=p.clone();if(i===3)n.y+=.06;else n.x+=[.08,.10,.05][i];
+    const name=['CM5','MOXA','USR-G806w','Cerbo'][i],n=i===2?usrDcNegative.clone():p.clone();if(i===3)n.y+=.06;else if(i!==2)n.x+=[.08,.10][i];
     const negativeExits=[{x:cm5.position.x-.32,y:n.y-.15},{x:netSwitch.position.x+.39,y:n.y+.17},{x:usr.position.x+.38,y:n.y-.16},{x:cerbo.position.x-.63,y:n.y}];
     const exit=negativeExits[i],positiveX=exit.x-.10;
     const positiveLead=i===3?[p.x-.10,p.y,p.z]:[p.x,i===1?p.y+.17:p.y-.15,p.z];
@@ -928,13 +964,13 @@ try{
     const positiveRoutes=[
       [pa,[pa.x,.32,.23],[4.52,.32,.23],[4.52,.68,.99],[p.x,.68,.99],[p.x,.72,p.z],p],
       [pa,[pa.x,.52,.23],[4.68,.52,.23],[4.68,p.y+.17,.96],positiveLead,p],
-      [pa,[pa.x,.44,.23],[5.84,.44,.23],[5.84,p.y-.09,.23],[p.x,p.y-.09,p.z],p],
+      [pa,[pa.x,.44,.23],[5.90,.44,.23],[5.90,p.y-.18,p.z],[p.x,p.y-.18,p.z],p],
       [pa,[pa.x,.53,.23],[6.00,.53,.23],[6.00,p.y,.36],positiveLead,p]
     ];
     const negativeRoutes=[
       [na,[na.x,na.y-.06,na.z],[na.x,.70,.60],[n.x,.70,.60],[n.x,.76,n.z],n],
       [na,[na.x,na.y-.06,na.z],[na.x,.75,.49],[4.59,.75,.49],[4.59,n.y+.22,.49],[n.x,n.y+.22,.49],negativeLead,n],
-      [na,[na.x,na.y-.06,na.z],[na.x,.80,.35],[4.46,.80,.35],[4.46,.35,.29],[5.82,.35,.29],[5.82,.89,.27],[n.x,.89,.27],[n.x,n.y-.04,n.z],n],
+      [na,[na.x,na.y-.06,na.z],[na.x,.80,.35],[4.46,.80,.35],[4.46,.35,.29],[5.99,.35,.29],[5.99,n.y-.23,n.z],[n.x,n.y-.23,n.z],n],
       [na,[na.x,na.y-.06,na.z],[na.x,.85,.39],[4.17,.85,.39],[4.17,.91,.39],[6.04,.91,.39],[6.04,n.y,.39],negativeLead,n]
     ];
     cable(flowGroups.signal,R,.016,positiveRoutes[i],`保险座 + OUT ${i+1} → ${name} DC+`,{category:'aux',ordered:true,nameEn:`Fuse box + OUT ${i+1} → ${name} DC+`});
@@ -1223,7 +1259,8 @@ try{
 
   // Communications installation reuses the final equipment and cable meshes.
   // Motion illustrates assembly order; it does not define drilling coordinates,
-  // fastener length, DIN clip shape or an unverified grounding arrangement.
+  // fastener length or an unverified grounding arrangement. Clip engagement
+  // follows the supplied videos; small latch dimensions remain illustrative.
   const commStepIds=['isolate-record','check-kit','install-rail','mount-router','mount-cerbo','mount-fuse','clip-negative','clip-cm5','clip-moxa','secure-endstops','place-spacers','mount-plate','connect-feed','power-cm5','power-moxa','power-router','power-cerbo','ethernet-cm5','ethernet-router','ethernet-cerbo','rs485-1','rs485-2','rs485-3','dress-cables','final-inspection','commissioning'];
   const commPartIds=Object.keys(commParts);
   const commPartCodes={plate:'C01',spacers:'C02','wall-screws':'C03',rail:'C04','rail-fasteners':'C05','end-stops':'C06',cm5:'C07',moxa:'C08',negative:'C09',router:'C10','router-fasteners':'C11',cerbo:'C12','cerbo-fasteners':'C13',fuse:'C14','fuse-fasteners':'C15',wiring:'C16'};
@@ -1234,6 +1271,8 @@ try{
     commOrigins.set(object,{position:object.position.clone(),quaternion:object.quaternion.clone(),scale:object.scale.clone(),visible:object.visible});
     object.traverse(mesh=>{mesh.userData.assemblyPart=id;mesh.userData.assemblyBoardId='comm-backplate';if(mesh.isMesh&&!pickables.includes(mesh)){mesh.userData.deviceRoot=plateMeta;pickables.push(mesh);}if(mesh.geometry)commDrawRanges.set(mesh,{start:mesh.geometry.drawRange.start,count:mesh.geometry.drawRange.count});if(mesh.material)commMaterialOrigins.set(mesh,mesh.material);});
   }
+  commClipRecords.forEach(record=>record.root.traverse(mesh=>{mesh.userData.assemblyPart='end-stops';mesh.userData.assemblyBoardId='comm-backplate';}));
+  commParts['router-fasteners'].forEach(root=>root.traverse(mesh=>{mesh.userData.assemblyPart='router-fasteners';}));
   const commGuideLayer=new THREE.Group();world.add(commGuideLayer);commGuideLayer.visible=false;
   const commLabelNodes=new Map();
   for(const id of commPartIds.filter(id=>id!=='wiring')){
@@ -1251,6 +1290,7 @@ try{
   function restoreCommunication(){
     commPresentation.restore();
     commOrigins.forEach((base,o)=>{o.position.copy(base.position);o.quaternion.copy(base.quaternion);o.scale.copy(base.scale);o.visible=base.visible;});
+    commClipRecords.forEach(record=>{record.spring.position.copy(record.springBase);record.spring.quaternion.copy(record.springRotation);});
     commDrawRanges.forEach((range,o)=>o.geometry.setDrawRange(range.start,range.count));
     commMaterialOrigins.forEach((material,o)=>o.material=material);
     if(commVisibility)commVisibility.forEach((value,o)=>o.visible=value);
@@ -1258,11 +1298,13 @@ try{
     const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=false;
     scene.updateMatrixWorld(true);
   }
-  function snapshotCommunication(){return {...commState,guideType:'communication',stepId:commStepIds[commState.step],language:interfaceLanguage,partIds:commPartIds.slice(),siteMountCount:0,spacerCount:6,endStopCount:4,railLengthMm:150,entryCameraSaved:!!commEntry};}
+  function snapshotCommunication(){return {...commState,guideType:'communication',stepId:commStepIds[commState.step],language:interfaceLanguage,partIds:commPartIds.slice(),siteMountCount:0,spacerCount:6,endStopCount:0,deviceClipCount:4,railCount:2,railLengthMm:150,entryCameraSaved:!!commEntry};}
   function emitCommunication(){parent.postMessage({type:'aiko-assembly-state',...snapshotCommunication()},location.origin);}
   function commTarget(){
     const step=commState.step;
-    if(step===2||step===6||step===7||step===8||step===9)return new THREE.Vector3(3.91,1.55,.85);
+    const clip=commClipRecords.find(record=>record.step===step);
+    if(clip)return commOrigins.get(clip.device).position.clone().add(new THREE.Vector3(0,0,.80));
+    if(step===2||step===9)return new THREE.Vector3(4.70,1.55,.85);
     if(step>=13&&step<=16)return [cm5Dc,moxaDc,usrDc,cerboDc][step-13].clone();
     if(step>=20&&step<=22)return new THREE.Vector3(cm5.position.x,2.05,1.0);
     return new THREE.Vector3(5.02,1.57,.62);
@@ -1270,7 +1312,8 @@ try{
   function focusCommunication(){
     const target=commTarget();
     if(commState.mode==='animation'&&commState.step>=13&&commState.step<=16){const offset=[[-.55,-.75,2.05],[-.55,.90,2.15],[-.65,-.85,2.2],[-1.4,-.20,2.1]][commState.step-13];camera.position.copy(target).add(new THREE.Vector3(...offset));controls.target.copy(target);controls.update();return;}
-    if(commState.mode==='animation'&&commState.step===9){camera.position.copy(target).add(new THREE.Vector3(1.45,2.35,2.15));controls.target.copy(target);controls.update();return;}
+    if(commState.mode==='animation'&&commClipRecords.some(record=>record.step===commState.step)){camera.position.copy(target).add(new THREE.Vector3(1.50,.25,.35));controls.target.copy(target);controls.update();return;}
+    if(commState.mode==='animation'&&commState.step===9){camera.position.copy(target).add(new THREE.Vector3(2.40,1.50,3.50));controls.target.copy(target);controls.update();return;}
     if(commState.mode==='animation'&&[10,11].includes(commState.step)){camera.position.set(10.3,3.2,4.8);controls.target.set(5.12,1.55,.35);controls.update();return;}
     const close=commState.mode==='animation'&&((commState.step>=2&&commState.step<=9)||(commState.step>=13&&commState.step<=22));
     const distance=commState.mode==='animation'&&commState.step>=20&&commState.step<=22?2.50:close?4.80:9.2;camera.position.copy(target).add(new THREE.Vector3(distance*.43,distance*.23,distance));controls.target.copy(target);controls.update();
@@ -1278,7 +1321,7 @@ try{
   function commRearCamera(){
     if(!commCameraAutomatic||commState.mode!=='animation')return;
     if([10,11].includes(commState.step)){const p=commState.stepProgress,amount=commState.step===10?commProgress(p,.26,.65):1-commProgress(p,.68,1);const wide=new THREE.Vector3(10.3,3.2,4.8),close=new THREE.Vector3(8.70,2.25,1.55),whole=new THREE.Vector3(5.12,1.55,.35),detail=new THREE.Vector3(7.22,1.55,-.17);camera.position.copy(wide).lerp(close,amount);controls.target.copy(whole).lerp(detail,amount);controls.update();return;}
-    if(![2,3,4,5].includes(commState.step))return;
+    if(![2,4,5].includes(commState.step))return;
     const p=commState.stepProgress,target=commTarget();
     // Brief side-to-rear view exposes nuts before the plate is attached to the wall.
     const swing=p<.45?0:p<.70?commProgress(p,.45,.70):1-commProgress(p,.88,1);
@@ -1303,8 +1346,9 @@ try{
       g.quaternion.copy(world.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(camera.quaternion));
       const direction=target.clone().sub(g.position);leader.position.copy(g.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
     }
-    const activeWire=commState.mode==='animation'?(step===9?{id:'endstops',endpoints:commParts['end-stops'].map(o=>o.getWorldPosition(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert()))}:commWireSets.find(set=>set.step===step)):null;
-    commEndpointRings.forEach((ring,i)=>{ring.visible=!!activeWire&&i<activeWire.endpoints.length;if(ring.visible){ring.position.copy(activeWire.endpoints[i]);ring.position.z+=.025;const fine=activeWire.id.startsWith('rs485-')&&i>0;ring.scale.setScalar(fine?.36:activeWire.id==='endstops'?.58:1);ring.material.color.setHex(fine?[0xff8a4a,0xe8564d,0xffffff,0x479ffc][i]:0xff8a4a);}});
+    const activeClip=commClipRecords.find(record=>record.step===step);
+    const activeWire=commState.mode==='animation'?(step===9?{id:'device-clips',endpoints:commClipRecords.map(record=>record.root.getWorldPosition(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert()))}:activeClip?{id:'clip-contacts',endpoints:[activeClip.hook,activeClip.spring].map(o=>{const b=new THREE.Box3().setFromObject(o);return b.getCenter(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert());})}:commWireSets.find(set=>set.step===step)):null;
+    commEndpointRings.forEach((ring,i)=>{ring.visible=!!activeWire&&i<activeWire.endpoints.length;if(ring.visible){ring.position.copy(activeWire.endpoints[i]);ring.position.z+=.025;const fine=activeWire.id.startsWith('rs485-')&&i>0;ring.scale.setScalar(fine?.36:activeWire.id.includes('clip')?.58:1);ring.material.color.setHex(fine?[0xff8a4a,0xe8564d,0xffffff,0x479ffc][i]:0xff8a4a);}});
     commFocusBox.visible=!!commState.partId&&commState.partId!=='wiring';
     if(commFocusBox.visible){const bounds=commPartBounds(commState.partId);commFocusBox.visible=!bounds.isEmpty();if(commFocusBox.visible)commFocusBox.box.copy(bounds).applyMatrix4(world.matrixWorld.clone().invert()).expandByScalar(.035);}
   }
@@ -1329,7 +1373,21 @@ try{
       });
     });
   }
-  function ghostCommObjects(objects,opacity){for(const object of objects)object.traverse(mesh=>{if(!mesh.material||mesh.userData.isCableHit)return;const original=commMaterialOrigins.get(mesh);if(!original||Array.isArray(original))return;let ghost=commGhostMaterials.get(mesh);if(!ghost){ghost=original.clone();commGhostMaterials.set(mesh,ghost);}ghost.transparent=true;ghost.opacity=original.opacity*opacity;ghost.depthWrite=false;mesh.material=ghost;});}
+  function ghostCommObjects(objects,opacity,preserveClips=false){for(const object of objects)object.traverse(mesh=>{if(!mesh.material||mesh.userData.isCableHit)return;if(preserveClips){for(let parent=mesh;parent&&parent!==object.parent;parent=parent.parent)if(parent.userData.deviceClip)return;}const original=commMaterialOrigins.get(mesh);if(!original||Array.isArray(original))return;let ghost=commGhostMaterials.get(mesh);if(!ghost){ghost=original.clone();commGhostMaterials.set(mesh,ghost);}ghost.transparent=true;ghost.opacity=original.opacity*opacity;ghost.depthWrite=false;mesh.material=ghost;});}
+  function poseDeviceClip(record,progress){
+    const object=record.device,base=commOrigins.get(object),p=commClamp(progress);
+    // Phase 1: approach upper lip. Phase 2: pivot about the engaged lip.
+    // Phase 3: elastic latch returns and both rail lips remain captured.
+    const approach=commProgress(p,0,.28),seat=commProgress(p,.28,.80),angle=-.40*(1-seat);
+    const rotation=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),angle);
+    const pivot=record.pivot.clone().applyQuaternion(base.quaternion);
+    object.quaternion.copy(base.quaternion).multiply(rotation);
+    object.position.add(pivot).sub(record.pivot.clone().applyQuaternion(object.quaternion));
+    object.position.y+=(1-approach)*.21;object.position.z+=(1-approach)*.38;
+    const flex=commProgress(p,.48,.65)*(1-commProgress(p,.73,.91));
+    record.spring.position.y+=record.flexDirection*.034*flex;
+    record.spring.rotation.x+=record.flexDirection*.10*flex;
+  }
   function applyCommunicationPose(){
     restoreCommunication();
     if(!commState.available||commState.mode==='normal'){if(commState.available&&commState.partId)updateCommunicationLabels();return;}
@@ -1341,11 +1399,11 @@ try{
     commTitle.visible=mode==='exploded';
     if(explosive){
       const spread=mode==='exploded'?commState.spread:1;
-      for(const id of commPartIds){for(const object of commParts[id]){object.visible=id!=='wiring';if(id==='wiring')continue;object.position.add(new THREE.Vector3(...commExplode[id]).multiplyScalar(spread));}}
+      for(const id of commPartIds){for(const object of commParts[id]){object.visible=id!=='wiring';if(id==='wiring'||id==='end-stops'||id==='router-fasteners')continue;object.position.add(new THREE.Vector3(...commExplode[id]).multiplyScalar(spread));}}
     }else{
       const tabletop=step>=2&&step<=10?.80:step===11?.80*(1-commProgress(p,0,.66)):0;
       for(const id of commPartIds){
-        if(id==='wiring')continue;
+        if(id==='wiring'||id==='end-stops'||id==='router-fasteners')continue;
         const installedAt=commInstallStep[id]??0;
         for(const object of commParts[id]){
           const rootPart=commRootPart(object),site=id==='spacers'||id==='wall-screws';
@@ -1359,17 +1417,23 @@ try{
           if(id==='wall-screws')t=commProgress(p,.60,1);
           const index=commParts[id].indexOf(object),count=commParts[id].length;
           if(id==='end-stops'||id==='spacers')t=commProgress(p,index/count,Math.min(1,(index+1.5)/count));
-          if(['cm5','moxa','negative'].includes(id)){
-            // Generic rail alignment; only MOXA has a documented upper-hook sequence.
-            object.position.z+=(1-t)*.72;object.position.y+=(1-t)*.24;
-            if(id==='moxa')object.rotation.x+=-(1-t)*.18;
-          }else if(id==='end-stops'){object.position.x+=(index<2?-.40:.40)*(1-t);object.position.z+=(1-t)*.28;}
+          const clip=commClipRecords.find(record=>record.device===object);
+          if(clip)poseDeviceClip(clip,p);
           else if(object.userData.commRearNut)object.position.z-=.65*(1-t);
           else object.position.z+=(1-t)*(site?1.05:.88);
         }
       }
       commWireSets.forEach(set=>{setWireProgress(set,step>set.step?1:step===set.step?p:step===0?1:0);if(step>=12&&step<=22&&set.step<step)ghostCommObjects(set.objects,.14);});
-      if(step===9){ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.20);ghostCommObjects([commBack],.16);}
+      const activeClip=commClipRecords.find(record=>record.step===step);
+      if(activeClip){
+        // Keep actual hook and spring opaque; ghost only the body obscuring them.
+        ghostCommObjects([activeClip.device],.12,true);ghostCommObjects([commBack],.08);
+        ghostCommObjects([activeClip.carrier],.28);
+        activeClip.device.traverse(mesh=>{if(mesh.geometry?.type==='PlaneGeometry'&&mesh.material?.map)mesh.visible=false;});
+        [cm5,netSwitch,negativeDistributor,usr,cerbo,fuse].filter(device=>device!==activeClip.device).forEach(device=>device.visible=false);
+      }
+      if(step===9){ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.18,true);ghostCommObjects([commBack],.12);}
+
       if(step===10||step===11&&p<.70){ghostCommObjects([commBack],.20);ghostCommObjects([cm5,netSwitch,negativeDistributor,usr,cerbo,fuse],.28);}
     }
     scene.updateMatrixWorld(true);commRearCamera();updateCommunicationLabels();
