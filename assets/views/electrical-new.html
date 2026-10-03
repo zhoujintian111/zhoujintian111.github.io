@@ -250,7 +250,7 @@ try{
     const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),material);mesh.rotation.x=rotX;mesh.position.set(x,y,z);mesh.castShadow=true;return mesh;
   }
   function screw(x,y,z,parent,scale=1){
-    const s=cylinder(.045*scale,.035*scale,mat.silver,x,y,z);parent.add(s);
+    const s=cylinder(.045*scale,.035*scale,mat.silver,x,y,z);s.userData.mountingScrewHead=true;parent.add(s);
     const slot=box(.055*scale,.009*scale,.012,mat.black,x,y,z+.022,0);parent.add(slot);
   }
   function labelTexture(title,subtitle='',accent='#ffffff',w=512,h=256){
@@ -536,10 +536,10 @@ try{
   }
   function commFixing(parent,x,y,z,scale,id,withRearNut=false){
     captureCommPart(id,parent,()=>{
-      screw(x,y,z,parent,scale);
+      const headIndex=parent.children.length;screw(x,y,z,parent,scale);parent.children[headIndex].userData.commFixingHead=true;
       axisCylinder(parent,.030*scale,.14,mat.silver,x,y,z-.06);
       const washer=annularPiece(.055*scale,.031*scale,.008,mat.silver);washer.position.set(x,y,z-.018);parent.add(washer);
-      if(withRearNut){const rearWasher=annularPiece(.055*scale,.031*scale,.008,mat.silver);rearWasher.position.set(x,y,-.057);parent.add(rearWasher);const nut=axisCylinder(parent,.050*scale,.035,mat.silver,x,y,-.078,'z',6);nut.userData.commRearNut=true;}
+      if(withRearNut){const rearWasher=annularPiece(.055*scale,.031*scale,.008,mat.silver);rearWasher.position.set(x,y,-.057);rearWasher.userData.commRearWasher=true;parent.add(rearWasher);const nut=axisCylinder(parent,.050*scale,.035,mat.silver,x,y,-.078,'z',6);nut.userData.commRearNut=true;}
     });
   }
   const commBack=box(4.50,2.50,.04,new THREE.MeshPhysicalMaterial({color:0x151515,roughness:.68,metalness:.56}),5.12,1.55,-.18,.03);communication.add(commBack);commParts.plate.push(commBack);
@@ -1082,12 +1082,48 @@ try{
   const guideLayer=new THREE.Group();world.add(guideLayer);
   // External cable-tie mounts are documented in the right panel only.
   const assemblyLabels=new THREE.Group();guideLayer.add(assemblyLabels);assemblyLabels.visible=false;
-  const labelAnchors=[[-1.25,.94,.05],[-1.53,-.92,.10],[.15,.88,.67],[.75,-.95,.18],[2.03,.23,.36]];
+  // Screen-space callouts share one layout across all installation views.
+  // The labels keep their real part IDs; leaders terminate on real geometry.
+  function installationAnnotation(parent,code,names){
+    const g=new THREE.Group();parent.add(g);g.userData.annotationCode=code;g.userData.annotationNames=names;g.userData.annotationMaterials=new Map();
+    const plane=new THREE.Mesh(new THREE.PlaneGeometry(1,.255),new THREE.MeshBasicMaterial({transparent:true,depthTest:false,depthWrite:false}));plane.renderOrder=82;g.add(plane);return g;
+  }
+  function refreshInstallationAnnotation(g,selected){
+    const lang=interfaceLanguage==='en'?'en':'zh',name=g.userData.annotationNames[lang==='en'?1:0],key=lang+':'+selected;
+    let material=g.userData.annotationMaterials.get(key);
+    if(!material){
+      const texture=canvasTexture(800,204,(ctx,w,h)=>{ctx.fillStyle=selected?'#ff5a00':'#ffffff';ctx.fillRect(0,0,w,h);ctx.fillStyle=selected?'#ffffff':'#bd4000';ctx.font='700 73px Arial';ctx.textBaseline='middle';ctx.fillText(g.userData.annotationCode,28,60,w-56);ctx.fillStyle=selected?'#ffffff':'#19212a';ctx.font='600 61px Arial, "Microsoft YaHei", sans-serif';ctx.fillText(name,28,151,w-56);});
+      material=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthTest:false,depthWrite:false});g.userData.annotationMaterials.set(key,material);
+    }
+    g.children[0].material=material;g.userData.annotationLanguage=lang;g.userData.annotationText=g.userData.annotationCode+' · '+name;g.userData.annotationSelected=selected;
+  }
+  function layoutInstallationAnnotations(entries){
+    if(!entries.length)return;
+    camera.updateMatrixWorld(true);world.updateMatrixWorld(true);
+    const inverse=world.matrixWorld.clone().invert(),rect=canvas.getBoundingClientRect(),width=rect.width||1280,height=rect.height||690;
+    const pixels=Math.max(100,Math.min(178,width*.39)),halfX=pixels/width,halfY=pixels*.255/height;
+    const depth=3,visibleHeight=2*Math.tan(THREE.MathUtils.degToRad(camera.fov*.5))*depth,labelScale=visibleHeight*pixels/height;
+    const z=camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(depth).add(camera.position).project(camera).z;
+    const sorted=entries.map(entry=>({...entry,projected:entry.target.clone().applyMatrix4(world.matrixWorld).project(camera)})).sort((a,b)=>a.projected.x-b.projected.x);
+    const halves=[sorted.slice(0,Math.ceil(sorted.length/2)),sorted.slice(Math.ceil(sorted.length/2))];
+    halves.forEach((column,side)=>{
+      column.sort((a,b)=>b.projected.y-a.projected.y);
+      const spacing=Math.max(halfY*2+.055,.14),span=(column.length-1)*spacing,mid=Math.max(-.72+span/2,Math.min(.72-span/2,column.reduce((n,e)=>n+(e.preferredY??e.projected.y),0)/Math.max(1,column.length)));
+      column.forEach(({g,leader,target,selected},i)=>{
+        refreshInstallationAnnotation(g,selected);g.visible=leader.visible=true;g.scale.setScalar(labelScale);
+        const x=(side?1:-1)*(1-halfX-.04),y=mid+span/2-i*spacing;
+        g.position.copy(new THREE.Vector3(x,y,z).unproject(camera).applyMatrix4(inverse));g.quaternion.copy(world.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(camera.quaternion));
+        const edge=new THREE.Vector3(x+(side?-1:1)*halfX,y,z).unproject(camera).applyMatrix4(inverse),direction=target.clone().sub(edge);
+        leader.position.copy(edge).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());leader.userData.annotationTarget=target.toArray();
+      });
+    });
+  }
+  const assemblyShortNames={adapter:['转换板','Adapter plate'],'wall-screws':['背板固定螺丝','Backboard screws'],module:['完整恒流板','Complete CC board'],'module-screws':['M4×6 固定螺钉','M4×6 fixing screws'],mc4:['EVO2 线端','EVO2 cable ends']};
   const labels=assemblyIds.map((id,i)=>{
-    const g=new THREE.Group();assemblyLabels.add(g);textPlate(g,[['A02','A05','A01','A03','A09'][i]],.34,.16,0,0,0,'#ffffff','#ef5b25',340);
+    const g=installationAnnotation(assemblyLabels,['A02','A05','A01','A03','A09'][i],assemblyShortNames[id]);
     g.traverse(o=>{o.userData.assemblyPart=id;if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});return g;
   });
-  const leaderMaterial=new THREE.MeshBasicMaterial({color:0xef875a});
+  const leaderMaterial=new THREE.MeshBasicMaterial({color:0xb34511,depthTest:false,depthWrite:false,transparent:true,opacity:.8});
   const assemblyLeaders=assemblyIds.map(()=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,1,5),leaderMaterial);assemblyLabels.add(m);return m;});
   const assemblyHighlight=new THREE.Box3Helper(new THREE.Box3(),0xff5a00);assemblyHighlight.visible=false;world.add(assemblyHighlight);
   const mc4Prep=new THREE.Group();guideLayer.add(mc4Prep);mc4Prep.visible=false;
@@ -1167,19 +1203,23 @@ try{
       }
     }
     assemblyLabels.visible=!originalReference;
-    labels.forEach((label,i)=>{
-      const [x,y,z]=labelAnchors[i],id=assemblyIds[i],frontZ=Math.max(...Object.values(pose))+1.0;
-      label.position.set(board.position.x+x,board.position.y+y,Math.max(z+(pose[id]||0),frontZ));
-      if(id==='mc4')label.position.x+=pose.plugGap*.55;
-      const anchor={adapter:[-.87,.57,.05],'wall-screws':[-.66,-.61,.08],module:[.05,.48,.64],'module-screws':[.73,-.365,.145],mc4:[1.28,.165,.38]}[id];
-      const target=new THREE.Vector3(board.position.x+anchor[0],board.position.y+anchor[1],anchor[2]+(pose[id]||0));if(id==='mc4')target.x+=pose.plugGap;
-      const direction=target.clone().sub(label.position),leader=assemblyLeaders[i];label.visible=leader.visible=id!=='mc4'||parts.mc4.some(o=>o.visible);leader.position.copy(label.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
-    });
+    scene.updateMatrixWorld(true);updateAssemblyLabels();
     mc4Prep.visible=installation&&(assemblyState.step===5||assemblyState.step===6);
     preparationEnds.forEach(({g,contact,sleeve},i)=>{
       const plug=parts.mc4[i];g.position.copy(plug.position);g.scale.x=origins.get(plug).x>board.position.x?1:-1;contact.visible=sleeve.visible=assemblyState.step===6;
     });
     scene.updateMatrixWorld(true);updateAssemblyHighlight();
+  }
+  function updateAssemblyLabels(){
+    if(!assemblyLabels.visible)return;
+    const {parts}=activeAssembly,inverse=world.matrixWorld.clone().invert(),entries=[];
+    labels.forEach((g,i)=>{
+      const id=assemblyIds[i],leader=assemblyLeaders[i],objects=parts[id].filter(isActuallyVisible);g.visible=leader.visible=objects.length>0;if(!objects.length)return;
+      // A representative actual head/plug is clearer than the empty centre of a set.
+      const heads=objects.filter(o=>o.userData.mountingScrewHead),candidates=heads.length?heads:objects;const representative=candidates.reduce((best,o)=>o.getWorldPosition(new THREE.Vector3()).distanceTo(camera.position)<best.getWorldPosition(new THREE.Vector3()).distanceTo(camera.position)?o:best);
+      const bounds=new THREE.Box3().setFromObject(representative),target=(id==='adapter'?new THREE.Vector3(bounds.max.x-.06,bounds.max.y-.06,bounds.max.z):bounds.getCenter(new THREE.Vector3())).applyMatrix4(inverse);
+      entries.push({g,leader,target,selected:assemblyState.partId===id});
+    });layoutInstallationAnnotations(entries);
   }
   function updateAssemblyInfo(){
     if(!assemblyState.available)return;
@@ -1219,14 +1259,14 @@ try{
       if(assemblyState.step===assemblyState.stepCount-1&&!assemblyState.playing){assemblyState.step=0;assemblyElapsed=0;focusAssembly();applyAssemblyPose(poseForAssembly());}
       assemblyState.playing=!assemblyState.playing;assemblyLastTime=Date.now();emitAssembly();
     },
-    selectPart(id){if(!assemblyIds.includes(id))return;if(!assemblyState.available)this.selectBoard(assemblyState.boardId);assemblyState.partId=id;updateAssemblyInfo();updateAssemblyHighlight();emitAssembly();},
+    selectPart(id){if(!assemblyIds.includes(id))return;if(!assemblyState.available)this.selectBoard(assemblyState.boardId);assemblyState.partId=id;updateAssemblyInfo();updateAssemblyHighlight();updateAssemblyLabels();emitAssembly();},
     exit(){
       assemblyState.playing=false;assemblyState.available=false;assemblyState.mode='normal';assemblyState.partId=null;assemblyElapsed=0;
       restoreAssembly();assemblySelectionVisibility=null;assemblyFocusTarget=null;
       if(assemblyEntry){camera.position.copy(assemblyEntry.position);controls.target.copy(assemblyEntry.target);controls.update();}assemblyEntry=null;emitAssembly();
     },
     snapshot:snapshotAssembly,
-    refresh(){updateAssemblyInfo();if(assemblyState.available)emitAssembly();}
+    refresh(){updateAssemblyInfo();updateAssemblyLabels();if(assemblyState.available)emitAssembly();}
   };
   window.aikoAssemblyGuide=assemblyGuide;
   function assemblyTick(now){
@@ -1264,6 +1304,7 @@ try{
   const commStepIds=['isolate-record','check-kit','install-rail','mount-router','mount-cerbo','mount-fuse','clip-negative','clip-cm5','clip-moxa','secure-endstops','place-spacers','mount-plate','connect-feed','power-cm5','power-moxa','power-router','power-cerbo','ethernet-cm5','ethernet-router','ethernet-cerbo','rs485-1','rs485-2','rs485-3','dress-cables','final-inspection','commissioning'];
   const commPartIds=Object.keys(commParts);
   const commPartCodes={plate:'C01',spacers:'C02','wall-screws':'C03',rail:'C04','rail-fasteners':'C05','end-stops':'C06',cm5:'C07',moxa:'C08',negative:'C09',router:'C10','router-fasteners':'C11',cerbo:'C12','cerbo-fasteners':'C13',fuse:'C14','fuse-fasteners':'C15',wiring:'C16'};
+  const commShortNames={plate:['通讯底板','Mounting plate'],spacers:['12 mm 通孔隔柱','12 mm spacers'],'wall-screws':['M6 背板固定件','M6 backboard fixings'],rail:['150 mm 导轨 ×2','150 mm rails ×2'],'rail-fasteners':['M4×16 导轨螺栓组','M4×16 rail fixings'],'end-stops':['设备背部导轨扣','Rear device DIN clips'],cm5:['CM5 工业主机','CM5 computer'],moxa:['MOXA 交换机','MOXA switch'],negative:['一进四分线端子','1-in / 4-out terminal'],router:['USR-G806w 路由器','USR-G806w router'],'router-fasteners':['路由器背部导轨扣','Rear router DIN clip'],cerbo:['Cerbo GX MK2','Cerbo GX MK2'],'cerbo-fasteners':['M3 固定螺栓组','M3 Cerbo fixings'],fuse:['四路保险座','4-way fuse holder'],'fuse-fasteners':['M4 固定螺栓组 ×2','M4 fuse fixings ×2'],wiring:['电源与通讯线缆','Power / data cables']};
   const commInstallStep={rail:2,'rail-fasteners':2,router:3,'router-fasteners':3,cerbo:4,'cerbo-fasteners':4,fuse:5,'fuse-fasteners':5,negative:6,cm5:7,moxa:8,'end-stops':9,spacers:10,'wall-screws':11};
   const commExplode={plate:[0,0,.35],spacers:[0,0,-.90],'wall-screws':[0,0,2.05],rail:[0,.82,1.00],'rail-fasteners':[0,.82,1.65],'end-stops':[0,.82,2.00],cm5:[-.26,.50,2.25],moxa:[.35,.50,2.25],negative:[-.95,-.30,2.05],router:[.05,.60,1.35],'router-fasteners':[0,0,.65],cerbo:[.55,0,1.35],'cerbo-fasteners':[0,0,.65],fuse:[0,-.45,1.35],'fuse-fasteners':[0,0,.65],wiring:[0,0,0]};
   const commOrigins=new Map(),commDrawRanges=new Map(),commMaterialOrigins=new Map(),commGhostMaterials=new Map();
@@ -1276,7 +1317,7 @@ try{
   const commGuideLayer=new THREE.Group();world.add(commGuideLayer);commGuideLayer.visible=false;
   const commLabelNodes=new Map();
   for(const id of commPartIds.filter(id=>id!=='wiring')){
-    const g=new THREE.Group();commGuideLayer.add(g);textPlate(g,[commPartCodes[id]],.34,.16,0,0,0,'#ffffff','#ef5b25',340);
+    const g=installationAnnotation(commGuideLayer,commPartCodes[id],commShortNames[id]);
     g.traverse(o=>{o.userData.assemblyPart=id;o.userData.assemblyBoardId='comm-backplate';if(o.isMesh){o.userData.deviceRoot=plateMeta;pickables.push(o);}});
     const leader=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,1,5),leaderMaterial);commGuideLayer.add(leader);commLabelNodes.set(id,{g,leader});
   }
@@ -1304,6 +1345,7 @@ try{
     const step=commState.step;
     const clip=commClipRecords.find(record=>record.step===step);
     if(clip)return commOrigins.get(clip.device).position.clone().add(new THREE.Vector3(0,0,.80));
+    if(step===5)return commOrigins.get(fuse).position.clone().add(new THREE.Vector3(0,0,1.05));
     if(step===2||step===9)return new THREE.Vector3(4.70,1.55,.85);
     if(step>=13&&step<=16)return [cm5Dc,moxaDc,usrDc,cerboDc][step-13].clone();
     if(step>=20&&step<=22)return new THREE.Vector3(cm5.position.x,2.05,1.0);
@@ -1311,6 +1353,7 @@ try{
   }
   function focusCommunication(){
     const target=commTarget();
+    if(commState.mode==='animation'&&commState.step===5){camera.position.copy(target).add(new THREE.Vector3(.65,.45,2.3));controls.target.copy(target);controls.update();return;}
     if(commState.mode==='animation'&&commState.step>=13&&commState.step<=16){const offset=[[-.55,-.75,2.05],[-.55,.90,2.15],[-.65,-.85,2.2],[-1.4,-.20,2.1]][commState.step-13];camera.position.copy(target).add(new THREE.Vector3(...offset));controls.target.copy(target);controls.update();return;}
     if(commState.mode==='animation'&&commClipRecords.some(record=>record.step===commState.step)){camera.position.copy(target).add(new THREE.Vector3(1.50,.25,.35));controls.target.copy(target);controls.update();return;}
     if(commState.mode==='animation'&&commState.step===9){camera.position.copy(target).add(new THREE.Vector3(2.40,1.50,3.50));controls.target.copy(target);controls.update();return;}
@@ -1325,30 +1368,28 @@ try{
     const p=commState.stepProgress,target=commTarget();
     // Brief side-to-rear view exposes nuts before the plate is attached to the wall.
     const swing=p<.45?0:p<.70?commProgress(p,.45,.70):1-commProgress(p,.88,1);
-    const angle=.22+swing*2.16,r=5.5;camera.position.set(target.x+Math.sin(angle)*r,target.y+1.45,target.z+Math.cos(angle)*r);controls.target.copy(target);controls.update();
+    const angle=.22+swing*2.16,r=commState.step===5?2.65:5.5;camera.position.set(target.x+Math.sin(angle)*r,target.y+(commState.step===5?.5:1.45),target.z+Math.cos(angle)*r);controls.target.copy(target);controls.update();
   }
   controls.addEventListener('start',()=>{commCameraAutomatic=false;});
   function commPartBounds(id){const bounds=new THREE.Box3();commParts[id].forEach(o=>{if(isActuallyVisible(o))bounds.union(new THREE.Box3().setFromObject(o));});return bounds;}
   function updateCommunicationLabels(){
     const explosive=commState.mode==='exploded'||(commState.mode==='animation'&&commState.step===1),step=commState.step;
-    let shown=explosive?['plate','spacers','wall-screws','rail','rail-fasteners','end-stops']:Object.keys(commInstallStep).filter(id=>commInstallStep[id]===step);
+    let shown=explosive?commPartIds.filter(id=>id!=='wiring'):Object.keys(commInstallStep).filter(id=>commInstallStep[id]===step);
     if(step===11&&!explosive)shown=['plate','wall-screws'];
-    const anchors={plate:[7.65,3.03,2.9],spacers:[2.15,2.66,2.8],'wall-screws':[7.78,1.20,3.2],rail:[3.05,3.00,2.8],'rail-fasteners':[3.08,.24,3.3],'end-stops':[4.2,3.18,3.4]};
-    let n=0;for(const [id,{g,leader}] of commLabelNodes){
-      const visible=shown.includes(id),bounds=visible?commPartBounds(id):null;g.visible=leader.visible=visible&&bounds&&!bounds.isEmpty();if(!g.visible)continue;
-      const representative=!explosive&&['spacers','wall-screws'].includes(id)?commParts[id].reduce((best,o)=>o.getWorldPosition(new THREE.Vector3()).distanceTo(controls.target)<best.getWorldPosition(new THREE.Vector3()).distanceTo(controls.target)?o:best):commParts[id][0];
-      const target=(id==='spacers'||id==='rail-fasteners'||id==='wall-screws'?representative.getWorldPosition(new THREE.Vector3()):bounds.getCenter(new THREE.Vector3())).applyMatrix4(world.matrixWorld.clone().invert());
-      if(explosive&&anchors[id])g.position.set(...anchors[id]);else g.position.set(target.x+(n++%2?1.15:-1.05),target.y+.84,Math.max(target.z+.65,1.85));
-      camera.updateMatrixWorld(true);const projected=g.position.clone().applyMatrix4(world.matrixWorld).project(camera);
-      projected.x=Math.max(-.76,Math.min(.76,projected.x));projected.y=Math.max(-.74,Math.min(.74,projected.y));
-      if(commState.mode==='animation')projected.z=camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(3).add(camera.position).project(camera).z;
-      g.position.copy(projected.unproject(camera).applyMatrix4(world.matrixWorld.clone().invert()));
-      g.quaternion.copy(world.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(camera.quaternion));
-      const direction=target.clone().sub(g.position);leader.position.copy(g.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+    if(commState.partId&&!shown.includes(commState.partId))shown.push(commState.partId);
+    const entries=[],inverse=world.matrixWorld.clone().invert();
+    for(const [id,{g,leader}] of commLabelNodes){
+      const visible=shown.includes(id),objects=visible?commParts[id].filter(isActuallyVisible):[];g.visible=leader.visible=objects.length>0;if(!objects.length)continue;
+      const heads=objects.filter(o=>o.userData.commFixingHead||o.userData.mountingScrewHead),candidates=heads.length?heads:objects;
+      const representative=candidates.reduce((best,o)=>o.getWorldPosition(new THREE.Vector3()).distanceTo(camera.position)<best.getWorldPosition(new THREE.Vector3()).distanceTo(camera.position)?o:best);
+      const bounds=new THREE.Box3().setFromObject(representative),target=(id==='plate'?new THREE.Vector3(bounds.max.x-.06,bounds.max.y-.06,bounds.max.z):bounds.getCenter(new THREE.Vector3())).applyMatrix4(inverse);
+      if(id==='rail')target.copy(commRails[0].localToWorld(new THREE.Vector3(-.66,.1525,.077)).applyMatrix4(inverse));
+      entries.push({g,leader,target,preferredY:!explosive&&step===5?.70:undefined,selected:commState.partId===id});
     }
+    layoutInstallationAnnotations(entries);
     const activeClip=commClipRecords.find(record=>record.step===step);
-    const activeWire=commState.mode==='animation'?(step===9?{id:'device-clips',endpoints:commClipRecords.map(record=>record.root.getWorldPosition(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert()))}:activeClip?{id:'clip-contacts',endpoints:[activeClip.hook,activeClip.spring].map(o=>{const b=new THREE.Box3().setFromObject(o);return b.getCenter(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert());})}:commWireSets.find(set=>set.step===step)):null;
-    commEndpointRings.forEach((ring,i)=>{ring.visible=!!activeWire&&i<activeWire.endpoints.length;if(ring.visible){ring.position.copy(activeWire.endpoints[i]);ring.position.z+=.025;const fine=activeWire.id.startsWith('rs485-')&&i>0;ring.scale.setScalar(fine?.36:activeWire.id.includes('clip')?.58:1);ring.material.color.setHex(fine?[0xff8a4a,0xe8564d,0xffffff,0x479ffc][i]:0xff8a4a);}});
+    const activeWire=commState.mode==='animation'?(step===5?{id:'fuse-mounts',endpoints:commParts['fuse-fasteners'].filter(o=>o.userData.commFixingHead||o.userData.commRearNut).map(o=>o.getWorldPosition(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert()))}:step===9?{id:'device-clips',endpoints:commClipRecords.map(record=>record.root.getWorldPosition(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert()))}:activeClip?{id:'clip-contacts',endpoints:[activeClip.hook,activeClip.spring].map(o=>{const b=new THREE.Box3().setFromObject(o);return b.getCenter(new THREE.Vector3()).applyMatrix4(world.matrixWorld.clone().invert());})}:commWireSets.find(set=>set.step===step)):null;
+    commEndpointRings.forEach((ring,i)=>{ring.visible=!!activeWire&&i<activeWire.endpoints.length;if(ring.visible){ring.position.copy(activeWire.endpoints[i]);ring.position.z+=.025;const fine=activeWire.id.startsWith('rs485-')&&i>0;ring.scale.setScalar(fine?.36:activeWire.id==='fuse-mounts'?.57:activeWire.id.includes('clip')?.58:1);ring.material.color.setHex(fine?[0xff8a4a,0xe8564d,0xffffff,0x479ffc][i]:0xff8a4a);}});
     commFocusBox.visible=!!commState.partId&&commState.partId!=='wiring';
     if(commFocusBox.visible){const bounds=commPartBounds(commState.partId);commFocusBox.visible=!bounds.isEmpty();if(commFocusBox.visible)commFocusBox.box.copy(bounds).applyMatrix4(world.matrixWorld.clone().invert()).expandByScalar(.035);}
   }
@@ -1400,6 +1441,8 @@ try{
     if(explosive){
       const spread=mode==='exploded'?commState.spread:1;
       for(const id of commPartIds){for(const object of commParts[id]){object.visible=id!=='wiring';if(id==='wiring'||id==='end-stops'||id==='router-fasteners')continue;object.position.add(new THREE.Vector3(...commExplode[id]).multiplyScalar(spread));}}
+      if(commState.partId==='end-stops')ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.15,true);
+      if(commState.partId==='router-fasteners')ghostCommObjects([usr],.15,true);
     }else{
       const tabletop=step>=2&&step<=10?.80:step===11?.80*(1-commProgress(p,0,.66)):0;
       for(const id of commPartIds){
@@ -1419,7 +1462,7 @@ try{
           if(id==='end-stops'||id==='spacers')t=commProgress(p,index/count,Math.min(1,(index+1.5)/count));
           const clip=commClipRecords.find(record=>record.device===object);
           if(clip)poseDeviceClip(clip,p);
-          else if(object.userData.commRearNut)object.position.z-=.65*(1-t);
+          else if(object.userData.commRearNut||object.userData.commRearWasher)object.position.z-=.65*(1-t);
           else object.position.z+=(1-t)*(site?1.05:.88);
         }
       }
@@ -1432,6 +1475,14 @@ try{
         activeClip.device.traverse(mesh=>{if(mesh.geometry?.type==='PlaneGeometry'&&mesh.material?.map)mesh.visible=false;});
         [cm5,netSwitch,negativeDistributor,usr,cerbo,fuse].filter(device=>device!==activeClip.device).forEach(device=>device.visible=false);
       }
+      if(step===5){
+        // Installation detail only: expose both fixing heads and rear hardware.
+        // Electrical output studs remain in the ghosted body, visually distinct.
+        ghostCommObjects([fuse],.13);ghostCommObjects([commBack],.10);
+        commParts['fuse-fasteners'].forEach(object=>object.traverse(mesh=>{const original=commMaterialOrigins.get(mesh);if(original)mesh.material=original;}));
+        fuse.traverse(mesh=>{if(mesh.geometry?.type==='PlaneGeometry'&&mesh.material?.map)mesh.visible=false;});
+        [cm5,netSwitch,negativeDistributor,usr,cerbo].forEach(device=>device.visible=false);
+      }
       if(step===9){ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.18,true);ghostCommObjects([commBack],.12);}
 
       if(step===10||step===11&&p<.70){ghostCommObjects([commBack],.20);ghostCommObjects([cm5,netSwitch,negativeDistributor,usr,cerbo,fuse],.28);}
@@ -1440,7 +1491,7 @@ try{
   }
   function communicationInfo(){
     if(!commState.available)return;
-    if(commState.partId)setInfo(['COMMUNICATION ASSEMBLY',commPartCodes[commState.partId],interfaceLanguage==='en'?'Read the matching part and installation step in the right panel.':'右侧显示该配件的规格、安装顺序和检查点。']);
+    if(commState.partId)setInfo(['COMMUNICATION ASSEMBLY',commPartCodes[commState.partId]+' · '+commShortNames[commState.partId][interfaceLanguage==='en'?1:0],interfaceLanguage==='en'?'Read the matching part and installation step in the right panel.':'右侧显示该配件的规格、安装顺序和检查点。']);
   }
   const communicationGuide={
     selectBoard(id){if(id!=='comm-backplate')return false;if(commState.available){emitCommunication();return true;}commEntry={position:camera.position.clone(),target:controls.target.clone()};commVisibility=new Map();scene.traverse(o=>commVisibility.set(o,o.visible));Object.assign(commState,{available:true,mode:'normal',step:0,stepProgress:0,playing:false,partId:null});commLastTime=Date.now();selectedDevice=plateMeta.userData;parent.postMessage({...plateMeta.userData,type:'aiko-device',version:'new'},location.origin);applyCommunicationPose();emitCommunication();return true;},
@@ -1450,9 +1501,9 @@ try{
     setProgress(value){const n=Number(value);if(!Number.isFinite(n))return;if(commState.mode!=='animation')this.setMode('animation');commState.stepProgress=commClamp(n);commState.playing=false;commCameraAutomatic=true;applyCommunicationPose();commCameraAutomatic=false;emitCommunication();},
     replayStep(){if(commState.mode!=='animation')this.setMode('animation');commState.stepProgress=0;commState.playing=true;commReplayOnly=true;commCameraAutomatic=true;commLastTime=Date.now();focusCommunication();applyCommunicationPose();emitCommunication();},
     playPause(){if(commState.mode!=='animation')this.setMode('animation');if(commState.stepProgress>=1){if(commReplayOnly){commState.playing=false;commReplayOnly=false;emitCommunication();return;}if(commState.step===commState.stepCount-1)commState.step=0;commState.stepProgress=0;}commState.playing=!commState.playing;commReplayOnly=false;commCameraAutomatic=commState.playing;commLastTime=Date.now();emitCommunication();},
-    selectPart(id){if(!commPartIds.includes(id))return;commState.partId=id;updateCommunicationLabels();communicationInfo();emitCommunication();},
+    selectPart(id){if(!commPartIds.includes(id))return;commState.partId=id;applyCommunicationPose();communicationInfo();emitCommunication();},
     exit(){commState.playing=false;commState.available=false;commState.mode='normal';commState.partId=null;commState.stepProgress=0;restoreCommunication();if(commEntry){camera.position.copy(commEntry.position);controls.target.copy(commEntry.target);controls.update();}commEntry=null;commVisibility=null;commCameraAutomatic=false;emitCommunication();},
-    snapshot:snapshotCommunication,refresh(){communicationInfo();if(commState.available)emitCommunication();}
+    snapshot:snapshotCommunication,refresh(){communicationInfo();if(commState.available){updateCommunicationLabels();emitCommunication();}}
   };
   function communicationTick(now){
     if(!commState.available||!commState.playing){commLastTime=now;return;}
@@ -1479,11 +1530,11 @@ try{
   }
   function visibleDeviceHit(){
     const hits=raycaster.intersectObjects(pickables,false).filter(hit=>isActuallyVisible(hit.object));
-    return hits.find(hit=>!hit.object.userData.isCableHit)||hits[0];
+    return hits.find(hit=>hit.object.parent?.userData.annotationCode)||hits.find(hit=>!hit.object.userData.isCableHit)||hits[0];
   }
   function deviceAt(e){
     const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);
-    const hit=visibleDeviceHit();return hit?.object?.userData?.deviceRoot?.userData||null;
+    const hit=visibleDeviceHit(),annotation=hit?.object?.parent?.userData;if(annotation?.annotationCode)return {title:annotation.annotationCode+' · '+annotation.annotationNames[0],titleEn:annotation.annotationCode+' · '+annotation.annotationNames[1]};return hit?.object?.userData?.deviceRoot?.userData||null;
   }
   canvas.addEventListener('pointermove',e=>{
     const d=deviceAt(e);canvas.style.cursor=panMode?'grab':d?'pointer':'';
@@ -1501,7 +1552,7 @@ try{
 
   const resize=()=>{const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()};
   const ro=new ResizeObserver(resize);ro.observe(canvas);resize();
-  let running=true;const animate=()=>{if(!running)return;assemblyTick(Date.now());communicationTick(Date.now());controls.update();commPresentation.update();renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
+  let running=true;const animate=()=>{if(!running)return;assemblyTick(Date.now());communicationTick(Date.now());controls.update();commPresentation.update();if(assemblyState.available&&assemblyState.mode!=='normal')updateAssemblyLabels();if(commState.available&&commState.mode!=='normal')updateCommunicationLabels();renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
   document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false;if(commState.playing){commState.playing=false;emitCommunication();}if(assemblyState.playing){assemblyState.playing=false;emitAssembly();}}else if(!running){running=true;animate()}});
   loading.classList.add('is-done');
 }catch(err){

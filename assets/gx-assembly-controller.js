@@ -14,11 +14,21 @@ export function createGxAssemblyGuide(THREE,context){
  const box=(parent,w,h,d,x,y,z,mat=black)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);parent.add(m);return m;};
  const line=(parent,points,material=orange)=>{const o=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),material);o.renderOrder=30;parent.add(o);return o;};
  const tube=(parent,points,radius=.0018)=>{const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');const m=new THREE.Mesh(new THREE.TubeGeometry(curve,100,radius,8,false),black);parent.add(m);return m;};
- const label=(parent,text,point,width=.16)=>{
-   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d');
-   ctx.fillStyle='rgba(12,18,24,.94)';ctx.fillRect(0,0,1024,128);ctx.fillStyle='#ff5a00';ctx.fillRect(0,0,9,128);ctx.fillStyle='#f4f6f7';ctx.font='500 48px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,65);
+ // Labels are screen-sized callouts; their leaders track the actual moving part.
+ const labelEntries=[];
+ const viewport=()=>({height:window.innerHeight||document.documentElement?.clientHeight||720,width:window.innerWidth||document.documentElement?.clientWidth||Math.round((window.innerHeight||720)*camera.aspect)});
+ const label=(parent,text,anchor,side='auto',partId=null)=>{
+   const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),maxWidth=Math.max(118,Math.min(264,viewport().width*.38)),fontSize=14;
+   ctx.font='600 28px Arial';
+   const words=/\p{Script=Han}/u.test(text)?[...text]:text.split(' '),join=/\p{Script=Han}/u.test(text)?'':' ',lines=[];let row='';
+   for(const word of words){const next=row?row+join+word:word;if(row&&ctx.measureText(next).width>(maxWidth-24)*2){lines.push(row);row=word;}else row=next;}if(row)lines.push(row);
+   const pixelWidth=Math.min(maxWidth,Math.max(118,...lines.map(t=>ctx.measureText(t).width/2+24))),pixelHeight=lines.length*19+12;
+   canvas.width=Math.ceil(pixelWidth*2);canvas.height=pixelHeight*2;
+   ctx.fillStyle='rgba(247,249,250,.98)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#ff5a00';ctx.fillRect(0,0,6,canvas.height);ctx.fillStyle='#19232c';ctx.font='600 '+fontSize*2+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';lines.forEach((t,i)=>ctx.fillText(t,20,24+i*38));
    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,depthWrite:false}));sprite.scale.set(width,width/8,1);sprite.position.copy(point);sprite.renderOrder=40;parent.add(sprite);return sprite;
+   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,depthWrite:false}));sprite.name=text;sprite.userData.assemblyLabel={partId,text,pixelWidth,pixelHeight};sprite.renderOrder=42;parent.add(sprite);
+   const leader=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(0,0,0),V(0,0,0)]),new THREE.LineBasicMaterial({color:0x64717c,transparent:true,opacity:.78,depthTest:false,depthWrite:false}));leader.name='Leader · '+text;leader.renderOrder=41;parent.add(leader);
+   labelEntries.push({sprite,leader,anchor:typeof anchor==='function'?anchor:()=>anchor.clone(),side,pixelWidth,pixelHeight,partId});return sprite;
  };
  const labels=new THREE.Group();layer.add(labels);
  const template=new THREE.Group();template.name='Front fixing pattern 1 — reference only';layer.add(template);
@@ -81,30 +91,78 @@ export function createGxAssemblyGuide(THREE,context){
    ferriteGx.userData.hinge.rotation.y=0;ferriteHdmi.userData.hinge.rotation.y=0;
    layer.visible=false;gxTouch.cable.visible=false;route.geometry.setDrawRange(0,Infinity);tail.geometry.setDrawRange(0,Infinity);usbTail.geometry.setDrawRange(0,Infinity);
  };
- const clearLabels=()=>{labelSignature='';for(const o of [...labels.children]){labels.remove(o);if(o.material){o.material.map?.dispose();o.material.dispose();}o.geometry?.dispose();}};
+ const clearLabels=()=>{labelSignature='';labelEntries.length=0;for(const o of [...labels.children]){labels.remove(o);if(o.material){o.material.map?.dispose();o.material.dispose();}o.geometry?.dispose();}};
  const localized=(zh,en)=>language==='en'?en:zh;
+ const labelNames={
+   display:['GX Touch 50屏幕','GX Touch 50 display'],frame:['正面固定框','Front mounting frame'],
+   'frame-screws':['固定框螺钉 ×4 · 规格待核','Frame screws ×4 · size TBD'],
+   'display-cable':['原厂屏幕组合线','Factory display lead'],'ferrite-gx':['屏幕侧磁环','Display-side ferrite'],
+   'ferrite-hdmi':['HDMI侧磁环','HDMI-side ferrite'],'hdmi-plug':['HDMI插头 · 显示','HDMI plug · video'],
+   'usb-plug':['USB插头 · 供电','USB plug · power'],cover:['原车可掀装饰画面','Existing liftable cover']
+ };
+ const isShown=object=>{for(let o=object;o;o=o.parent)if(!o.visible)return false;return true;};
+ const partAnchor=id=>{
+   if(id==='display-cable'){
+     if(route.visible)return world.localToWorld(routePoints[3].clone());
+     return new THREE.Box3().setFromObject(screenTail.visible?screenTail:tail).getCenter(V(0,0,0));
+   }
+   if(id==='cover')return world.localToWorld(V(.517,1.57,0));
+   if(id==='frame-screws'){
+     // Use the exposed outer screw head, rather than a screw hidden by the display.
+     const heads=gxTouch.fixings.map(screw=>screw.getWorldPosition(V(0,0,0)));
+     return heads.reduce((outer,point)=>point.clone().project(camera).x>outer.clone().project(camera).x?point:outer);
+   }
+   if(id==='frame')return gxTouch.mount.children[0].getWorldPosition(V(0,0,0));
+   return parts[id][0].getWorldPosition(V(0,0,0));
+ };
+ function layoutLabels(){
+   if(!labelEntries.length||!state.available||state.mode==='normal')return;
+   const {width,height}=viewport(),margin=18,top=60,bottom=height-38,gap=9;
+   camera.updateMatrixWorld(true);labels.updateWorldMatrix(true,false);
+   const groups={left:[],right:[]};
+   labelEntries.forEach(entry=>{
+     const anchor=entry.anchor(),ndc=anchor.clone().project(camera);entry.anchorWorld=anchor;entry.depth=Math.max(-.95,Math.min(.995,ndc.z));
+     entry.sprite.visible=entry.leader.visible=Number.isFinite(ndc.x)&&ndc.z<1&&ndc.z>-1;
+     if(!entry.sprite.visible)return;
+     const side=entry.side==='auto'?(ndc.x<=0?'left':'right'):entry.side;entry.sideNow=side;entry.anchorY=(1-ndc.y)*height/2;
+     entry.y=Math.max(top+entry.pixelHeight/2,Math.min(bottom-entry.pixelHeight/2,entry.anchorY));groups[side].push(entry);
+   });
+   for(const entries of Object.values(groups)){
+     entries.sort((a,b)=>a.anchorY-b.anchorY);let previous=top;
+     entries.forEach(e=>{e.y=Math.max(e.y,previous+e.pixelHeight/2);previous=e.y+e.pixelHeight/2+gap;});
+     const overflow=previous-gap-bottom;if(overflow>0)entries.forEach(e=>e.y-=overflow);
+     if(entries.length&&entries[0].y-entries[0].pixelHeight/2<top){let y=top;entries.forEach(e=>{e.y=y+e.pixelHeight/2;y+=e.pixelHeight+gap;});}
+     for(const e of entries){
+       const left=e.sideNow==='left',x=left?margin+e.pixelWidth/2:width-margin-e.pixelWidth/2;
+       const toWorld=(px,py)=>V(px/width*2-1,1-py/height*2,e.depth).unproject(camera);
+       const center=toWorld(x,e.y),edge=toWorld(x+(left?1:-1)*e.pixelWidth/2,e.y),elbow=toWorld(x+(left?1:-1)*(e.pixelWidth/2+12),e.y);
+       const worldWidth=toWorld(x+e.pixelWidth/2,e.y).distanceTo(toWorld(x-e.pixelWidth/2,e.y)),worldHeight=toWorld(x,e.y+e.pixelHeight/2).distanceTo(toWorld(x,e.y-e.pixelHeight/2));
+       e.sprite.position.copy(labels.worldToLocal(center));e.sprite.scale.set(worldWidth,worldHeight,1);
+       const pts=[e.anchorWorld,elbow,edge].map(point=>labels.worldToLocal(point.clone())),positions=e.leader.geometry.attributes.position;
+       pts.forEach((point,i)=>positions.setXYZ(i,point.x,point.y,point.z));positions.needsUpdate=true;e.leader.geometry.computeBoundingSphere();
+       e.sprite.userData.assemblyLabel.screenBox={x:x-e.pixelWidth/2,y:e.y-e.pixelHeight/2,width:e.pixelWidth,height:e.pixelHeight};
+     }
+   }
+ }
  function buildLabels(){
    if(!state.available||state.mode==='normal'){clearLabels();return;}
-   const signature=[language,state.mode,state.step,state.partId,state.spread].join('|');if(signature===labelSignature)return;clearLabels();labelSignature=signature;
+   const signature=[language,state.mode,state.step,state.partId,state.spread,viewport().width,viewport().height].join('|');
+   if(signature===labelSignature){layoutLabels();return;}clearLabels();labelSignature=signature;
    const p=state.step,exploded=state.mode==='exploded';
-   if(exploded||p===1){
-     label(labels,'G01',V(tc.x-.18,tc.y+.068,tc.z+.085),.065);label(labels,'G02 / G03',V(tc.x-.064,tc.y+.065,tc.z-.040),.105);
-     label(labels,'G05',ferriteGx.position.clone().add(V(-.045,.036,0)),.065);
-   }else if([2,4,10].includes(p)){
-     label(labels,localized('电池仓 · FIND YOUR POWER下方','Battery bay · below FIND YOUR POWER'),V(.43,1.08,0),.54);
-     label(labels,localized('装饰层后方上行','Up behind the decorative layer'),V(.43,1.57,.10),.45);
-     label(labels,localized('电视背后 → 右侧GX','Behind TV → GX on the right'),V(.43,2.19,.24),.45);
-   }else if(p===3){label(labels,localized('① 前固定孔 · 110.2 × 69.2 mm','① Front pattern · 110.2 × 69.2 mm'),V(tc.x-.01,tc.y+.067,tc.z),.24);}
-   else if(p===5){label(labels,localized('G03 · 从正面固定','G03 · Fasten from the front'),V(tc.x-.06,tc.y+.068,tc.z),.21);}
-   else if(p===6){label(labels,localized('G05 · 尽量靠近屏幕','G05 · As close to GX as possible'),V(tc.x-.075,tc.y+.062,tc.z),.22);}
-   else if(p===7){label(labels,localized('屏幕与固定框对齐就位','Align the display with its frame'),V(tc.x-.10,tc.y+.065,tc.z),.23);}
-   if([8,9].includes(p)||exploded){
-     const base=endpointInset.position;
-     label(labels,localized('Cerbo GX MK2 · 接口局部示意','Cerbo GX MK2 · connector detail'),base.clone().add(V(-.04,.08,0)),.26);
-     label(labels,'HDMI',base.clone().add(V(-.04,.04,-.04)),.07);label(labels,'USB',base.clone().add(V(-.04,.04,.041)),.065);
-     label(labels,localized('G06 · 磁环靠近HDMI插头','G06 · Ferrite next to HDMI plug'),base.clone().add(V(-.11,-.035,-.04)),.24);
+   let shown=exploded?ids.slice(0,8):stepParts[p].slice();
+   if(state.partId&&!shown.includes(state.partId))shown.push(state.partId);
+   shown=shown.filter(id=>parts[id].some(isShown));
+   // A code always resolves to one material-list row; no combined G02/G03 tag.
+   shown.forEach(id=>{const index=ids.indexOf(id),text='G'+String(index+1).padStart(2,'0')+' · '+localized(...labelNames[id]);
+     const side=['display','frame','ferrite-gx'].includes(id)?'left':'right';
+     label(labels,text,()=>partAnchor(id),side,id);
+   });
+   if([2,4,10].includes(p)&&!exploded){
+     label(labels,localized('电池仓 · FIND YOUR POWER下方','Battery bay · below FIND YOUR POWER'),()=>world.localToWorld(V(.517,1.08,0)),'left');
+     label(labels,localized('电视后 → 向右接GX','Behind TV → right to GX'),()=>world.localToWorld(V(.517,2.105,.40)),'left');
    }
-   if(state.partId){const objects=parts[state.partId];const bound=new THREE.Box3();objects.forEach(o=>bound.expandByObject(o));const point=bound.getCenter(new THREE.Vector3());point.x-=.025;point.y+=.025;label(labels,'G'+String(ids.indexOf(state.partId)+1).padStart(2,'0'),point,.07);}
+   if(p===3&&!exploded)label(labels,localized('① 四孔距110.2 × 69.2 mm','① Four-hole pitch 110.2 × 69.2 mm'),()=>world.localToWorld(V(tc.x-.005,tc.y,tc.z)),'right');
+   layoutLabels();
  }
  function poseCamera(){
    if(!automaticCamera)return;cancelCameraTween?.();
@@ -165,11 +223,13 @@ export function createGxAssemblyGuide(THREE,context){
    playPause(){if(state.mode!=='animation')this.setMode('animation');if(state.stepProgress===1){if(state.step===state.stepCount-1)state.step=0;state.stepProgress=0;}state.playing=!state.playing;replayOnly=false;automaticCamera=state.playing;lastTime=0;apply();emit();},
    selectPart(id){if(!ids.includes(id))return;state.partId=id;buildLabels();emit();},
    exit(){state.playing=false;state.available=false;state.mode='normal';state.partId=null;state.stepProgress=0;restorePose();clearLabels();if(entry){camera.position.copy(entry.position);camera.quaternion.copy(entry.quaternion);camera.fov=entry.fov;camera.updateProjectionMatrix();controls.target.copy(entry.target);for(const key of ['minDistance','maxDistance','minPolarAngle','maxPolarAngle','enablePan'])controls[key]=entry[key];if(viewName)viewName.textContent=entry.name;if(viewNote)viewNote.textContent=entry.note;controls.update();}entry=null;entryVisibility=null;activeVisibility=null;entryPose=null;automaticCamera=false;window.dispatchEvent(new Event('aiko-gx-view'));emit();},
-   tick(now){if(!state.available||!state.playing){lastTime=now;return;}if(!lastTime){lastTime=now;return;}const dt=Math.min(120,Math.max(0,now-lastTime));lastTime=now;if(state.stepProgress===1){if(replayOnly||state.step===state.stepCount-1){state.playing=false;replayOnly=false;emit();return;}state.step++;state.stepProgress=0;state.partId=null;automaticCamera=true;}state.stepProgress=Math.min(1,state.stepProgress+dt/(state.step===9?7400:state.step===4?6500:5400));apply();if(now-lastEmit>120||state.stepProgress===1){lastEmit=now;emit();}},
+   tick(now){layoutLabels();if(!state.available||!state.playing){lastTime=now;return;}if(!lastTime){lastTime=now;return;}const dt=Math.min(120,Math.max(0,now-lastTime));lastTime=now;if(state.stepProgress===1){if(replayOnly||state.step===state.stepCount-1){state.playing=false;replayOnly=false;emit();return;}state.step++;state.stepProgress=0;state.partId=null;automaticCamera=true;}state.stepProgress=Math.min(1,state.stepProgress+dt/(state.step===9?7400:state.step===4?6500:5400));apply();if(now-lastEmit>120||state.stepProgress===1){lastEmit=now;emit();}},
    snapshot,refresh(){if(state.available){buildLabels();emit();}},
-   geometry:{parts,route,routePoints,screenTail,ferrites:[ferriteGx,ferriteHdmi],endpointInset,ports,cover:wallGraphic,template,layer,stepIds:gxAssemblyStepIds}
+   geometry:{parts,labels,route,routePoints,screenTail,ferrites:[ferriteGx,ferriteHdmi],endpointInset,ports,cover:wallGraphic,template,layer,stepIds:gxAssemblyStepIds}
  };
  controls.addEventListener?.('start',()=>{automaticCamera=false;});
+ controls.addEventListener?.('change',layoutLabels);
+ window.addEventListener('resize',()=>{if(state.available)buildLabels();});
  window.addEventListener('message',event=>{
    if(event.origin!==location.origin)return;
    if(event.data?.type==='aiko-language'){language=event.data.language==='en'?'en':'zh';api.refresh();return;}

@@ -157,5 +157,18 @@
     "scope": "Communications/GX exploded and animation clarity; three constant-current selector labels",
     "appearance": "Neutral light-gray background and camera-relative neutral fill; retain physical black materials; restore normal/exit appearance",
     "railRevisionStatus": "r7: confirmed two150mm rails and individual device clip engagement implemented; r6 visibility and labels retained."
+  },
+  "assemblyAnnotations": {
+    "version": "assembly-20261003-r8",
+    "scope": "Three CC boards, communications plate and GX installation",
+    "codes": "A01/A02/A03/A05/A09, C01–C16, G01–G09 remain stable",
+    "presentation": "Bilingual code plus short material name; verified fastener size when known; screen-aware label placement and leaders to physical parts; fuse mounting fasteners C15 close-up",
+    "partsList": "Companion Excel maps all30 codes and separates fastener details; no public workbook upload in site",
+    "fastenerEvidence": [
+      "Single-vehicleBOM simplified revision2026-09-28",
+      "Shipping list2026-09-29",
+      "Latest user confirmations override old rail/router configurations"
+    ],
+    "limits": "M3x16 versus picturedM3x12 remains unresolved; fuseM4x12 is prepared candidate, not approved fit; M6x20/25 wall fixings and GX screws require actual substrate/stack verification."
   }
 }

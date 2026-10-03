@@ -1,4 +1,4 @@
-import { communicationGuide } from './communication-guide-data.js?v=assembly-20261003-r7';
+import { communicationGuide } from './communication-guide-data.js?v=assembly-20261003-r8';
 import { gxGuide } from './gx-guide-data.js?v=assembly-20261003-r6';
 // Shared installation guide for the three confirmed constant-current board locations.
 // Part quantities are per board, not a new shipping BOM. Channel map follows upgrade-data.js.
