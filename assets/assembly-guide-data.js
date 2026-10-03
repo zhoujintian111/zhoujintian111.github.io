@@ -1,12 +1,12 @@
-// Reviewed installation sample: upper-right constant-current board 1 only.
-// Dimensions and quantities identify the sample; they are not a new shipping BOM.
+// Shared installation guide for the three confirmed constant-current board locations.
+// Part quantities are per board, not a new shipping BOM. Channel map follows upgrade-data.js.
 const bi=(zh,en)=>({zh,en});
-export const assemblyGuideData={
+const sharedAssemblyGuide={
   boardId:'constant-aiko',
   parts:[
     {id:'adapter',index:'A02',name:bi('转换板','Adapter plate'),spec:bi('196 × 150 × 4 mm · 6061-T6','196 × 150 × 4 mm · 6061-T6'),quantity:bi('1 块 / 恒流板','1 per board'),purpose:bi('现场固定到电池仓背板，再承接恒流板整机。','Installed on the battery-bay backboard before the complete module.'),note:bi('右侧两块预计复用原孔，现场核对；左侧新位置打孔，仍统一用转换板。','The two right-hand plates are expected to reuse existing holes; verify on site. Drill at the new left-hand location and retain its adapter plate.')},
     {id:'wall-screws',index:'A05',name:bi('转换板 → 背板螺丝','Adapter-to-backboard screws'),spec:bi('原车螺丝优先；已备 M5×8 可现场选用','Reuse original screws first; prepared M5×8 screws are an on-site option'),quantity:bi('4 处 / 转换板','4 locations per adapter'),purpose:bi('螺丝直接固定进背板，背面没有螺母或固定件。','Screws secure directly into the backboard, with no rear nuts or hardware.'),note:bi('按现场基层、原孔和长度选择原件或新件；图中不指定钻头、螺纹形式及扭矩。垫片按原方案现场核对。','Choose original or new screws to suit the substrate, existing holes and required length. Drill size, thread form and torque are not specified. Confirm washers on site.')},
-    {id:'module',index:'A01',name:bi('预装完整恒流板','Complete preassembled module'),spec:bi('外形 158 × 104 × 58.8 mm','Envelope 158 × 104 × 58.8 mm'),quantity:bi('1 套 / 安装位置','1 per installation location'),purpose:bi('壳体、内部连接、MC4 面板座和内部扎带座均已预装。','Enclosure, internal wiring, MC4 panel sockets and internal cable mounts arrive assembled.'),note:bi('现场不用拆开整机；本样板只分解现场安装件。','The module stays closed on site. This sample separates only site-installed parts.')},
+    {id:'module',index:'A01',name:bi('预装完整恒流板','Complete preassembled module'),spec:bi('外形 158 × 104 × 58.8 mm','Envelope 158 × 104 × 58.8 mm'),quantity:bi('1 套 / 安装位置','1 per installation location'),purpose:bi('壳体、内部连接、MC4 面板座和内部扎带座均已预装。','Enclosure, internal wiring, MC4 panel sockets and internal cable mounts arrive assembled.'),note:bi('现场不用拆开整机；爆炸图只分解现场安装件。','The module stays closed on site. The exploded view separates only site-installed parts.')},
     {id:'module-screws',index:'A03',name:bi('恒流板 → 转换板螺钉','Module-to-adapter screws'),spec:bi('M4×6 · 4 处','M4×6 · 4 locations'),quantity:bi('4 颗 / 恒流板','4 per module'),purpose:bi('穿过安装耳，拧入转换板上的 M4 螺纹孔。','Pass through the mounting ears and engage the adapter’s M4 threaded holes.'),note:bi('146 × 73 mm 孔距；核对螺钉啮合及背面突出量。整机盖板螺丝保持预装。','146 × 73 mm pitch; check thread engagement and rear projection. Enclosure cover screws remain preassembled.')},
     {id:'mc4',index:'A09',name:bi('现场加装 EVO2 线端','EVO2 cable ends fitted on site'),spec:bi('Stäubli MC4-Evo 2 · IN± / OUT±','Stäubli MC4-Evo 2 · IN± / OUT±'),quantity:bi('4 个线端 / 恒流板','4 cable ends per module'),purpose:bi('原车输入、输出线没有 MC4；现场制作线端后与整机面板座插合。','Original input/output wires have no MC4 ends. Terminate the wires on site, then mate them to the module sockets.'),note:bi('按对应料号及 MA273 核对导线、密封件和工具，再剥线、压接、装入壳体、锁紧与检查。具体长度和扭矩按实物对应版本；不混配不同制造商。','Match the part number, cable, seal and tools to MA273, then strip, crimp, insert, tighten and inspect. Use the values for the actual variant; do not mix manufacturers.')}
   ],
@@ -63,3 +63,39 @@ export const assemblyGuideData={
     ],check:bi('厂家上电程序和所有关键接线已确认，逐路功能检查完成且无异常，记录齐全后交付。','Handover follows confirmation of the manufacturer’s power-up procedure and all critical wiring, successful circuit checks and complete records.'),parts:['wall-screws','module-screws','mc4']}
   ]
 };
+
+
+export const assemblyBoards=[
+  {id:'constant-aiko',number:1,channel:'CH0',location:bi('右上','Upper right'),shortLabel:bi('1 · 右上','1 · Upper right')},
+  {id:'constant-ja',number:2,channel:'CH1',location:bi('右下','Lower right'),shortLabel:bi('2 · 右下','2 · Lower right')},
+  {id:'constant-jk',number:3,channel:'CH2',location:bi('左下','Lower left'),shortLabel:bi('3 · 左下','3 · Lower left')}
+];
+
+export function getAssemblyGuide(boardId='constant-aiko'){
+  const board=assemblyBoards.find(item=>item.id===boardId)||assemblyBoards[0];
+  const left=board.id==='constant-jk';
+  const title=bi(`恒流板 ${board.number} · ${board.location.zh}`,`Board ${board.number} · ${board.location.en}`);
+  const mounting=left
+    ?bi('左侧新位置：统一使用转换板，在电池仓背板新打孔。螺丝直接进入背板，无背面螺母。','New left-hand location: retain the adapter and drill new holes in the battery-bay backboard. Screws engage directly, without rear nuts.')
+    :bi('右侧位置：预计复用原MPPT固定孔，现场试对后确认；统一使用转换板。','Right-hand location: the original MPPT holes are expected to align; verify on site. Retain the adapter plate.');
+  const communication=bi(`恒流板 ${board.number} → CM5 原生 RS485 ${board.channel}`,`Board ${board.number} → CM5 native RS485 ${board.channel}`);
+  const parts=sharedAssemblyGuide.parts.map(part=>({...part,...(part.id==='adapter'?{note:mounting}:{})}));
+  const steps=sharedAssemblyGuide.steps.map(step=>({...step,actions:[...step.actions]}));
+  steps[1].actions[0]=bi(`拍下原车第 ${board.number} 路MPPT全景、输入输出端子及原螺丝安装位置，核对它对应的组件和线号。`,`Photograph original MPPT circuit ${board.number}, its input/output terminals and fixing points; confirm the associated PV module and wire labels.`);
+  if(left){
+    steps[3].text=bi('本板移到左下新位置，仍统一使用转换板；需在电池仓背板新打孔。','This board moves to the new lower-left position and still uses an adapter. Drill new holes in the battery-bay backboard.');
+    steps[3].actions[1]=bi('按已确认左下位置试放转换板，核对与上方Orion、右侧恒流板2及线缆的空间，再用实物转换板标记背板新孔；不沿用右侧复孔说明。','Trial-position the adapter at the confirmed lower-left location. Check clearance to the Orion above, board 2 to the right and all cables; mark new backboard holes using the actual adapter. The right-hand hole-reuse instruction does not apply.');
+  }else{
+    steps[3].text=bi('本板位于右侧，预计转换板能对上原MPPT孔位；必须现场试对确认。','This right-hand adapter is expected to align with the original MPPT holes. Confirm by trial fitting on the vehicle.');
+    steps[3].actions[1]=bi(`将恒流板 ${board.number} 的转换板与原MPPT固定孔试对；只有孔位、基层及螺丝咬合均合适才复用。若不能对上，先确认修正方案再施工。`,`Trial-fit board ${board.number}'s adapter against the original MPPT holes. Reuse them only if alignment, substrate and screw engagement are suitable. Resolve any mismatch before installation.`);
+    steps[3].actions[2]=bi('检查旧孔及背板基层、厚度和孔后空间；若现场确认需要补孔，先避开背后的线缆或设备，再按实际基层确定钻孔规格、深度并清除切屑。','Inspect existing holes, substrate, thickness and rear clearance. If additional drilling is confirmed on site, avoid concealed cables or equipment, select the size and depth for the actual substrate and remove swarf.');
+  }
+  steps[5].actions[0]=bi(`核对本机为恒流板 ${board.number}（${board.location.zh}）：右侧IN接光伏，左侧OUT接MG充电侧，上方为RS485接口。`,`Confirm board ${board.number} (${board.location.en.toLowerCase()}): right-hand IN from PV, left-hand OUT to the MG charging side and RS485 at the top.`);
+  steps[7].actions[2]=bi(`将配套RS485线端接入顶部防水接口，另一端接CM5原生${board.channel}：红→R/A（A+），黑→T/B（B−），蓝→GND。防水端针序及屏蔽收口仍须按已确认资料核对，不自行并接蓝线与屏蔽网。`,`Connect the matching RS485 lead to the top waterproof socket and the other end to CM5 native ${board.channel}: red → R/A (A+), black → T/B (B−), blue → GND. Verify the waterproof pinout and shield termination against approved information; do not assume that blue and braid should be bonded.`);
+  steps[7].check=bi(`四个电源接头均对应且锁止；恒流板 ${board.number} 与CM5 ${board.channel} 一致，针序及屏蔽处理有明确依据。`,`All four power connectors are correctly assigned and locked; board ${board.number} matches CM5 ${board.channel}, with an approved pinout and shield termination.`);
+  steps[9].actions[2]=bi(`按已确认调试方案检查恒流板 ${board.number} 的电压/电流、CM5 ${board.channel} 及GX显示，核对实际组件与板号对应。发现异味、异常发热或故障立即停止并安全隔离；拍照、记录线号、读数和遗留问题。`,`Follow the agreed commissioning plan to check board ${board.number}'s voltage/current, CM5 ${board.channel} and GX display, including the actual PV-to-board assignment. Stop and safely isolate on abnormal heat, odour or faults; record photos, wire IDs, readings and outstanding issues.`);
+  return {...sharedAssemblyGuide,boardId:board.id,boardContext:{...board,title,mounting,communication},parts,steps};
+}
+
+// Compatibility export for existing consumers; all UI selections use getAssemblyGuide.
+export const assemblyGuideData=getAssemblyGuide();

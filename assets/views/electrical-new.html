@@ -661,7 +661,7 @@ try{
   // Constant-current enclosure and adapter are rebuilt from YG-L04A-1171-000:
   // overall 158 × 104 × 58.8; body 130 × 100 × 50; I/O Ø16.5, spacing 33;
   // new 146 × 73 mounting pattern on a 196 × 150 × 4 adapter using old 132 × 122 centres.
-  const boardAssemblyParts=new Map(),boardOneWiring=[];
+  const boardAssemblyParts=new Map(),boardWiringMap=new Map();
   function makeConstantBoard(x,y,label,id,channel){
     const g=new THREE.Group();g.position.set(x,y,.03);replacements.add(g);
     const silver=new THREE.MeshPhysicalMaterial({color:0xaeb3b3,roughness:.29,metalness:.82,clearcoat:.13,clearcoatRoughness:.42,normalMap:micro,normalScale:new THREE.Vector2(.035,.035)});
@@ -720,7 +720,7 @@ try{
     };
     g.userData.signal=new THREE.Vector3(0,.828,.35).add(g.position);
     const separate=new Set([...parts.adapter,...parts['wall-screws'],...parts['module-screws']]);
-    parts.module=g.children.filter(o=>!separate.has(o));boardAssemblyParts.set(g,parts);
+    parts.module=g.children.filter(o=>!separate.has(o));boardAssemblyParts.set(g,parts);boardWiringMap.set(g,[]);
     return g;
   }
   // Approved relationships; model spacing is not a fabrication datum.
@@ -816,7 +816,7 @@ try{
     const firstN=i===0?[[returnX,outN.y,z+.08],[returnX,5.23,z+.08],[1.02,5.23,z+.08],[1.02,yN,z+.08]]:[[returnX,outN.y,z+.08],[returnX,yN,z+.08]];
     cable(flowGroups.pv,R,.032,[outP,...firstP,[riseX,yP,z],[riseX,4.46+i*.18,z],[target.plus.x,4.46+i*.18,z],[target.plus.x,target.plus.y-.10,z],target.plus],`恒流板 ${i+1} OUT+ → MG第${i+1}组 +`,{ordered:true,nameEn:`Board ${i+1} OUT+ → MG pair ${i+1} +`});
     cable(flowGroups.pv,K,.032,[outN,...firstN,[riseX-.10,yN,z+.08],[riseX-.10,4.55+i*.18,z+.08],[target.minus.x,4.55+i*.18,z+.08],[target.minus.x,target.minus.y-.10,z+.08],target.minus],`恒流板 ${i+1} OUT− → MG第${i+1}组 −`,{ordered:true,outline:true,nameEn:`Board ${i+1} OUT− → MG pair ${i+1} −`});
-    if(i===0)boardOneWiring.push(...flowGroups.pv.children.slice(wiringStart));
+    boardWiringMap.get(board).push(...flowGroups.pv.children.slice(wiringStart));
   });
 
   // Three gray cable jackets; exposed RGB cores terminate in actual CH0–CH2 contacts.
@@ -846,7 +846,7 @@ try{
       axisCylinder(flowGroups.signal,.019,.042,new THREE.MeshStandardMaterial({color,roughness:.62}),p.x,p.y,p.z+.040,'z');
       axisCylinder(flowGroups.signal,.010,.022,mat.silver,p.x,p.y,p.z+.015,'z');
     });
-    if(i===0)boardOneWiring.push(...flowGroups.signal.children.slice(wiringStart));
+    boardWiringMap.get(board).push(...flowGroups.signal.children.slice(wiringStart));
   });
   const ethLinks=[
     {a:cm5Eth1.clone().add(cm5.position),b:switchPorts[4],name:'CM5 ETH1 → MOXA Port 5',points:[[cm5.position.x+.28,.80,1.22],[netSwitch.position.x+.28,.80,1.18]]},
@@ -911,7 +911,7 @@ try{
     const topP=i===2?7.20:7.80+i*.15,topN=topP+.11,depthP=i===2?.64:.90,depthN=i===2?.54:.78;
     cable(flowGroups.pv,R,.032,[o.p,[o.p.x,o.p.y,depthP],[o.p.x,topP,depthP],[laneP,topP,depthP],[laneP,inP.y,.80],inP],`光伏保护 ${i+1} + → 恒流板 ${i+1} IN+`,{ordered:true,nameEn:`PV protection ${i+1} + → board ${i+1} IN+`});
     cable(flowGroups.pv,K,.032,[o.n,[o.n.x,o.n.y,depthN],[o.n.x,topN,depthN],[laneN,topN,depthN],[laneN,inN.y,.70],inN],`光伏保护 ${i+1} − → 恒流板 ${i+1} IN−`,{ordered:true,outline:true,nameEn:`PV protection ${i+1} − → board ${i+1} IN−`});
-    if(i===0)boardOneWiring.push(...flowGroups.pv.children.slice(wiringStart));
+    boardWiringMap.get(o.board).push(...flowGroups.pv.children.slice(wiringStart));
   });
 
   // Harness ties as true 3D clamps.
@@ -954,26 +954,14 @@ try{
     refreshInterface();
   }
   root.querySelectorAll('.a3-mode').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
-  root.querySelector('[data-action="communication"]').addEventListener('click',()=>{camera.position.set(4.0,2.35,9.0);controls.target.set(5.05,1.55,.2);controls.update();setMode('signal')});
-  root.querySelector('[data-action="cm5-wiring"]').addEventListener('click',()=>{camera.position.set(cm5.position.x,2.06,2.75);controls.target.set(cm5.position.x,2.06,1.04);controls.update();setMode('signal')});
+  root.querySelector('[data-action="communication"]').addEventListener('click',()=>{setMode('signal');camera.position.set(4.0,2.35,9.0);controls.target.set(5.05,1.55,.2);controls.update()});
+  root.querySelector('[data-action="cm5-wiring"]').addEventListener('click',()=>{setMode('signal');camera.position.set(cm5.position.x,2.06,2.75);controls.target.set(cm5.position.x,2.06,1.04);controls.update()});
   window.addEventListener('message',event=>{if(event.origin===location.origin&&event.data?.type==='aiko-focus-communication')root.querySelector('[data-action="communication"]').click()});
   root.querySelector('[data-action="reset"]').addEventListener('click',()=>{setMode('all');camera.position.copy(home.position);controls.target.copy(home.target);controls.update()});
   setMode('all');
 
-  // Installation pilot uses the actual board-1 meshes, never an alternate board.
-  // Moving only site-installed parts leaves the complete enclosure intact.
-  const assemblyParts=boardAssemblyParts.get(cc1);
-  // Smooth shafts show the prepared screw lengths without inventing the
-  // backboard thread form or drilling instructions. No rear hardware is added.
-  [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,y])=>{
-    const shaft=axisCylinder(cc1,.024,.08,mat.silver,x,y,.006);assemblyParts['wall-screws'].push(shaft);
-  });
-  [[-.73,-.365],[-.73,.365],[.73,-.365],[.73,.365]].forEach(([x,y])=>{
-    const shaft=axisCylinder(cc1,.019,.06,mat.silver,x,y,.098);assemblyParts['module-screws'].push(shaft);
-  });
-  assemblyParts.mc4=boardOneWiring.filter(o=>o.userData.connectorType==='mc4-cable');
-  const guideLayer=new THREE.Group();world.add(guideLayer);
-  // External cable-tie mounts are documented in the right panel only.
+  // Reuse the three actual assemblies and their original MPPT references.
+  // Only site-installed pieces move; each completed enclosure remains intact.
   const assemblyIds=['adapter','wall-screws','module','module-screws','mc4'];
   const assemblyNames={
     adapter:['A02 · 转换板','A02 · Adapter plate'],
@@ -982,66 +970,88 @@ try{
     'module-screws':['A03 · M4×6 螺钉','A03 · M4×6 screws'],
     mc4:['A09 · 现场 EVO2 线端','A09 · Field-fitted EVO2 ends']
   };
-  const assemblyOrigins=new Map();
-  for(const id of assemblyIds)for(const object of assemblyParts[id]){
-    assemblyOrigins.set(object,object.position.clone());
-    object.traverse(mesh=>{mesh.userData.assemblyPart=id;if(mesh.isMesh&&!pickables.includes(mesh)){mesh.userData.deviceRoot=cc1;pickables.push(mesh);}});
-  }
+  const assemblyRecords=new Map([cc1,cc2,cc3].map((board,index)=>{
+    const parts=boardAssemblyParts.get(board),wiring=boardWiringMap.get(board);
+    // Smooth shafts convey prepared lengths, not a backboard thread form.
+    [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,y])=>parts['wall-screws'].push(axisCylinder(board,.024,.08,mat.silver,x,y,.006)));
+    [[-.73,-.365],[-.73,.365],[.73,-.365],[.73,.365]].forEach(([x,y])=>parts['module-screws'].push(axisCylinder(board,.019,.06,mat.silver,x,y,.098)));
+    parts.mc4=wiring.filter(o=>o.userData.connectorType==='mc4-cable');
+    const origins=new Map();
+    for(const id of assemblyIds)for(const object of parts[id]){
+      origins.set(object,object.position.clone());
+      object.traverse(mesh=>{
+        mesh.userData.assemblyPart=id;mesh.userData.assemblyBoardId=board.userData.id;
+        if(mesh.isMesh&&!pickables.includes(mesh)){mesh.userData.deviceRoot=board;pickables.push(mesh);}
+      });
+    }
+    return [board.userData.id,{board,number:index+1,original:[mppt1,mppt2,mppt3][index],parts,wiring,origins}];
+  }));
+  let activeAssembly=assemblyRecords.get('constant-aiko');
+  const guideLayer=new THREE.Group();world.add(guideLayer);
+  // External cable-tie mounts are documented in the right panel only.
   const assemblyLabels=new THREE.Group();guideLayer.add(assemblyLabels);assemblyLabels.visible=false;
   const labelAnchors=[[-1.25,.94,.05],[-1.53,-.92,.10],[.15,.88,.67],[.75,-.95,.18],[2.03,.23,.36]];
-  const labels=assemblyIds.map((id,i)=>{const [x,y,z]=labelAnchors[i];const g=new THREE.Group();g.position.set(cc1.position.x+x,cc1.position.y+y,z);assemblyLabels.add(g);textPlate(g,[['A02','A05','A01','A03','A09'][i]],.34,.16,0,0,0,'#ffffff','#ef5b25',340);g.traverse(o=>{o.userData.assemblyPart=id;if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});return g;});
+  const labels=assemblyIds.map((id,i)=>{
+    const g=new THREE.Group();assemblyLabels.add(g);textPlate(g,[['A02','A05','A01','A03','A09'][i]],.34,.16,0,0,0,'#ffffff','#ef5b25',340);
+    g.traverse(o=>{o.userData.assemblyPart=id;if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});return g;
+  });
   const leaderMaterial=new THREE.MeshBasicMaterial({color:0xef875a});
   const assemblyLeaders=assemblyIds.map(()=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,1,5),leaderMaterial);assemblyLabels.add(m);return m;});
   const assemblyHighlight=new THREE.Box3Helper(new THREE.Box3(),0xff5a00);assemblyHighlight.visible=false;world.add(assemblyHighlight);
-  let assemblyContextVisibility=null;
-  const assemblyContextAllowed=new Set();
-  [cc1,mppt1,cabinet,guideLayer,...assemblyParts.mc4].forEach(group=>group.traverse(o=>assemblyContextAllowed.add(o)));
-  function setAssemblyContext(isolate){
-    if(isolate&&!assemblyContextVisibility){
-      assemblyContextVisibility=new Map();scene.traverse(o=>{if(o.isMesh&&!assemblyContextAllowed.has(o)){assemblyContextVisibility.set(o,o.visible);o.visible=false;}});
-    }else if(!isolate&&assemblyContextVisibility){
-      assemblyContextVisibility.forEach((visible,o)=>o.visible=visible);assemblyContextVisibility=null;
-    }
-  }
-  function updateAssemblyHighlight(){
-    assemblyHighlight.visible=assemblyState.available&&cc1.visible&&!!assemblyState.partId&&(assemblyState.partId!=='mc4'||assemblyParts.mc4.some(o=>o.visible));
-    if(!assemblyHighlight.visible)return;
-    const bounds=new THREE.Box3();assemblyParts[assemblyState.partId].forEach(o=>bounds.union(new THREE.Box3().setFromObject(o)));
-    assemblyHighlight.box.copy(bounds).applyMatrix4(world.matrixWorld.clone().invert()).expandByScalar(.035);
-  }
   const mc4Prep=new THREE.Group();guideLayer.add(mc4Prep);mc4Prep.visible=false;
-  const preparationEnds=[];
-  assemblyParts.mc4.forEach((plug,i)=>{
-    const side=plug.position.x>cc1.position.x?1:-1;
-    const g=new THREE.Group();mc4Prep.add(g);g.userData.side=side;
-    const wireMat=i%2===0?mat.red:mat.blackRubber;
-    axisCylinder(g,.032,.38,wireMat,side*.94,0,0,'x');
-    axisCylinder(g,.020,.072,mat.silver,side*.72,0,0,'x');
-    // Contact and cable housing are separated conceptually; no tool dimensions.
-    const contact=axisCylinder(g,.029,.13,mat.brass,side*.53,0,0,'x');
-    const sleeve=axisCylinder(g,.039,.072,mat.silver,side*.60,0,0,'x');
+  const preparationEnds=Array.from({length:4},(_,i)=>{
+    const g=new THREE.Group();mc4Prep.add(g);
+    // The same schematic preparation aid is repositioned for the chosen board.
+    const wire=axisCylinder(g,.032,.38,i%2===0?mat.red:mat.blackRubber,.94,0,0,'x');
+    const bare=axisCylinder(g,.020,.072,mat.silver,.72,0,0,'x');
+    const contact=axisCylinder(g,.029,.13,mat.brass,.53,0,0,'x');
+    const sleeve=axisCylinder(g,.039,.072,mat.silver,.60,0,0,'x');
     g.traverse(o=>{o.userData.assemblyPart='mc4';if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});
-    preparationEnds.push({g,plug,contact,sleeve});
+    return {g,wire,bare,contact,sleeve};
   });
-  mc4Prep.traverse(o=>assemblyContextAllowed.add(o));
-  let assemblyEntry=null,assemblyLastTime=0,assemblyElapsed=0,assemblyPose=null;
+  let assemblyContextVisibility=null,assemblySelectionVisibility=null;
+  let assemblyEntry=null,assemblyLastTime=0,assemblyElapsed=0,assemblyPose=null,assemblyFocusTarget=null;
   const explodedPose={adapter:.50,'wall-screws':1.0,module:1.55,'module-screws':2.35,mc4:1.55,plugGap:.72};
   const assembledPose={adapter:0,'wall-screws':0,module:0,'module-screws':0,mc4:0,plugGap:0};
   const assemblyStepPoses=[
     {...assembledPose}, // 0: isolate power; original MPPT is a static reference.
     {...assembledPose}, // 1: record and label original wires.
-    {...assembledPose}, // 2: follow the written removal procedure; no invented motion.
-    {...explodedPose}, // 3: check mounting holes and prepare the site-installed pieces.
-    {...explodedPose,adapter:0,'wall-screws':0}, // 4: fix the adapter to the backboard.
-    {...assembledPose,plugGap:.80}, // 5: install the complete module, original wire ends still bare.
-    {...assembledPose,plugGap:.80}, // 6: fit EVO2 contacts and housings on site.
-    {...assembledPose}, // 7: mate power and RS485 connections while isolated.
-    {...assembledPose}, // 8: cable management is explained in the right panel only.
+    {...assembledPose}, // 2: written removal procedure; no invented motion.
+    {...explodedPose}, // 3: check holes at the actual new assembly position.
+    {...explodedPose,adapter:0,'wall-screws':0}, // 4: fix the adapter.
+    {...assembledPose,plugGap:.80}, // 5: mount complete module; wire ends bare.
+    {...assembledPose,plugGap:.80}, // 6: fit EVO2 contacts and housings.
+    {...assembledPose}, // 7: mate power and RS485 while isolated.
+    {...assembledPose}, // 8: cable management in the right panel only.
     {...assembledPose} // 9: final checks and conditional restoration.
   ];
   const assemblyState={available:false,boardId:'constant-aiko',mode:'normal',step:0,playing:false,spread:1,partId:null,stepCount:assemblyStepPoses.length};
-  function snapshotAssembly(){return {...assemblyState,language:interfaceLanguage,partIds:assemblyIds.slice(),siteMountCount:0,originalEquipmentVisible:mppt1.visible,newAssemblyVisible:cc1.visible,entryCameraSaved:!!assemblyEntry};}
+  function snapshotAssembly(){return {...assemblyState,boardNumber:activeAssembly.number,originalEquipmentId:activeAssembly.original.userData.id,language:interfaceLanguage,partIds:assemblyIds.slice(),siteMountCount:0,originalEquipmentVisible:isActuallyVisible(activeAssembly.original),newAssemblyVisible:isActuallyVisible(activeAssembly.board),originalPosition:activeAssembly.original.position.toArray(),newPosition:activeAssembly.board.position.toArray(),entryCameraSaved:!!assemblyEntry};}
   function emitAssembly(){parent.postMessage({type:'aiko-assembly-state',...snapshotAssembly()},location.origin);}
+  function setAssemblyContext(isolate){
+    if(isolate&&!assemblyContextVisibility){
+      const allowed=new Set();
+      [activeAssembly.board,activeAssembly.original,cabinet,guideLayer,...activeAssembly.parts.mc4].forEach(group=>group.traverse(o=>allowed.add(o)));
+      assemblyContextVisibility=new Map();scene.traverse(o=>{if(o.isMesh&&!allowed.has(o)){assemblyContextVisibility.set(o,o.visible);o.visible=false;}});
+    }else if(!isolate&&assemblyContextVisibility){
+      assemblyContextVisibility.forEach((visible,o)=>o.visible=visible);assemblyContextVisibility=null;
+    }
+  }
+  function restoreAssembly(){
+    setAssemblyContext(false);
+    activeAssembly.origins.forEach((position,o)=>o.position.copy(position));
+    if(assemblySelectionVisibility)assemblySelectionVisibility.forEach((visible,o)=>o.visible=visible);
+    assemblyLabels.visible=mc4Prep.visible=assemblyHighlight.visible=false;
+    const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=false;
+    scene.updateMatrixWorld(true);
+  }
+  function updateAssemblyHighlight(){
+    const {board,parts}=activeAssembly;
+    assemblyHighlight.visible=assemblyState.available&&board.visible&&!!assemblyState.partId&&(assemblyState.partId!=='mc4'||parts.mc4.some(o=>o.visible));
+    if(!assemblyHighlight.visible)return;
+    const bounds=new THREE.Box3();parts[assemblyState.partId].forEach(o=>bounds.union(new THREE.Box3().setFromObject(o)));
+    assemblyHighlight.box.copy(bounds).applyMatrix4(world.matrixWorld.clone().invert()).expandByScalar(.035);
+  }
   function poseForAssembly(){
     if(assemblyState.mode==='normal')return {...assembledPose};
     if(assemblyState.mode==='animation')return {...assemblyStepPoses[assemblyState.step]};
@@ -1049,77 +1059,78 @@ try{
   }
   function applyAssemblyPose(pose){
     assemblyPose=pose;
+    const {board,original,parts,wiring,origins}=activeAssembly;
     const showGuide=assemblyState.available&&assemblyState.mode!=='normal';
-    setAssemblyContext(showGuide);
-    const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=showGuide;
-    const installation=assemblyState.available&&assemblyState.mode==='animation';
-    const originalReference=installation&&assemblyState.step<3;
-    cc1.visible=!originalReference;mppt1.visible=originalReference||currentMode==='replacement';
+    if(!showGuide){restoreAssembly();updateAssemblyHighlight();return;}
+    setAssemblyContext(true);
+    const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=true;
+    const installation=assemblyState.mode==='animation',originalReference=installation&&assemblyState.step<3;
+    replacements.visible=true;board.visible=!originalReference;original.visible=originalReference;
     const open=['module','mc4','plugGap'].some(key=>pose[key]>.001);
-    boardOneWiring.forEach(o=>o.visible=!open&&!originalReference);
-    for(const id of assemblyIds)for(const object of assemblyParts[id]){
-      object.position.copy(assemblyOrigins.get(object));object.position.z+=pose[id]||0;
+    wiring.forEach(o=>o.visible=!open&&!originalReference);
+    for(const id of assemblyIds)for(const object of parts[id]){
+      object.position.copy(origins.get(object));object.position.z+=pose[id]||0;
       if(id==='mc4'){
-        const side=object.position.x>cc1.position.x?1:-1;object.position.x+=side*pose.plugGap;object.visible=!installation||assemblyState.step>=6;
+        const side=object.position.x>board.position.x?1:-1;object.position.x+=side*pose.plugGap;object.visible=!installation||assemblyState.step>=6;
       }
     }
-    assemblyLabels.visible=showGuide&&!originalReference;
+    assemblyLabels.visible=!originalReference;
     labels.forEach((label,i)=>{
-      const [x,y,z]=labelAnchors[i],id=assemblyIds[i];
-      const frontZ=Math.max(...Object.values(pose))+1.0;
-      label.position.set(cc1.position.x+x,cc1.position.y+y,Math.max(z+(pose[id]||0),frontZ));
+      const [x,y,z]=labelAnchors[i],id=assemblyIds[i],frontZ=Math.max(...Object.values(pose))+1.0;
+      label.position.set(board.position.x+x,board.position.y+y,Math.max(z+(pose[id]||0),frontZ));
       if(id==='mc4')label.position.x+=pose.plugGap*.55;
-      const anchor={adapter:[-.87,.57,.05], 'wall-screws':[-.66,-.61,.08],module:[.05,.48,.64],'module-screws':[.73,-.365,.145],mc4:[1.28,.165,.38]}[id];
-      const target=new THREE.Vector3(cc1.position.x+anchor[0],cc1.position.y+anchor[1],anchor[2]+(pose[id]||0));
-      if(id==='mc4')target.x+=pose.plugGap;
-      const direction=target.clone().sub(label.position),leader=assemblyLeaders[i];label.visible=leader.visible=id!=='mc4'||assemblyParts.mc4.some(o=>o.visible);leader.position.copy(label.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+      const anchor={adapter:[-.87,.57,.05],'wall-screws':[-.66,-.61,.08],module:[.05,.48,.64],'module-screws':[.73,-.365,.145],mc4:[1.28,.165,.38]}[id];
+      const target=new THREE.Vector3(board.position.x+anchor[0],board.position.y+anchor[1],anchor[2]+(pose[id]||0));if(id==='mc4')target.x+=pose.plugGap;
+      const direction=target.clone().sub(label.position),leader=assemblyLeaders[i];label.visible=leader.visible=id!=='mc4'||parts.mc4.some(o=>o.visible);leader.position.copy(label.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
     });
-    // Bare original wire ends appear after module mounting. Step 6 separates
-    // contact/wire/housing conceptually, without unverified process settings.
-    const prep=installation&&(assemblyState.step===5||assemblyState.step===6);
-    mc4Prep.visible=prep;
-    preparationEnds.forEach(({g,plug,contact,sleeve})=>{
-      g.position.copy(plug.position);contact.visible=sleeve.visible=assemblyState.step===6;
+    mc4Prep.visible=installation&&(assemblyState.step===5||assemblyState.step===6);
+    preparationEnds.forEach(({g,contact,sleeve},i)=>{
+      const plug=parts.mc4[i];g.position.copy(plug.position);g.scale.x=origins.get(plug).x>board.position.x?1:-1;contact.visible=sleeve.visible=assemblyState.step===6;
     });
     scene.updateMatrixWorld(true);updateAssemblyHighlight();
   }
   function updateAssemblyInfo(){
     if(!assemblyState.available)return;
     const id=assemblyState.partId;
-    if(id)setInfo(['ASSEMBLY · BOARD 1',assemblyNames[id][interfaceLanguage==='en'?1:0],interfaceLanguage==='en'?'Select the matching part in the right panel for its use and installation notes.':'右侧显示该配件的规格、用途与现场安装说明。']);
+    if(id)setInfo([`ASSEMBLY · BOARD ${activeAssembly.number}`,assemblyNames[id][interfaceLanguage==='en'?1:0],interfaceLanguage==='en'?'Select the matching part in the right panel for its use and installation notes.':'右侧显示该配件的规格、用途与现场安装说明。']);
   }
-  function focusAssembly(){
-    camera.position.set(cc1.position.x+4.45,cc1.position.y+2.15,8.40);
-    controls.target.set(cc1.position.x,cc1.position.y,1.35);controls.update();
+  function focusAssembly(force=false){
+    const old=assemblyState.mode==='animation'&&assemblyState.step<3,target=old?activeAssembly.original:activeAssembly.board;
+    const key=assemblyState.boardId+(old?':old':':new');if(!force&&assemblyFocusTarget===key)return;assemblyFocusTarget=key;
+    camera.position.set(target.position.x+4.45,target.position.y+2.15,8.40);
+    controls.target.set(target.position.x,target.position.y,old?.6:1.35);controls.update();
   }
   const assemblyGuide={
     selectBoard(id){
-      if(id!=='constant-aiko'){this.exit();return false;}
-      if(!assemblyState.available){
-        assemblyEntry={position:camera.position.clone(),target:controls.target.clone()};
-        assemblyState.available=true;assemblyState.mode='normal';assemblyState.step=0;assemblyState.playing=false;assemblyState.partId=null;
-        parent.postMessage({...cc1.userData,type:'aiko-device',version:'new'},location.origin);
-      }
-      selectedDevice=cc1.userData;applyAssemblyPose(poseForAssembly());emitAssembly();return true;
+      const record=assemblyRecords.get(id);if(!record){this.exit();return false;}
+      if(assemblyState.available&&assemblyState.boardId===id){emitAssembly();return true;}
+      if(!assemblyEntry)assemblyEntry={position:camera.position.clone(),target:controls.target.clone()};
+      restoreAssembly();activeAssembly=record;assemblySelectionVisibility=new Map();scene.traverse(o=>assemblySelectionVisibility.set(o,o.visible));
+      Object.assign(assemblyState,{available:true,boardId:id,mode:'normal',step:0,playing:false,partId:null});assemblyElapsed=0;assemblyFocusTarget=null;
+      guideLayer.traverse(o=>{if(o.userData.assemblyPart){o.userData.assemblyBoardId=id;o.userData.deviceRoot=record.board;}});
+      selectedDevice=record.board.userData;parent.postMessage({...record.board.userData,type:'aiko-device',version:'new'},location.origin);
+      applyAssemblyPose(poseForAssembly());emitAssembly();return true;
     },
     setMode(mode){
-      if(!['normal','exploded','animation'].includes(mode))return;
-      if(!assemblyState.available)this.selectBoard('constant-aiko');
+      if(!['normal','exploded','animation'].includes(mode))return;if(!assemblyState.available)this.selectBoard(assemblyState.boardId);
       assemblyState.mode=mode;assemblyState.playing=false;assemblyState.partId=null;assemblyElapsed=0;
-      if(mode!=='normal')focusAssembly();
-      applyAssemblyPose(poseForAssembly());emitAssembly();
+      if(mode!=='normal')focusAssembly(true);applyAssemblyPose(poseForAssembly());emitAssembly();
     },
     setSpread(value){const n=Number(value);if(!Number.isFinite(n))return;assemblyState.spread=Math.max(0,Math.min(1,n));if(assemblyState.mode==='exploded')applyAssemblyPose(poseForAssembly());emitAssembly();},
-    goStep(index){const n=Number(index);if(!Number.isFinite(n))return;if(!assemblyState.available)this.selectBoard('constant-aiko');assemblyState.mode='animation';assemblyState.step=Math.max(0,Math.min(assemblyState.stepCount-1,Math.round(n)));assemblyState.partId=null;assemblyState.playing=false;assemblyElapsed=0;applyAssemblyPose(poseForAssembly());emitAssembly();},
+    goStep(index){
+      const n=Number(index);if(!Number.isFinite(n))return;if(!assemblyState.available)this.selectBoard(assemblyState.boardId);
+      const entering=assemblyState.mode!=='animation';assemblyState.mode='animation';assemblyState.step=Math.max(0,Math.min(assemblyState.stepCount-1,Math.round(n)));assemblyState.partId=null;assemblyState.playing=false;assemblyElapsed=0;
+      focusAssembly(entering);applyAssemblyPose(poseForAssembly());emitAssembly();
+    },
     playPause(){
       if(assemblyState.mode!=='animation')this.setMode('animation');
-      if(assemblyState.step===assemblyState.stepCount-1&&!assemblyState.playing){assemblyState.step=0;assemblyElapsed=0;applyAssemblyPose(poseForAssembly());}
+      if(assemblyState.step===assemblyState.stepCount-1&&!assemblyState.playing){assemblyState.step=0;assemblyElapsed=0;focusAssembly();applyAssemblyPose(poseForAssembly());}
       assemblyState.playing=!assemblyState.playing;assemblyLastTime=Date.now();emitAssembly();
     },
-    selectPart(id){if(!assemblyIds.includes(id))return;if(!assemblyState.available)this.selectBoard('constant-aiko');assemblyState.partId=id;updateAssemblyInfo();updateAssemblyHighlight();emitAssembly();},
+    selectPart(id){if(!assemblyIds.includes(id))return;if(!assemblyState.available)this.selectBoard(assemblyState.boardId);assemblyState.partId=id;updateAssemblyInfo();updateAssemblyHighlight();emitAssembly();},
     exit(){
       assemblyState.playing=false;assemblyState.available=false;assemblyState.mode='normal';assemblyState.partId=null;assemblyElapsed=0;
-      applyAssemblyPose(assembledPose);assemblyLabels.visible=false;mc4Prep.visible=false;
+      restoreAssembly();assemblySelectionVisibility=null;assemblyFocusTarget=null;
       if(assemblyEntry){camera.position.copy(assemblyEntry.position);controls.target.copy(assemblyEntry.target);controls.update();}assemblyEntry=null;emitAssembly();
     },
     snapshot:snapshotAssembly,
@@ -1129,9 +1140,8 @@ try{
   function assemblyTick(now){
     if(!assemblyState.playing){assemblyLastTime=now;return;}
     assemblyElapsed+=Math.min(100,Math.max(0,now-assemblyLastTime));assemblyLastTime=now;
-    // Hold each instruction, then move smoothly to the next stable assembly state.
     const duration=4200,transition=1200;
-    if(assemblyElapsed>=duration){assemblyElapsed=0;if(assemblyState.step<assemblyState.stepCount-1)assemblyState.step++;else assemblyState.playing=false;assemblyState.partId=null;applyAssemblyPose(poseForAssembly());emitAssembly();}
+    if(assemblyElapsed>=duration){assemblyElapsed=0;if(assemblyState.step<assemblyState.stepCount-1)assemblyState.step++;else assemblyState.playing=false;assemblyState.partId=null;focusAssembly();applyAssemblyPose(poseForAssembly());emitAssembly();}
     if(assemblyState.playing&&assemblyState.step<assemblyState.stepCount-1&&assemblyElapsed>duration-transition){
       let t=(assemblyElapsed-duration+transition)/transition;t=t*t*(3-2*t);
       const from=assemblyStepPoses[assemblyState.step],to=assemblyStepPoses[assemblyState.step+1];
@@ -1146,7 +1156,7 @@ try{
     else if(command==='step')assemblyGuide.goStep(value);
     else if(command==='play')assemblyGuide.playPause();
     else if(command==='exit')assemblyGuide.exit();
-    else if(command==='select')assemblyGuide.selectBoard(value||'constant-aiko');
+    else if(command==='select')assemblyGuide.selectBoard(value||assemblyState.boardId);
     else if(command==='part')assemblyGuide.selectPart(value);
   });
   applyAssemblyPose(assembledPose);
@@ -1177,8 +1187,8 @@ try{
     if(panMode||(e.button!=null&&e.button!==0)||Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;
     const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);
     const hit=visibleDeviceHit();if(!hit)return;
-    const partId=hit.object.userData.assemblyPart;if(partId&&assemblyState.available){window.aikoAssemblyGuide.selectPart(partId);return;}
-    const d=hit.object.userData.deviceRoot?.userData;if(d){if(d.id!=='constant-aiko'&&assemblyState.available)window.aikoAssemblyGuide.exit();selectedDevice=d;setInfo(['DEVICE',interfaceLanguage==='en'?d.titleEn:d.title,interfaceLanguage==='en'?d.textEn:d.text]);parent.postMessage({...d,type:'aiko-device',version:'new'},location.origin);if(d.id==='constant-aiko')window.aikoAssemblyGuide.selectBoard(d.id);}
+    const partId=hit.object.userData.assemblyPart,partBoardId=hit.object.userData.assemblyBoardId;if(partId&&assemblyState.available&&partBoardId===assemblyState.boardId){window.aikoAssemblyGuide.selectPart(partId);return;}
+    const d=hit.object.userData.deviceRoot?.userData;if(d){if(!assemblyRecords.has(d.id)&&assemblyState.available)window.aikoAssemblyGuide.exit();selectedDevice=d;setInfo(['DEVICE',interfaceLanguage==='en'?d.titleEn:d.title,interfaceLanguage==='en'?d.textEn:d.text]);parent.postMessage({...d,type:'aiko-device',version:'new'},location.origin);if(assemblyRecords.has(d.id))window.aikoAssemblyGuide.selectBoard(d.id);}
   });
 
   const resize=()=>{const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()};

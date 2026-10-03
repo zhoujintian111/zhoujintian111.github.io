@@ -1,10 +1,11 @@
 import { hardware, deviceMessage } from './assets/upgrade-data.js?v=din150-20261002';
-import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r2';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r3';
+import { assemblyBoards } from './assets/assembly-guide-data.js?v=assembly-20261003-r3';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r2',
+  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r3',
   gxOld: 'assets/views/gx-old.html',
   gxNew: 'assets/views/gx-new.html?v=gx-frontwall-20261001'
 };
@@ -297,7 +298,8 @@ const assemblyInspector=createAssemblyInspector({
     frame?.contentWindow?.postMessage({type:'aiko-assembly-command',command,value},location.origin);
   }
 });
-let assemblyDeepLink=new URLSearchParams(location.search).get('assembly')==='constant-aiko';
+const requestedAssembly=new URLSearchParams(location.search).get('assembly');
+let assemblyDeepLink=assemblyBoards.some(board=>board.id===requestedAssembly)?requestedAssembly:null;
 
 function text(key){return ui[state.lang][key] || ui.zh[key] || key;}
 function labelFor(item){return state.lang==='en' ? (item.labelEn || item.label) : item.label;}
@@ -429,8 +431,9 @@ function loadFrame(src, options={}) {
     if(src===paths.gxNew&&!frame.contentWindow?.aikoGxScene)frame.contentWindow?.addEventListener('aiko-scene-ready',()=>{if(generation===sceneGeneration){if(options.camera)activateCamera(frame,options.camera);frame.contentWindow.postMessage({type:'aiko-language',language:state.lang},location.origin);}}, {once:true});
     try{frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin)}catch(_){}
     if(src===paths.electricalNew && assemblyDeepLink){
-      assemblyDeepLink=false;
-      requestAnimationFrame(()=>frame.contentWindow?.postMessage({type:'aiko-assembly-command',command:'select',value:'constant-aiko'},location.origin));
+      const boardId=assemblyDeepLink;
+      assemblyDeepLink=null;
+      requestAnimationFrame(()=>frame.contentWindow?.postMessage({type:'aiko-assembly-command',command:'select',value:boardId},location.origin));
     }
     setLoading(false);
     if (options.onLoad) options.onLoad(frame,generation);
@@ -513,8 +516,8 @@ function showRecord(key) {
 
 function renderDetail() {
   const r=records[state.record] || records.guide;
-  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || state.deviceMessage?.id==='constant-aiko' && state.record==='__device');
-  assemblyInspector.setEligible(eligible);
+  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || assemblyBoards.some(board=>board.id===state.deviceMessage?.id) && state.record==='__device');
+  assemblyInspector.setEligible(eligible,state.deviceMessage?.id);
   document.querySelector('.detail-tabs').hidden=assemblyInspector.active;
   el.detailBody.hidden=assemblyInspector.active;
   document.querySelectorAll('[data-detail-tab]').forEach(btn=>{

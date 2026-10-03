@@ -41,9 +41,9 @@
     "topology": "One common negative bus return; four device returns"
   },
   "assemblyPilot": {
-    "version": "assembly-20261003-r2",
+    "version": "assembly-20261003-r3",
     "boardId": "constant-aiko",
-    "scope": "Upper-right board 1; on-site installation relationship sample",
+    "scope": "Installation guidance for all three constant-current modules; reusable local normal/exploded/ten-step views",
     "modes": [
       "normal",
       "exploded",
@@ -56,6 +56,29 @@
     "limits": "Backboard drilling/thread details and EVO2 process values require actual substrate/part/cable matching. New-board power-up order still requires manufacturer confirmation before energizing. Digital guidance is not physical fit or commissioning validation.",
     "installationSteps": 10,
     "cableMounts": "No external mount geometry or markers; HC-1 / M3×12 guidance only in right-side installation instructions",
-    "firstStages": "Static original MPPT reference for isolation, wire labelling and removal; no simulated switch or teardown action"
+    "firstStages": "Each board shows its corresponding original MPPT at the original position for isolation, labelling and removal; switches to the new mounting position for installation. No switch operation or removal trajectory is invented.",
+    "boards": [
+      {
+        "id": "constant-aiko",
+        "number": 1,
+        "position": "upper right",
+        "cm5Channel": "CH0",
+        "mounting": "expected reuse of existing holes; field check required"
+      },
+      {
+        "id": "constant-ja",
+        "number": 2,
+        "position": "lower right",
+        "cm5Channel": "CH1",
+        "mounting": "expected reuse of existing holes; field check required"
+      },
+      {
+        "id": "constant-jk",
+        "number": 3,
+        "position": "lower left below Orion",
+        "cm5Channel": "CH2",
+        "mounting": "new backboard holes with adapter; original MPPT3 remains at its original removal-reference position"
+      }
+    ]
   }
 }
