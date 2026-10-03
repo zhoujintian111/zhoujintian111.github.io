@@ -170,5 +170,12 @@
       "Latest user confirmations override old rail/router configurations"
     ],
     "limits": "M3x16 versus picturedM3x12 remains unresolved; fuseM4x12 is prepared candidate, not approved fit; M6x20/25 wall fixings and GX screws require actual substrate/stack verification."
+  },
+  "assemblyReview": {
+    "version": "assembly-20261003-r9",
+    "scope": "Focused post-delivery audit corrections: GX picking/visibility/canvas sizing; communications fastener stack and rear explosion; bilingual fallback; private workbook omissions",
+    "preserved": "Confirmed device layout,45circuits,30indices and actual fastener uncertainty remain",
+    "fastenerIllustration": "C05 uses prepared M4x16;C13/C15 shaft continuity is schematic only and does not determine procurement length",
+    "verification": "Targeted defect reproduction and impacted-state checks; browser WebGL unavailable in review environment"
   }
 }

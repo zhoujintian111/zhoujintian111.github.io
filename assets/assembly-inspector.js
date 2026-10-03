@@ -1,4 +1,4 @@
-import { assemblyTargets, getAssemblyGuide } from './assembly-guide-data.js?v=assembly-20261003-r8';
+import { assemblyTargets, getAssemblyGuide } from './assembly-guide-data.js?v=assembly-20261003-r9';
 
 const copy = {
   zh: { title:'装配查看方式', normal:'常规', exploded:'爆炸图', animation:'装配演示', start:'查看局部装配', intro:'按下方安装说明先断电、拆旧，再安装和接线；切换装配演示可逐步查看。', commIntro:'通讯板及配件均现场安装。按步骤查看底板、两根导轨、设备卡扣和各类线缆连接；每一步均可暂停、回放和拖动查看动作。', spread:'展开程度', parts:'点选配件，查看用途', quantity:'本处数量', purpose:'装在哪里', note:'安装说明', previous:'上一步', next:'下一步', play:'播放', pause:'暂停', restart:'重新播放', replayStep:'重看本步', exit:'返回全景', pilot:'选择安装区域，查看对应的配件、安装步骤和接线说明。',boards:'选择安装区域', step:'步骤', jump:'选择步骤', progress:'本步动作', source:'Stäubli 官方装配说明', sourceNote:'EVO2 需按实际料号、线材和工具匹配参数。', sources:'安装资料', camera:'可旋转、平移及缩放查看；展开间距仅用于讲解。', index:'编号与配套物料清单对应；点选编号可核对规格、数量和安装位置。',instructions:'安装说明',check:'完成检查',view:'画面说明' },

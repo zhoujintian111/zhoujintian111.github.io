@@ -45,7 +45,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       <div class="a3-selection" aria-live="polite">
         <span class="a3-selection-id">NEW V1.0</span>
         <strong>改造后完整装配</strong>
-        <p>三块恒流板独立接入 CM5 原生 RS485；新增 USR-G806w、MOXA 与 Cerbo。安装底板为首件方案；GX Touch 50 位置暂缓。</p>
+        <p>三块恒流板按L型布局独立接入CM5；通讯板使用两根150 mm导轨。GX屏幕位于电视右侧同一正面白墙，中心高1450 mm。</p>
       </div>
       <div class="a3-dimension-panel" hidden>
         <b>安装基准 / mm</b>
@@ -535,12 +535,28 @@ try{
     const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:length,bevelEnabled:false,curveSegments:24}),material);mesh.geometry.translate(0,0,-length/2);mesh.castShadow=true;return mesh;
   }
   function commFixing(parent,x,y,z,scale,id,withRearNut=false){
+    // All rear hardware seats against the actual 4 mm plate, not an assumed
+    // device-local plane. Unconfirmed shaft lengths only illustrate this stack.
+    parent.updateWorldMatrix(true,false);commBack.updateWorldMatrix(true,false);
+    const axisOnPlate=commBack.worldToLocal(parent.localToWorld(new THREE.Vector3(x,y,0)));axisOnPlate.z=-.02;
+    const rearZ=parent.worldToLocal(commBack.localToWorld(axisOnPlate)).z;
+    const washerThickness=.008,nutThickness=.035,headUnderside=z-.035*scale/2;
+    const nutRearZ=rearZ-washerThickness-nutThickness;
+    const shaftLength=id==='rail-fasteners'?.16:headUnderside-(nutRearZ-.012);
+    const addedAt=commParts[id].length;
     captureCommPart(id,parent,()=>{
       const headIndex=parent.children.length;screw(x,y,z,parent,scale);parent.children[headIndex].userData.commFixingHead=true;
-      axisCylinder(parent,.030*scale,.14,mat.silver,x,y,z-.06);
-      const washer=annularPiece(.055*scale,.031*scale,.008,mat.silver);washer.position.set(x,y,z-.018);parent.add(washer);
-      if(withRearNut){const rearWasher=annularPiece(.055*scale,.031*scale,.008,mat.silver);rearWasher.position.set(x,y,-.057);rearWasher.userData.commRearWasher=true;parent.add(rearWasher);const nut=axisCylinder(parent,.050*scale,.035,mat.silver,x,y,-.078,'z',6);nut.userData.commRearNut=true;}
+      const shaft=axisCylinder(parent,.030*scale,shaftLength,mat.silver,x,y,headUnderside-shaftLength/2);
+      shaft.userData.commFixingShaft=true;shaft.userData.lengthBasis=id==='rail-fasteners'?'prepared M4×16; trial-fit required':'illustrative through displayed stack; final length unconfirmed';
+      shaft.userData.illustrativeLength=id!=='rail-fasteners';if(id==='rail-fasteners')shaft.userData.preparedLengthMm=16;
+      const washer=annularPiece(.055*scale,.031*scale,washerThickness,mat.silver);washer.position.set(x,y,headUnderside-washerThickness/2);parent.add(washer);
+      if(withRearNut){
+        const rearWasher=annularPiece(.055*scale,.031*scale,washerThickness,mat.silver);rearWasher.position.set(x,y,rearZ-washerThickness/2);rearWasher.userData.commRearWasher=true;parent.add(rearWasher);
+        const nut=axisCylinder(parent,.050*scale,nutThickness,mat.silver,x,y,rearZ-washerThickness-nutThickness/2,'z',6);nut.userData.commRearNut=true;
+      }
     });
+    // Rear hardware belongs to the plate stack, independent of device travel.
+    commParts[id].slice(addedAt).filter(o=>o.userData.commRearWasher||o.userData.commRearNut).forEach(o=>{communication.attach(o);o.userData.commPlateRearHardware=true;});
   }
   const commBack=box(4.50,2.50,.04,new THREE.MeshPhysicalMaterial({color:0x151515,roughness:.68,metalness:.56}),5.12,1.55,-.18,.03);communication.add(commBack);commParts.plate.push(commBack);
   function port(parent,x,y,z,w=.145,h=.12,kind='RJ45',axis='z'){
@@ -1440,7 +1456,7 @@ try{
     commTitle.visible=mode==='exploded';
     if(explosive){
       const spread=mode==='exploded'?commState.spread:1;
-      for(const id of commPartIds){for(const object of commParts[id]){object.visible=id!=='wiring';if(id==='wiring'||id==='end-stops'||id==='router-fasteners')continue;object.position.add(new THREE.Vector3(...commExplode[id]).multiplyScalar(spread));}}
+      for(const id of commPartIds){for(const object of commParts[id]){object.visible=id!=='wiring';if(id==='wiring'||id==='end-stops'||id==='router-fasteners')continue;object.position.add(new THREE.Vector3(...(object.userData.commPlateRearHardware?[0,0,commExplode.plate[2]-.65]:commExplode[id])).multiplyScalar(spread));}}
       if(commState.partId==='end-stops')ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.15,true);
       if(commState.partId==='router-fasteners')ghostCommObjects([usr],.15,true);
     }else{
@@ -1560,6 +1576,6 @@ try{
 }
 </script>
 
-<script src="../view-language.js"></script>
+<script src="../view-language.js?v=assembly-20261003-r9"></script>
 </body>
 </html>

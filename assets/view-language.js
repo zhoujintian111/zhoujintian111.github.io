@@ -83,6 +83,14 @@
     const wiring=q('[data-action="cm5-wiring"]');if(wiring)wiring.textContent=index?'CM5 wiring close-up':'CM5 接线近景';
     set('.a3-loading b',index?'Building 3D scene':'正在建立三维场景');set('.a3-guide span',index?'Pan button: drag to move · right-drag / two fingers: pan · wheel / pinch: zoom':'点平移后拖动移画面 · 右键拖动/双指平移 · 滚轮/捏合缩放');
     translateElectricalStatic(index);
+    if(page==='electrical-new.html'){
+      document.title=index?'Electrical update · 2026.09':'新电路系统 · 2026.09 更新';
+      if(!window.aikoSceneInterface){
+        set('.a3-selection-id','UPDATE 2026.09');
+        set('.a3-selection strong',index?'L-layout constant-current system':'L型三路恒流系统');
+        set('.a3-selection p',index?'Three L-layout boards connect independently to CM5; the communications panel uses two 150 mm rails. The GX screen is on the same front white wall, right of the TV, with its centre 1450 mm above the finished floor.':'三块恒流板按L型布局独立接入CM5；通讯板使用两根150 mm导轨。GX屏幕位于电视右侧同一正面白墙，中心距完成地板1450 mm。');
+      }
+    }
     window.aikoSceneInterface?.refresh();
 
   }

@@ -2,7 +2,7 @@
 // Cable clearance, ferrite envelope and explanatory connector inset are not drilling data.
 export const gxAssemblyStepIds=Object.freeze(['isolate-cerbo','check-kit','confirm-position-route','prepare-front-mount','route-display-cable','fix-frame','fit-gx-ferrite','seat-display','fit-hdmi-ferrite','connect-display','inspect-restore-cover','power-check']);
 export function createGxAssemblyGuide(THREE,context){
- const {scene,world,camera,controls,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,presentation,cancelCameraTween,prepareInterior}=context;
+ const {scene,world,camera,controls,canvas,stage,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,presentation,cancelCameraTween,prepareInterior}=context;
  const ids=['display','frame','frame-screws','display-cable','ferrite-gx','ferrite-hdmi','hdmi-plug','usb-plug','cover'];
  const stepParts=[[],ids.slice(0,8),['display','display-cable','cover'],['frame','frame-screws','cover'],['display-cable','cover'],['frame','frame-screws'],['display','display-cable','ferrite-gx'],['display','frame'],['ferrite-hdmi','hdmi-plug','display-cable'],['hdmi-plug','usb-plug'],['display-cable','cover'],['display']];
  const V=(x,y,z)=>new THREE.Vector3(x,y,z),clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>{n=clamp(n);return n*n*(3-2*n)},phase=(p,a,b)=>ease((p-a)/(b-a));
@@ -16,7 +16,7 @@ export function createGxAssemblyGuide(THREE,context){
  const tube=(parent,points,radius=.0018)=>{const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');const m=new THREE.Mesh(new THREE.TubeGeometry(curve,100,radius,8,false),black);parent.add(m);return m;};
  // Labels are screen-sized callouts; their leaders track the actual moving part.
  const labelEntries=[];
- const viewport=()=>({height:window.innerHeight||document.documentElement?.clientHeight||720,width:window.innerWidth||document.documentElement?.clientWidth||Math.round((window.innerHeight||720)*camera.aspect)});
+ const viewport=()=>{const rect=canvas?.getBoundingClientRect?.();const height=rect?.height||stage?.clientHeight||720;return {height,width:rect?.width||stage?.clientWidth||Math.round(height*camera.aspect)};};
  const label=(parent,text,anchor,side='auto',partId=null)=>{
    const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),maxWidth=Math.max(118,Math.min(264,viewport().width*.38)),fontSize=14;
    ctx.font='600 28px Arial';
@@ -26,7 +26,7 @@ export function createGxAssemblyGuide(THREE,context){
    canvas.width=Math.ceil(pixelWidth*2);canvas.height=pixelHeight*2;
    ctx.fillStyle='rgba(247,249,250,.98)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#ff5a00';ctx.fillRect(0,0,6,canvas.height);ctx.fillStyle='#19232c';ctx.font='600 '+fontSize*2+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';lines.forEach((t,i)=>ctx.fillText(t,20,24+i*38));
    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,depthWrite:false}));sprite.name=text;sprite.userData.assemblyLabel={partId,text,pixelWidth,pixelHeight};sprite.renderOrder=42;parent.add(sprite);
+   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,depthWrite:false}));sprite.name=text;sprite.userData.assemblyLabel={partId,text,pixelWidth,pixelHeight};if(partId){sprite.userData.assemblyPart=partId;sprite.userData.assemblyBoardId='gx-touch50';}sprite.renderOrder=42;parent.add(sprite);
    const leader=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(0,0,0),V(0,0,0)]),new THREE.LineBasicMaterial({color:0x64717c,transparent:true,opacity:.78,depthTest:false,depthWrite:false}));leader.name='Leader · '+text;leader.renderOrder=41;parent.add(leader);
    labelEntries.push({sprite,leader,anchor:typeof anchor==='function'?anchor:()=>anchor.clone(),side,pixelWidth,pixelHeight,partId});return sprite;
  };
@@ -100,7 +100,7 @@ export function createGxAssemblyGuide(THREE,context){
    'ferrite-hdmi':['HDMI侧磁环','HDMI-side ferrite'],'hdmi-plug':['HDMI插头 · 显示','HDMI plug · video'],
    'usb-plug':['USB插头 · 供电','USB plug · power'],cover:['原车可掀装饰画面','Existing liftable cover']
  };
- const isShown=object=>{for(let o=object;o;o=o.parent)if(!o.visible)return false;return true;};
+ const isShown=object=>{if(object.geometry?.drawRange?.count===0)return false;for(let o=object;o;o=o.parent)if(!o.visible)return false;return true;};
  const partAnchor=id=>{
    if(id==='display-cable'){
      if(route.visible)return world.localToWorld(routePoints[3].clone());
@@ -122,7 +122,7 @@ export function createGxAssemblyGuide(THREE,context){
    const groups={left:[],right:[]};
    labelEntries.forEach(entry=>{
      const anchor=entry.anchor(),ndc=anchor.clone().project(camera);entry.anchorWorld=anchor;entry.depth=Math.max(-.95,Math.min(.995,ndc.z));
-     entry.sprite.visible=entry.leader.visible=Number.isFinite(ndc.x)&&ndc.z<1&&ndc.z>-1;
+     entry.sprite.visible=entry.leader.visible=(!entry.partId||parts[entry.partId].some(isShown))&&Number.isFinite(ndc.x)&&ndc.z<1&&ndc.z>-1;
      if(!entry.sprite.visible)return;
      const side=entry.side==='auto'?(ndc.x<=0?'left':'right'):entry.side;entry.sideNow=side;entry.anchorY=(1-ndc.y)*height/2;
      entry.y=Math.max(top+entry.pixelHeight/2,Math.min(bottom-entry.pixelHeight/2,entry.anchorY));groups[side].push(entry);
@@ -146,7 +146,7 @@ export function createGxAssemblyGuide(THREE,context){
  }
  function buildLabels(){
    if(!state.available||state.mode==='normal'){clearLabels();return;}
-   const signature=[language,state.mode,state.step,state.partId,state.spread,viewport().width,viewport().height].join('|');
+   const signature=[language,state.mode,state.step,state.partId,state.spread,viewport().width,viewport().height,ids.map(id=>parts[id].some(isShown)?1:0).join('')].join('|');
    if(signature===labelSignature){layoutLabels();return;}clearLabels();labelSignature=signature;
    const p=state.step,exploded=state.mode==='exploded';
    let shown=exploded?ids.slice(0,8):stepParts[p].slice();
@@ -157,7 +157,7 @@ export function createGxAssemblyGuide(THREE,context){
      const side=['display','frame','ferrite-gx'].includes(id)?'left':'right';
      label(labels,text,()=>partAnchor(id),side,id);
    });
-   if([2,4,10].includes(p)&&!exploded){
+   if([2,4,10].includes(p)&&!exploded&&isShown(route)){
      label(labels,localized('电池仓 · FIND YOUR POWER下方','Battery bay · below FIND YOUR POWER'),()=>world.localToWorld(V(.517,1.08,0)),'left');
      label(labels,localized('电视后 → 向右接GX','Behind TV → right to GX'),()=>world.localToWorld(V(.517,2.105,.40)),'left');
    }
@@ -172,7 +172,7 @@ export function createGxAssemblyGuide(THREE,context){
    else if(step===8||step===9){target=V(.35,1.11,.29);offset=V(-.35,.14,.12);fov=36;}
    else if(step===6){target=V(tc.x-.074,tc.y-.014,tc.z-.020);offset=V(.25,.105,.095);fov=36;}
    else {target=V(tc.x-.048,tc.y,tc.z);offset=V(-.43,.10,.09);fov=36;}
-   camera.position.copy(target).add(offset);controls.target.copy(target);camera.fov=fov;camera.updateProjectionMatrix();
+   camera.position.copy(target).add(offset);controls.target.copy(target);camera.fov=fov;camera.updateProjectionMatrix();camera.lookAt(controls.target);camera.updateMatrixWorld(true);
  }
  function isolateLocal(){
    const allowed=new Set();[gxTouch.group,layer].forEach(g=>g.traverse(o=>allowed.add(o)));
@@ -222,9 +222,20 @@ export function createGxAssemblyGuide(THREE,context){
    replayStep(){if(state.mode!=='animation')this.setMode('animation');state.stepProgress=0;state.playing=true;replayOnly=true;automaticCamera=true;lastTime=0;apply();emit();},
    playPause(){if(state.mode!=='animation')this.setMode('animation');if(state.stepProgress===1){if(state.step===state.stepCount-1)state.step=0;state.stepProgress=0;}state.playing=!state.playing;replayOnly=false;automaticCamera=state.playing;lastTime=0;apply();emit();},
    selectPart(id){if(!ids.includes(id))return;state.partId=id;buildLabels();emit();},
+   pickPart(raycaster){
+     if(!state.available)return false;
+     layoutLabels();scene.updateMatrixWorld(true);
+     // Labels are drawn above geometry, so their visible sprites receive click priority.
+     const labelHits=raycaster.intersectObjects(labels.children.filter(o=>o.isSprite&&o.userData.assemblyPart&&isShown(o)),false);
+     const physicalHits=labelHits.length?[]:raycaster.intersectObjects([...new Set(Object.values(parts).flat())],true).filter(hit=>hit.object.isMesh&&isShown(hit.object));
+     const hit=labelHits[0]||physicalHits.find(hit=>ids.includes(hit.object.userData.assemblyPart));
+     const id=hit?.object.userData.assemblyPart;
+     if(!ids.includes(id))return false;
+     this.selectPart(id);return true;
+   },
    exit(){state.playing=false;state.available=false;state.mode='normal';state.partId=null;state.stepProgress=0;restorePose();clearLabels();if(entry){camera.position.copy(entry.position);camera.quaternion.copy(entry.quaternion);camera.fov=entry.fov;camera.updateProjectionMatrix();controls.target.copy(entry.target);for(const key of ['minDistance','maxDistance','minPolarAngle','maxPolarAngle','enablePan'])controls[key]=entry[key];if(viewName)viewName.textContent=entry.name;if(viewNote)viewNote.textContent=entry.note;controls.update();}entry=null;entryVisibility=null;activeVisibility=null;entryPose=null;automaticCamera=false;window.dispatchEvent(new Event('aiko-gx-view'));emit();},
    tick(now){layoutLabels();if(!state.available||!state.playing){lastTime=now;return;}if(!lastTime){lastTime=now;return;}const dt=Math.min(120,Math.max(0,now-lastTime));lastTime=now;if(state.stepProgress===1){if(replayOnly||state.step===state.stepCount-1){state.playing=false;replayOnly=false;emit();return;}state.step++;state.stepProgress=0;state.partId=null;automaticCamera=true;}state.stepProgress=Math.min(1,state.stepProgress+dt/(state.step===9?7400:state.step===4?6500:5400));apply();if(now-lastEmit>120||state.stepProgress===1){lastEmit=now;emit();}},
-   snapshot,refresh(){if(state.available){buildLabels();emit();}},
+   snapshot,updateLabels:layoutLabels,refresh(){if(state.available){buildLabels();emit();}},
    geometry:{parts,labels,route,routePoints,screenTail,ferrites:[ferriteGx,ferriteHdmi],endpointInset,ports,cover:wallGraphic,template,layer,stepIds:gxAssemblyStepIds}
  };
  controls.addEventListener?.('start',()=>{automaticCamera=false;});

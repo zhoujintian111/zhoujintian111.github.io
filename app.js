@@ -1,13 +1,13 @@
 import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r7';
-import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r8';
-import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r8';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r9';
+import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r9';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r8',
+  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r9',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/gx-new.html?v=assembly-20261003-r8'
+  gxNew: 'assets/views/gx-new.html?v=assembly-20261003-r9'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
@@ -387,6 +387,8 @@ function renderCatalogContents() {
 
 function sendLanguageToFrames() {
   el.frameStack.querySelectorAll('.view-frame').forEach(frame=>{
+    if(frame.src.includes('electrical-new.html'))frame.title=state.lang==='en'?'Upgraded electrical system':'改装后电路系统';
+    if(frame.src.includes('gx-new.html'))frame.title=state.lang==='en'?'GX screen and vehicle interior':'GX屏幕与车内总览';
     try{frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin)}catch(_){}
   });
 }
@@ -429,7 +431,7 @@ function loadFrame(src, options={}) {
   const frame = document.createElement('iframe');
   frame.className = 'view-frame';
   frame.src = src;
-  frame.title = options.title || text('lockedView');
+  frame.title = src.includes('electrical-new.html') ? (state.lang==='en'?'Upgraded electrical system':'改装后电路系统') : src.includes('gx-new.html') ? (state.lang==='en'?'GX screen and vehicle interior':'GX屏幕与车内总览') : options.title || text('lockedView');
   frame.setAttribute('loading','eager');
   el.frameStack.appendChild(frame);
   frame.addEventListener('load', () => {
