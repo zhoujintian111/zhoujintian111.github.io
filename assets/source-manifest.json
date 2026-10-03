@@ -118,5 +118,11 @@
     "mounting": "Front frame screws, official template method ①, 110.2 × 69.2 mm; no rear wing nuts",
     "ferrites": "Both around HDMI cable; one close to GX, one close to HDMI plug; none on USB tail",
     "limits": "Concealed route is explanatory. Verify backing, fastener type/length/engagement, pilot holes, rear cable exit, cable length and cover clearance on vehicle; no wall groove or measured hidden cable space is asserted. Ferrite size and closure motion are illustrative."
+  },
+  "installationPresentation": {
+    "version": "assembly-20261003-r6",
+    "scope": "Communications/GX exploded and animation clarity; three constant-current selector labels",
+    "appearance": "Neutral light-gray background and camera-relative neutral fill; retain physical black materials; restore normal/exit appearance",
+    "railRevisionStatus": "Two150mm rails requested; device distribution confirmed. Detailed layout not implemented pending end-stop and fixing confirmation."
   }
 }

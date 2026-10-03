@@ -166,6 +166,33 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
   <script type="module">
     import * as THREE from 'three';
     import {OrbitControls} from '../vendor/three/examples/jsm/controls/OrbitControls.js';
+// Installation-only presentation. No device material or frozen scene asset is changed.
+// Identical in both scene entry points so either page remains self-contained/offline.
+function createInstallationPresentation(THREE,{scene,camera,renderer,controls}){
+  const rig=new THREE.Group();rig.name='Installation neutral lighting';rig.visible=false;scene.add(rig);
+  const key=new THREE.DirectionalLight(0xffffff,2.6),fill=new THREE.DirectionalLight(0xffffff,1.2);
+  key.position.set(-.70,.85,.60);fill.position.set(.85,.05,-.10);
+  key.target.position.set(0,0,-1);fill.target.position.set(0,0,-1);
+  rig.add(key,fill,key.target,fill.target,new THREE.HemisphereLight(0xffffff,0x707780,.55));
+  const background=new THREE.Color(0xd6dade);let saved=null;
+  function update(){
+    if(!saved)return;
+    camera.updateMatrixWorld(true);camera.getWorldPosition(rig.position);camera.getWorldQuaternion(rig.quaternion);
+    rig.scale.setScalar(Math.max(camera.position.distanceTo(controls.target),.01));rig.updateMatrixWorld(true);
+  }
+  function restore(){
+    rig.visible=false;
+    if(!saved)return;
+    scene.background=saved.background;scene.fog=saved.fog;renderer.toneMappingExposure=saved.exposure;saved=null;
+  }
+  function setActive(active){
+    if(!active){restore();return;}
+    if(!saved)saved={background:scene.background,fog:scene.fog,exposure:renderer.toneMappingExposure};
+    scene.background=background;scene.fog=null;renderer.toneMappingExposure=.90;rig.visible=true;update();
+  }
+  return {setActive,update,restore};
+}
+
     window.__AIKO_THREE_OFFLINE__={THREE,OrbitControls};
     const root = document.getElementById('aiko-interior-four-cameras-v02');
     const stage = root.querySelector('[data-stage]');
@@ -191,7 +218,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
     const start = async () => {
       const { THREE, OrbitControls } = window.__AIKO_THREE_OFFLINE__;
       const {makeGxTouch,gxTouchSpec}=await import('../gx-touch-model.js?v=assembly-20261003-r5');
-      const {createGxAssemblyGuide}=await import('../gx-assembly-controller.js?v=assembly-20261003-r5');
+      const {createGxAssemblyGuide}=await import('../gx-assembly-controller.js?v=assembly-20261003-r6');
       const gxPhoto=await new THREE.TextureLoader().loadAsync('../images/gx-touch-50-official.png');
       gxPhoto.colorSpace=THREE.SRGBColorSpace;
       gxPhoto.offset.set(49/1925,48/1307);gxPhoto.repeat.set(1804/1925,1210/1307);
@@ -252,6 +279,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       gxEdgeLight.position.set(0.69, 2.105, 1.025);
       gxEdgeLight.visible = false;
       scene.add(gxEdgeLight);
+      const gxPresentation=createInstallationPresentation(THREE,{scene,camera,renderer,controls});
 
       const locked = Object.freeze({
         vehicleLength: 7.200,
@@ -1770,11 +1798,12 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
         }
         window.aikoAssemblyGuide?.tick(now);
         controls.update();
+        gxPresentation.update();
         renderer.render(scene, camera);
         requestAnimationFrame(render);
       };
 
-      const gxGuide=createGxAssemblyGuide(THREE,{scene,world,camera,controls,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,cancelCameraTween:()=>{cameraTween=null;},prepareInterior:()=>{world.visible=true;exteriorWorld.visible=false;gxDetailLight.visible=true;}});
+      const gxGuide=createGxAssemblyGuide(THREE,{scene,world,camera,controls,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,presentation:gxPresentation,cancelCameraTween:()=>{cameraTween=null;},prepareInterior:()=>{world.visible=true;exteriorWorld.visible=false;gxDetailLight.visible=true;}});
       window.aikoAssemblyGuide=gxGuide;
       window.aikoGxScene={scene,camera,world,controls,gxTouch,gxDimensions,moveCamera,cameraViews,installationReferences:{wallGraphic,tvBody,tvScreen,interiorFloor},assembly:gxGuide.geometry};
       loading.hidden = true;

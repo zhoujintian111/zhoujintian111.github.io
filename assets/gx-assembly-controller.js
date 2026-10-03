@@ -2,7 +2,7 @@
 // Cable clearance, ferrite envelope and explanatory connector inset are not drilling data.
 export const gxAssemblyStepIds=Object.freeze(['isolate-cerbo','check-kit','confirm-position-route','prepare-front-mount','route-display-cable','fix-frame','fit-gx-ferrite','seat-display','fit-hdmi-ferrite','connect-display','inspect-restore-cover','power-check']);
 export function createGxAssemblyGuide(THREE,context){
- const {scene,world,camera,controls,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,cancelCameraTween,prepareInterior}=context;
+ const {scene,world,camera,controls,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,presentation,cancelCameraTween,prepareInterior}=context;
  const ids=['display','frame','frame-screws','display-cable','ferrite-gx','ferrite-hdmi','hdmi-plug','usb-plug','cover'];
  const stepParts=[[],ids.slice(0,8),['display','display-cable','cover'],['frame','frame-screws','cover'],['display-cable','cover'],['frame','frame-screws'],['display','display-cable','ferrite-gx'],['display','frame'],['ferrite-hdmi','hdmi-plug','display-cable'],['hdmi-plug','usb-plug'],['display-cable','cover'],['display']];
  const V=(x,y,z)=>new THREE.Vector3(x,y,z),clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>{n=clamp(n);return n*n*(3-2*n)},phase=(p,a,b)=>ease((p-a)/(b-a));
@@ -75,6 +75,7 @@ export function createGxAssemblyGuide(THREE,context){
  const snapshot=()=>({...state,language,stepId:gxAssemblyStepIds[state.step],partIds:ids.slice(),entryCameraSaved:!!entry,routeVisible:route.visible&&layer.visible,ferriteCount:2,fixingCount:gxTouch.fixings.length,siteMountCount:0,screenCenter:gxTouch.group.position.toArray(),frontFixingPattern:1});
  const emit=()=>{if(typeof parent!=='undefined')parent.postMessage({type:'aiko-assembly-state',...snapshot()},location.origin);};
  const restorePose=()=>{
+   presentation?.restore();
    (state.available?initialPose:entryPose||initialPose).forEach((p,o)=>{o.position.copy(p.position);o.quaternion.copy(p.quaternion);o.scale.copy(p.scale);o.visible=p.visible;});
    ghosts.forEach((r,o)=>o.material=r.original);(state.available?activeVisibility:entryVisibility)?.forEach((visible,o)=>o.visible=visible);
    ferriteGx.userData.hinge.rotation.y=0;ferriteHdmi.userData.hinge.rotation.y=0;
@@ -121,6 +122,7 @@ export function createGxAssemblyGuide(THREE,context){
  }
  function apply(){
    restorePose();if(!state.available||state.mode==='normal'){clearLabels();return;}
+   presentation?.setActive(true);
    layer.visible=true;route.visible=true;screenTail.visible=false;template.visible=false;endpointInset.visible=false;ferriteGx.visible=true;ferriteHdmi.visible=false;labels.visible=true;gxDimensions.visible=false;
    const p=state.stepProgress,s=state.step,exploded=state.mode==='exploded',wide=[0,2,4,10,11].includes(s);
    if(!wide||exploded)isolateLocal();else{ghost(wallGraphic,s===10?.18+.82*phase(p,.50,1):.16);ghost(tvBody,.13);ghost(tvScreen,.13);}

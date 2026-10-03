@@ -130,6 +130,33 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
+// Installation-only presentation. No device material or frozen scene asset is changed.
+// Identical in both scene entry points so either page remains self-contained/offline.
+function createInstallationPresentation(THREE,{scene,camera,renderer,controls}){
+  const rig=new THREE.Group();rig.name='Installation neutral lighting';rig.visible=false;scene.add(rig);
+  const key=new THREE.DirectionalLight(0xffffff,2.6),fill=new THREE.DirectionalLight(0xffffff,1.2);
+  key.position.set(-.70,.85,.60);fill.position.set(.85,.05,-.10);
+  key.target.position.set(0,0,-1);fill.target.position.set(0,0,-1);
+  rig.add(key,fill,key.target,fill.target,new THREE.HemisphereLight(0xffffff,0x707780,.55));
+  const background=new THREE.Color(0xd6dade);let saved=null;
+  function update(){
+    if(!saved)return;
+    camera.updateMatrixWorld(true);camera.getWorldPosition(rig.position);camera.getWorldQuaternion(rig.quaternion);
+    rig.scale.setScalar(Math.max(camera.position.distanceTo(controls.target),.01));rig.updateMatrixWorld(true);
+  }
+  function restore(){
+    rig.visible=false;
+    if(!saved)return;
+    scene.background=saved.background;scene.fog=saved.fog;renderer.toneMappingExposure=saved.exposure;saved=null;
+  }
+  function setActive(active){
+    if(!active){restore();return;}
+    if(!saved)saved={background:scene.background,fog:scene.fog,exposure:renderer.toneMappingExposure};
+    scene.background=background;scene.fog=null;renderer.toneMappingExposure=.90;rig.visible=true;update();
+  }
+  return {setActive,update,restore};
+}
+
 const root=document.getElementById('aiko-old-system-routing-fix');
 const canvas=root?.querySelector('.a3-canvas');
 const loading=root?.querySelector('.a3-loading');
@@ -182,6 +209,7 @@ try{
   const rim=new THREE.SpotLight(0x4b7890,18,30,.5,.82,1.45);rim.position.set(8.5,11,-.4);rim.target.position.set(1.2,5.4,.4);scene.add(rim,rim.target);
   const fill=new THREE.RectAreaLight(0x6f8e9f,5.5,5.2,7);fill.position.set(7.6,6.2,8.5);fill.lookAt(.5,5.2,0);scene.add(fill);
   const warm=new THREE.PointLight(0xd5653c,1.2,8,2.1);warm.position.set(-6.4,1.5,4.5);scene.add(warm);
+  const commPresentation=createInstallationPresentation(THREE,{scene,camera,renderer,controls});
 
   function noiseMap(size=192,base=128,spread=12){
     const c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');const d=g.createImageData(size,size);
@@ -1221,6 +1249,7 @@ try{
   const commProgress=(p,start,end)=>commEase((p-start)/(end-start));
   function commRootPart(object){for(let p=object.parent;p&&p!==world;p=p.parent)if(commOrigins.has(p))return false;return true;}
   function restoreCommunication(){
+    commPresentation.restore();
     commOrigins.forEach((base,o)=>{o.position.copy(base.position);o.quaternion.copy(base.quaternion);o.scale.copy(base.scale);o.visible=base.visible;});
     commDrawRanges.forEach((range,o)=>o.geometry.setDrawRange(range.start,range.count));
     commMaterialOrigins.forEach((material,o)=>o.material=material);
@@ -1304,6 +1333,7 @@ try{
   function applyCommunicationPose(){
     restoreCommunication();
     if(!commState.available||commState.mode==='normal'){if(commState.available&&commState.partId)updateCommunicationLabels();return;}
+    commPresentation.setActive(true);
     const allowed=new Set();[communication,commGuideLayer,...commParts.wiring].forEach(o=>o.traverse(child=>allowed.add(child)));
     scene.traverse(o=>{if(o.isMesh&&!allowed.has(o))o.visible=false;});communication.visible=flowGroups.signal.visible=true;commGuideLayer.visible=true;
     const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=true;
@@ -1407,7 +1437,7 @@ try{
 
   const resize=()=>{const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()};
   const ro=new ResizeObserver(resize);ro.observe(canvas);resize();
-  let running=true;const animate=()=>{if(!running)return;assemblyTick(Date.now());communicationTick(Date.now());controls.update();renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
+  let running=true;const animate=()=>{if(!running)return;assemblyTick(Date.now());communicationTick(Date.now());controls.update();commPresentation.update();renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
   document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false;if(commState.playing){commState.playing=false;emitCommunication();}if(assemblyState.playing){assemblyState.playing=false;emitAssembly();}}else if(!running){running=true;animate()}});
   loading.classList.add('is-done');
 }catch(err){

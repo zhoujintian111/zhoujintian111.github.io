@@ -1,5 +1,5 @@
 import { communicationGuide } from './communication-guide-data.js?v=assembly-20261003-r4';
-import { gxGuide } from './gx-guide-data.js?v=assembly-20261003-r5';
+import { gxGuide } from './gx-guide-data.js?v=assembly-20261003-r6';
 // Shared installation guide for the three confirmed constant-current board locations.
 // Part quantities are per board, not a new shipping BOM. Channel map follows upgrade-data.js.
 const bi=(zh,en)=>({zh,en});
@@ -68,9 +68,9 @@ const sharedAssemblyGuide={
 
 
 export const assemblyBoards=[
-  {id:'constant-aiko',number:1,channel:'CH0',location:bi('右上','Upper right'),shortLabel:bi('1 · 右上','1 · Upper right')},
-  {id:'constant-ja',number:2,channel:'CH1',location:bi('右下','Lower right'),shortLabel:bi('2 · 右下','2 · Lower right')},
-  {id:'constant-jk',number:3,channel:'CH2',location:bi('左下','Lower left'),shortLabel:bi('3 · 左下','3 · Lower left')}
+  {id:'constant-aiko',number:1,channel:'CH0',location:bi('右上','Upper right'),shortLabel:bi('1 · 右上恒流板','1 · Upper-right CC board')},
+  {id:'constant-ja',number:2,channel:'CH1',location:bi('右下','Lower right'),shortLabel:bi('2 · 右下恒流板','2 · Lower-right CC board')},
+  {id:'constant-jk',number:3,channel:'CH2',location:bi('左下','Lower left'),shortLabel:bi('3 · 左下恒流板','3 · Lower-left CC board')}
 ];
 
 export const assemblyTargets=[...assemblyBoards,{id:'comm-backplate',shortLabel:bi('通讯集成板','Comms panel')},{id:'gx-touch50',shortLabel:bi('GX屏幕安装','GX screen installation')}];

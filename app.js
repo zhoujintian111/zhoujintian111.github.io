@@ -1,13 +1,13 @@
-import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r5';
-import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r5';
-import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r5';
+import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r6';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r6';
+import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r6';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r4',
+  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r6',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/gx-new.html?v=assembly-20261003-r5'
+  gxNew: 'assets/views/gx-new.html?v=assembly-20261003-r6'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
