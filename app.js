@@ -1,9 +1,10 @@
 import { hardware, deviceMessage } from './assets/upgrade-data.js?v=din150-20261002';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html?v=din150-20261002',
+  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003',
   gxOld: 'assets/views/gx-old.html',
   gxNew: 'assets/views/gx-new.html?v=gx-frontwall-20261001'
 };
@@ -288,12 +289,24 @@ const el = Object.fromEntries(['frameStack','hotspots','coverSheet','outlineLaye
 let sceneGeneration=0;
 const sceneTimers=new Set();
 let currentHotspotItems=[];
+const assemblyInspector=createAssemblyInspector({
+  container:document.getElementById('assemblyInspector'),
+  getLanguage:()=>state.lang,
+  send:(command,value)=>{
+    const frame=el.frameStack.querySelector('.view-frame.is-active');
+    frame?.contentWindow?.postMessage({type:'aiko-assembly-command',command,value},location.origin);
+  }
+});
+let assemblyDeepLink=new URLSearchParams(location.search).get('assembly')==='constant-aiko';
 
 function text(key){return ui[state.lang][key] || ui.zh[key] || key;}
 function labelFor(item){return state.lang==='en' ? (item.labelEn || item.label) : item.label;}
 function viewLabel(view){return state.lang==='en' ? (view[2] || view[1]) : view[1];}
 
 function beginScene() {
+  const oldFrame=el.frameStack.querySelector('.view-frame.is-active');
+  oldFrame?.contentWindow?.postMessage({type:'aiko-assembly-command',command:'exit'},location.origin);
+  assemblyInspector.reset();
   sceneGeneration+=1;
   sceneTimers.forEach(timer=>clearTimeout(timer));
   sceneTimers.clear();
@@ -415,6 +428,10 @@ function loadFrame(src, options={}) {
     if (options.camera) activateCamera(frame, options.camera);
     if(src===paths.gxNew&&!frame.contentWindow?.aikoGxScene)frame.contentWindow?.addEventListener('aiko-scene-ready',()=>{if(generation===sceneGeneration){if(options.camera)activateCamera(frame,options.camera);frame.contentWindow.postMessage({type:'aiko-language',language:state.lang},location.origin);}}, {once:true});
     try{frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin)}catch(_){}
+    if(src===paths.electricalNew && assemblyDeepLink){
+      assemblyDeepLink=false;
+      requestAnimationFrame(()=>frame.contentWindow?.postMessage({type:'aiko-assembly-command',command:'select',value:'constant-aiko'},location.origin));
+    }
     setLoading(false);
     if (options.onLoad) options.onLoad(frame,generation);
   }, {once:true});
@@ -496,6 +513,10 @@ function showRecord(key) {
 
 function renderDetail() {
   const r=records[state.record] || records.guide;
+  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || state.deviceMessage?.id==='constant-aiko' && state.record==='__device');
+  assemblyInspector.setEligible(eligible);
+  document.querySelector('.detail-tabs').hidden=assemblyInspector.active;
+  el.detailBody.hidden=assemblyInspector.active;
   document.querySelectorAll('[data-detail-tab]').forEach(btn=>{
     const active=btn.dataset.detailTab===state.detailTab; btn.classList.toggle('is-active',active); btn.setAttribute('aria-selected',String(active));
   });
@@ -590,7 +611,7 @@ function renderRoute() {
   if(state.route==='guide') return setGuideStep(state.guideStep||'overview');
   if(state.route==='exterior') {setVersionVisible(false);state.camera='rear-left';setViewStrip(externalViews);loadFrame(paths.vehicle,{title:routes.exterior.title,camera:'rear-left'});showRecord('body');setStageCopy('statusExterior','hintExterior');}
   if(state.route==='interior') {setVersionVisible(false);state.camera='rear-forward';setViewStrip(interiorViews);loadFrame(paths.gxNew,{title:routes.interior.title,camera:'rear-forward'});showRecord('interiorModule');setStageCopy('statusInterior','hintInterior');}
-  if(state.route==='electrical') {state.version='old';loadElectrical();}
+  if(state.route==='electrical') {state.version=assemblyDeepLink?'new':'old';loadElectrical();}
   if(state.route==='gx') {state.version='new';state.gxDetail=true;loadGx();}
   if(state.route==='catalog') {setVersionVisible(false);renderCatalog();}
 }
@@ -613,9 +634,15 @@ el.versionSwitch.querySelectorAll('button').forEach(btn=>btn.addEventListener('c
 el.compareButton.addEventListener('click',()=>{state.compare=!state.compare;showOutline();});
 
 window.addEventListener('message',event=>{
-  if(event.origin!==location.origin || event.data?.type!=='aiko-device') return;
+  if(event.origin!==location.origin || !['aiko-device','aiko-assembly-state'].includes(event.data?.type)) return;
   const activeFrame=el.frameStack.querySelector('.view-frame.is-active');
   if(!activeFrame || event.source!==activeFrame.contentWindow) return;
+  if(event.data.type==='aiko-assembly-state'){
+    assemblyInspector.update(event.data);
+    document.querySelector('.detail-tabs').hidden=assemblyInspector.active;
+    el.detailBody.hidden=assemblyInspector.active;
+    return;
+  }
   const message=event.data;
   const deviceRecordMap={'gx-old':'gxOld','gx-new':'gxNew'};
   if(deviceRecordMap[message.id]) {
@@ -631,5 +658,6 @@ window.addEventListener('message',event=>{
   showRecord('__device');
 });
 
+if(assemblyDeepLink)state.route='electrical';
 renderRoute();
 applyLanguage(initialLanguage,{persist:false});

@@ -6,7 +6,7 @@
   <meta name="description" content="AIKO 欧洲展车数字孪生、升级改装导览、设备规格与新旧系统对比。">
   <title>AIKO 展车升级改装系统</title>
   <link rel="icon" type="image/png" href="assets/brand/aiko-logo-dark.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=assembly-20261003">
 </head>
 <body>
   <div class="app-shell">
@@ -94,6 +94,8 @@
           </div>
           <p class="detail-summary" id="detailSummary">电路舱和 GX 是本次改装的两个核心区域。展示面打开后，可分别进入旧版、改装后版本和安装资料。</p>
 
+          <section id="assemblyInspector" class="assembly-inspector" hidden></section>
+
           <div class="detail-tabs" role="tablist" aria-label="资料分类">
             <button type="button" role="tab" data-detail-tab="overview" aria-selected="true" class="is-active" data-i18n="tabOverview">概览</button>
             <button type="button" role="tab" data-detail-tab="specs" aria-selected="false" data-i18n="tabSpecs">规格尺寸</button>
@@ -105,6 +107,6 @@
       </section>
     </main>
   </div>
-  <script type="module" src="app.js?v=din150-20261002"></script>
+  <script type="module" src="app.js?v=assembly-20261003"></script>
 </body>
 </html>
