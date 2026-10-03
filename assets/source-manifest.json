@@ -41,7 +41,7 @@
     "topology": "One common negative bus return; four device returns"
   },
   "assemblyPilot": {
-    "version": "assembly-20261003-r3",
+    "version": "assembly-20261003-r4",
     "boardId": "constant-aiko",
     "scope": "Installation guidance for all three constant-current modules; reusable local normal/exploded/ten-step views",
     "modes": [
@@ -80,5 +80,23 @@
         "mounting": "new backboard holes with adapter; original MPPT3 remains at its original removal-reference position"
       }
     ]
+  },
+  "communicationAssembly": {
+    "version": "assembly-20261003-r4",
+    "boardId": "comm-backplate",
+    "data": "assets/communication-guide-data.js",
+    "scope": "All communication devices and cables arrive loose and are installed on site; detailed local parts, assembly and wiring sequence",
+    "userConfirmation": "2026-10-03 14:47: all devices and all wiring installed on site; six fixing locations, 12 mm spacers, direct backboard mounting without nuts behind the wall",
+    "spacers": {
+      "count": 6,
+      "boreMm": 6.2,
+      "outerDiameterMm": 15,
+      "heightMm": 12,
+      "type": "Plain through bore, not a threaded stand-off",
+      "source": "User supplied product image f21537a0b0317d50ea07ad67a3500f39.jpg"
+    },
+    "railLengthMm": 150,
+    "installationSteps": 26,
+    "limits": "Wall screw length and engagement, device M3 screw length, clip latch geometry, grounding/bonding, waterproof pin order, fuse coordination and commissioning require actual-component/site verification. No unverified electrical bond or energization approval is depicted."
   }
 }

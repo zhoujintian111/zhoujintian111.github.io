@@ -1,11 +1,11 @@
-import { hardware, deviceMessage } from './assets/upgrade-data.js?v=din150-20261002';
-import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r3';
-import { assemblyBoards } from './assets/assembly-guide-data.js?v=assembly-20261003-r3';
+import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r4';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r4';
+import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r4';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r3',
+  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r4',
   gxOld: 'assets/views/gx-old.html',
   gxNew: 'assets/views/gx-new.html?v=gx-frontwall-20261001'
 };
@@ -299,7 +299,7 @@ const assemblyInspector=createAssemblyInspector({
   }
 });
 const requestedAssembly=new URLSearchParams(location.search).get('assembly');
-let assemblyDeepLink=assemblyBoards.some(board=>board.id===requestedAssembly)?requestedAssembly:null;
+let assemblyDeepLink=assemblyTargets.some(board=>board.id===requestedAssembly)?requestedAssembly:null;
 
 function text(key){return ui[state.lang][key] || ui.zh[key] || key;}
 function labelFor(item){return state.lang==='en' ? (item.labelEn || item.label) : item.label;}
@@ -516,8 +516,11 @@ function showRecord(key) {
 
 function renderDetail() {
   const r=records[state.record] || records.guide;
-  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || assemblyBoards.some(board=>board.id===state.deviceMessage?.id) && state.record==='__device');
-  assemblyInspector.setEligible(eligible,state.deviceMessage?.id);
+  const selectedDeviceId=state.deviceMessage?.id;
+  const communicationDevice=['comm-backplate','cm5-native','ethernet-switch','usr-router','cerbo-gx','aux-fuse','negative-distributor'].includes(selectedDeviceId);
+  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || (communicationDevice || assemblyTargets.some(board=>board.id===selectedDeviceId)) && state.record==='__device');
+  const assemblyTarget=state.record==='communication' || state.record==='__device' && communicationDevice?'comm-backplate':selectedDeviceId;
+  assemblyInspector.setEligible(eligible,assemblyTarget);
   document.querySelector('.detail-tabs').hidden=assemblyInspector.active;
   el.detailBody.hidden=assemblyInspector.active;
   document.querySelectorAll('[data-detail-tab]').forEach(btn=>{
