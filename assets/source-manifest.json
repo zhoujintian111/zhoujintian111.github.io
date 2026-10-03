@@ -41,7 +41,7 @@
     "topology": "One common negative bus return; four device returns"
   },
   "assemblyPilot": {
-    "version": "assembly-20261003",
+    "version": "assembly-20261003-r2",
     "boardId": "constant-aiko",
     "scope": "Upper-right board 1; on-site installation relationship sample",
     "modes": [
@@ -53,6 +53,9 @@
     "userConfirmed": "Complete enclosed module supplied; adapter and original-wire EVO2 ends installed on site; screws directly into backboard, no rear nuts; HC-1 mounts use M3×12",
     "placement": "Right-hand existing holes expected to match and checked on site; new left-hand holes use an adapter plate",
     "manufacturerReference": "https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_MA273-en.pdf",
-    "limits": "Illustrative explode distances and external mount positions; backboard thread form and EVO2 process settings require actual substrate, part and cable matching; not a physical fit validation"
+    "limits": "Backboard drilling/thread details and EVO2 process values require actual substrate/part/cable matching. New-board power-up order still requires manufacturer confirmation before energizing. Digital guidance is not physical fit or commissioning validation.",
+    "installationSteps": 10,
+    "cableMounts": "No external mount geometry or markers; HC-1 / M3×12 guidance only in right-side installation instructions",
+    "firstStages": "Static original MPPT reference for isolation, wire labelling and removal; no simulated switch or teardown action"
   }
 }

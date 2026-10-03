@@ -973,30 +973,14 @@ try{
   });
   assemblyParts.mc4=boardOneWiring.filter(o=>o.userData.connectorType==='mc4-cable');
   const guideLayer=new THREE.Group();world.add(guideLayer);
-  const mountMat=new THREE.MeshStandardMaterial({color:0xeeeeea,roughness:.68});
-  const tieExamples=[];
-  [[7.20,7.08,.80],[3.845,5.70,.92]].forEach(([x,y,wireZ])=>{
-    const g=new THREE.Group();g.position.set(x,y,.03);guideLayer.add(g);
-    // 15 × 10 × 7 mm saddle, 3 mm fixing hole, no rear nut.
-    g.add(box(.15,.10,.022,mountMat,0,0,.011,.008));
-    [-1,1].forEach(side=>g.add(box(.032,.10,.048,mountMat,side*.059,0,.046,.008)));
-    axisCylinder(g,.015,.002,mat.blackRubber,0,0,.023);
-    screw(0,0,.028,g,.36);
-    axisCylinder(g,.013,.12,mat.silver,0,0,-.034);
-    // Illustrative long tie loop reaches the schematic routed cable depth.
-    const tiePath=new THREE.CatmullRomCurve3([new THREE.Vector3(-.040,0,.04),new THREE.Vector3(-.049,0,wireZ-.03),new THREE.Vector3(0,0,wireZ+.005),new THREE.Vector3(.049,0,wireZ-.03),new THREE.Vector3(.040,0,.04)]);
-    const strap=new THREE.Mesh(new THREE.TubeGeometry(tiePath,32,.008,5,false),mat.blackRubber);g.add(strap);
-    tieExamples.push(g);
-  });
-  assemblyParts['tie-mount']=tieExamples;
-  const assemblyIds=['adapter','wall-screws','module','module-screws','mc4','tie-mount'];
+  // External cable-tie mounts are documented in the right panel only.
+  const assemblyIds=['adapter','wall-screws','module','module-screws','mc4'];
   const assemblyNames={
     adapter:['A02 · 转换板','A02 · Adapter plate'],
     'wall-screws':['A05 · 转换板固定螺丝','A05 · Adapter fixing screws'],
     module:['A01 · 完整恒流板','A01 · Complete module'],
     'module-screws':['A03 · M4×6 螺钉','A03 · M4×6 screws'],
-    mc4:['A09 · 现场 EVO2 线端','A09 · Field-fitted EVO2 ends'],
-    'tie-mount':['A11 · 外部扎带座','A11 · External cable mounts']
+    mc4:['A09 · 现场 EVO2 线端','A09 · Field-fitted EVO2 ends']
   };
   const assemblyOrigins=new Map();
   for(const id of assemblyIds)for(const object of assemblyParts[id]){
@@ -1004,14 +988,14 @@ try{
     object.traverse(mesh=>{mesh.userData.assemblyPart=id;if(mesh.isMesh&&!pickables.includes(mesh)){mesh.userData.deviceRoot=cc1;pickables.push(mesh);}});
   }
   const assemblyLabels=new THREE.Group();guideLayer.add(assemblyLabels);assemblyLabels.visible=false;
-  const labelAnchors=[[-1.25,.94,.05],[-1.53,-.92,.10],[.15,.88,.67],[.75,-.95,.18],[2.03,.23,.36],[1.98,1.12,.10]];
-  const labels=assemblyIds.map((id,i)=>{const [x,y,z]=labelAnchors[i];const g=new THREE.Group();g.position.set(cc1.position.x+x,cc1.position.y+y,z);assemblyLabels.add(g);textPlate(g,[['A02','A05','A01','A03','A09','A11'][i]],.34,.16,0,0,0,'#ffffff','#ef5b25',340);g.traverse(o=>{o.userData.assemblyPart=id;if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});return g;});
+  const labelAnchors=[[-1.25,.94,.05],[-1.53,-.92,.10],[.15,.88,.67],[.75,-.95,.18],[2.03,.23,.36]];
+  const labels=assemblyIds.map((id,i)=>{const [x,y,z]=labelAnchors[i];const g=new THREE.Group();g.position.set(cc1.position.x+x,cc1.position.y+y,z);assemblyLabels.add(g);textPlate(g,[['A02','A05','A01','A03','A09'][i]],.34,.16,0,0,0,'#ffffff','#ef5b25',340);g.traverse(o=>{o.userData.assemblyPart=id;if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});return g;});
   const leaderMaterial=new THREE.MeshBasicMaterial({color:0xef875a});
   const assemblyLeaders=assemblyIds.map(()=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,1,5),leaderMaterial);assemblyLabels.add(m);return m;});
   const assemblyHighlight=new THREE.Box3Helper(new THREE.Box3(),0xff5a00);assemblyHighlight.visible=false;world.add(assemblyHighlight);
   let assemblyContextVisibility=null;
   const assemblyContextAllowed=new Set();
-  [cc1,cabinet,guideLayer,...assemblyParts.mc4].forEach(group=>group.traverse(o=>assemblyContextAllowed.add(o)));
+  [cc1,mppt1,cabinet,guideLayer,...assemblyParts.mc4].forEach(group=>group.traverse(o=>assemblyContextAllowed.add(o)));
   function setAssemblyContext(isolate){
     if(isolate&&!assemblyContextVisibility){
       assemblyContextVisibility=new Map();scene.traverse(o=>{if(o.isMesh&&!assemblyContextAllowed.has(o)){assemblyContextVisibility.set(o,o.visible);o.visible=false;}});
@@ -1020,7 +1004,7 @@ try{
     }
   }
   function updateAssemblyHighlight(){
-    assemblyHighlight.visible=assemblyState.available&&!!assemblyState.partId;
+    assemblyHighlight.visible=assemblyState.available&&cc1.visible&&!!assemblyState.partId&&(assemblyState.partId!=='mc4'||assemblyParts.mc4.some(o=>o.visible));
     if(!assemblyHighlight.visible)return;
     const bounds=new THREE.Box3();assemblyParts[assemblyState.partId].forEach(o=>bounds.union(new THREE.Box3().setFromObject(o)));
     assemblyHighlight.box.copy(bounds).applyMatrix4(world.matrixWorld.clone().invert()).expandByScalar(.035);
@@ -1040,19 +1024,23 @@ try{
     preparationEnds.push({g,plug,contact,sleeve});
   });
   mc4Prep.traverse(o=>assemblyContextAllowed.add(o));
-  const assemblyState={available:false,boardId:'constant-aiko',mode:'normal',step:0,playing:false,spread:1,partId:null,stepCount:6};
   let assemblyEntry=null,assemblyLastTime=0,assemblyElapsed=0,assemblyPose=null;
-  const explodedPose={adapter:.50,'wall-screws':1.0,module:1.55,'module-screws':2.35,mc4:1.55,'tie-mount':.55,plugGap:.72};
-  const assembledPose={adapter:0,'wall-screws':0,module:0,'module-screws':0,mc4:0,'tie-mount':0,plugGap:0};
+  const explodedPose={adapter:.50,'wall-screws':1.0,module:1.55,'module-screws':2.35,mc4:1.55,plugGap:.72};
+  const assembledPose={adapter:0,'wall-screws':0,module:0,'module-screws':0,mc4:0,plugGap:0};
   const assemblyStepPoses=[
-    {...explodedPose},
-    {...explodedPose,adapter:0,'wall-screws':0},
-    {...assembledPose,plugGap:.80,'tie-mount':.55},
-    {...assembledPose,plugGap:.80,'tie-mount':.55},
-    {...assembledPose,'tie-mount':.55},
-    {...assembledPose}
+    {...assembledPose}, // 0: isolate power; original MPPT is a static reference.
+    {...assembledPose}, // 1: record and label original wires.
+    {...assembledPose}, // 2: follow the written removal procedure; no invented motion.
+    {...explodedPose}, // 3: check mounting holes and prepare the site-installed pieces.
+    {...explodedPose,adapter:0,'wall-screws':0}, // 4: fix the adapter to the backboard.
+    {...assembledPose,plugGap:.80}, // 5: install the complete module, original wire ends still bare.
+    {...assembledPose,plugGap:.80}, // 6: fit EVO2 contacts and housings on site.
+    {...assembledPose}, // 7: mate power and RS485 connections while isolated.
+    {...assembledPose}, // 8: cable management is explained in the right panel only.
+    {...assembledPose} // 9: final checks and conditional restoration.
   ];
-  function snapshotAssembly(){return {...assemblyState,language:interfaceLanguage,partIds:assemblyIds.slice(),siteMountCount:tieExamples.length,entryCameraSaved:!!assemblyEntry};}
+  const assemblyState={available:false,boardId:'constant-aiko',mode:'normal',step:0,playing:false,spread:1,partId:null,stepCount:assemblyStepPoses.length};
+  function snapshotAssembly(){return {...assemblyState,language:interfaceLanguage,partIds:assemblyIds.slice(),siteMountCount:0,originalEquipmentVisible:mppt1.visible,newAssemblyVisible:cc1.visible,entryCameraSaved:!!assemblyEntry};}
   function emitAssembly(){parent.postMessage({type:'aiko-assembly-state',...snapshotAssembly()},location.origin);}
   function poseForAssembly(){
     if(assemblyState.mode==='normal')return {...assembledPose};
@@ -1064,34 +1052,35 @@ try{
     const showGuide=assemblyState.available&&assemblyState.mode!=='normal';
     setAssemblyContext(showGuide);
     const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=showGuide;
+    const installation=assemblyState.available&&assemblyState.mode==='animation';
+    const originalReference=installation&&assemblyState.step<3;
+    cc1.visible=!originalReference;mppt1.visible=originalReference||currentMode==='replacement';
     const open=['module','mc4','plugGap'].some(key=>pose[key]>.001);
-    boardOneWiring.forEach(o=>o.visible=!open);
+    boardOneWiring.forEach(o=>o.visible=!open&&!originalReference);
     for(const id of assemblyIds)for(const object of assemblyParts[id]){
       object.position.copy(assemblyOrigins.get(object));object.position.z+=pose[id]||0;
       if(id==='mc4'){
-        const side=object.position.x>cc1.position.x?1:-1;object.position.x+=side*pose.plugGap;object.visible=true;
+        const side=object.position.x>cc1.position.x?1:-1;object.position.x+=side*pose.plugGap;object.visible=!installation||assemblyState.step>=6;
       }
     }
-    assemblyLabels.visible=showGuide;
+    assemblyLabels.visible=showGuide&&!originalReference;
     labels.forEach((label,i)=>{
       const [x,y,z]=labelAnchors[i],id=assemblyIds[i];
       const frontZ=Math.max(...Object.values(pose))+1.0;
       label.position.set(cc1.position.x+x,cc1.position.y+y,Math.max(z+(pose[id]||0),frontZ));
       if(id==='mc4')label.position.x+=pose.plugGap*.55;
-      const anchor={adapter:[-.87,.57,.05], 'wall-screws':[-.66,-.61,.08],module:[.05,.48,.64],'module-screws':[.73,-.365,.145],mc4:[1.28,.165,.38],'tie-mount':[1.70,.78,.08]}[id];
+      const anchor={adapter:[-.87,.57,.05], 'wall-screws':[-.66,-.61,.08],module:[.05,.48,.64],'module-screws':[.73,-.365,.145],mc4:[1.28,.165,.38]}[id];
       const target=new THREE.Vector3(cc1.position.x+anchor[0],cc1.position.y+anchor[1],anchor[2]+(pose[id]||0));
       if(id==='mc4')target.x+=pose.plugGap;
-      const direction=target.clone().sub(label.position),leader=assemblyLeaders[i];leader.position.copy(label.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+      const direction=target.clone().sub(label.position),leader=assemblyLeaders[i];label.visible=leader.visible=id!=='mc4'||assemblyParts.mc4.some(o=>o.visible);leader.position.copy(label.position).add(target).multiplyScalar(.5);leader.scale.set(1,direction.length(),1);leader.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
     });
-    // Step 0 explicitly shows un-terminated original wires; step 3 shows the
-    // contact/wire/housing relationship, without unverified process settings.
-    const prep=assemblyState.available&&assemblyState.mode==='animation'&&assemblyState.step<=3;
+    // Bare original wire ends appear after module mounting. Step 6 separates
+    // contact/wire/housing conceptually, without unverified process settings.
+    const prep=installation&&(assemblyState.step===5||assemblyState.step===6);
     mc4Prep.visible=prep;
     preparationEnds.forEach(({g,plug,contact,sleeve})=>{
-      g.position.copy(plug.position);contact.visible=sleeve.visible=assemblyState.step===3;
-      if(prep&&assemblyState.step<3)plug.visible=false;
+      g.position.copy(plug.position);contact.visible=sleeve.visible=assemblyState.step===6;
     });
-    tieExamples.forEach(g=>g.visible=assemblyState.available||currentMode==='all'||currentMode==='pv');
     scene.updateMatrixWorld(true);updateAssemblyHighlight();
   }
   function updateAssemblyInfo(){
@@ -1116,15 +1105,15 @@ try{
     setMode(mode){
       if(!['normal','exploded','animation'].includes(mode))return;
       if(!assemblyState.available)this.selectBoard('constant-aiko');
-      assemblyState.mode=mode;assemblyState.playing=false;assemblyElapsed=0;
+      assemblyState.mode=mode;assemblyState.playing=false;assemblyState.partId=null;assemblyElapsed=0;
       if(mode!=='normal')focusAssembly();
       applyAssemblyPose(poseForAssembly());emitAssembly();
     },
     setSpread(value){const n=Number(value);if(!Number.isFinite(n))return;assemblyState.spread=Math.max(0,Math.min(1,n));if(assemblyState.mode==='exploded')applyAssemblyPose(poseForAssembly());emitAssembly();},
-    goStep(index){const n=Number(index);if(!Number.isFinite(n))return;if(!assemblyState.available)this.selectBoard('constant-aiko');assemblyState.mode='animation';assemblyState.step=Math.max(0,Math.min(5,Math.round(n)));assemblyState.playing=false;assemblyElapsed=0;applyAssemblyPose(poseForAssembly());emitAssembly();},
+    goStep(index){const n=Number(index);if(!Number.isFinite(n))return;if(!assemblyState.available)this.selectBoard('constant-aiko');assemblyState.mode='animation';assemblyState.step=Math.max(0,Math.min(assemblyState.stepCount-1,Math.round(n)));assemblyState.partId=null;assemblyState.playing=false;assemblyElapsed=0;applyAssemblyPose(poseForAssembly());emitAssembly();},
     playPause(){
       if(assemblyState.mode!=='animation')this.setMode('animation');
-      if(assemblyState.step===5&&!assemblyState.playing){assemblyState.step=0;assemblyElapsed=0;applyAssemblyPose(poseForAssembly());}
+      if(assemblyState.step===assemblyState.stepCount-1&&!assemblyState.playing){assemblyState.step=0;assemblyElapsed=0;applyAssemblyPose(poseForAssembly());}
       assemblyState.playing=!assemblyState.playing;assemblyLastTime=Date.now();emitAssembly();
     },
     selectPart(id){if(!assemblyIds.includes(id))return;if(!assemblyState.available)this.selectBoard('constant-aiko');assemblyState.partId=id;updateAssemblyInfo();updateAssemblyHighlight();emitAssembly();},
@@ -1134,7 +1123,7 @@ try{
       if(assemblyEntry){camera.position.copy(assemblyEntry.position);controls.target.copy(assemblyEntry.target);controls.update();}assemblyEntry=null;emitAssembly();
     },
     snapshot:snapshotAssembly,
-    refresh(){updateAssemblyInfo();if(!assemblyState.available)tieExamples.forEach(g=>g.visible=currentMode==='all'||currentMode==='pv');if(assemblyState.available)emitAssembly();}
+    refresh(){updateAssemblyInfo();if(assemblyState.available)emitAssembly();}
   };
   window.aikoAssemblyGuide=assemblyGuide;
   function assemblyTick(now){
@@ -1142,8 +1131,8 @@ try{
     assemblyElapsed+=Math.min(100,Math.max(0,now-assemblyLastTime));assemblyLastTime=now;
     // Hold each instruction, then move smoothly to the next stable assembly state.
     const duration=4200,transition=1200;
-    if(assemblyElapsed>=duration){assemblyElapsed=0;if(assemblyState.step<5)assemblyState.step++;else assemblyState.playing=false;applyAssemblyPose(poseForAssembly());emitAssembly();}
-    if(assemblyState.playing&&assemblyState.step<5&&assemblyElapsed>duration-transition){
+    if(assemblyElapsed>=duration){assemblyElapsed=0;if(assemblyState.step<assemblyState.stepCount-1)assemblyState.step++;else assemblyState.playing=false;assemblyState.partId=null;applyAssemblyPose(poseForAssembly());emitAssembly();}
+    if(assemblyState.playing&&assemblyState.step<assemblyState.stepCount-1&&assemblyElapsed>duration-transition){
       let t=(assemblyElapsed-duration+transition)/transition;t=t*t*(3-2*t);
       const from=assemblyStepPoses[assemblyState.step],to=assemblyStepPoses[assemblyState.step+1];
       applyAssemblyPose(Object.fromEntries(Object.keys(from).map(key=>[key,from[key]+(to[key]-from[key])*t])));
