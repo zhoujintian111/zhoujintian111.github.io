@@ -1,4 +1,5 @@
 import { communicationGuide } from './communication-guide-data.js?v=assembly-20261003-r4';
+import { gxGuide } from './gx-guide-data.js?v=assembly-20261003-r5';
 // Shared installation guide for the three confirmed constant-current board locations.
 // Part quantities are per board, not a new shipping BOM. Channel map follows upgrade-data.js.
 const bi=(zh,en)=>({zh,en});
@@ -72,10 +73,11 @@ export const assemblyBoards=[
   {id:'constant-jk',number:3,channel:'CH2',location:bi('左下','Lower left'),shortLabel:bi('3 · 左下','3 · Lower left')}
 ];
 
-export const assemblyTargets=[...assemblyBoards,{id:'comm-backplate',shortLabel:bi('通讯集成板','Comms panel')}];
+export const assemblyTargets=[...assemblyBoards,{id:'comm-backplate',shortLabel:bi('通讯集成板','Comms panel')},{id:'gx-touch50',shortLabel:bi('GX屏幕安装','GX screen installation')}];
 
 export function getAssemblyGuide(boardId='constant-aiko'){
   if(boardId==='comm-backplate')return communicationGuide;
+  if(boardId==='gx-touch50')return gxGuide;
   const board=assemblyBoards.find(item=>item.id===boardId)||assemblyBoards[0];
   const left=board.id==='constant-jk';
   const title=bi(`恒流板 ${board.number} · ${board.location.zh}`,`Board ${board.number} · ${board.location.en}`);

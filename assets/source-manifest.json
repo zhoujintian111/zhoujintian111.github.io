@@ -15,13 +15,17 @@
       12.4
     ],
     "centreAboveInteriorFloorMm": 1450,
-    "mounting": "Included fixing frame; manufacturer drilling template",
+    "mounting": "Included fixing frame, front screws; manufacturer drilling template method ①",
     "manufacturerReferences": [
       "https://www.victronenergy.com/upload/documents/GX-Touch-50.pdf",
       "https://www.victronenergy.com/upload/documents/Drilling-jig-GX-Touch-50.pdf",
       "https://www.victronenergy.com/media/pg/Cerbo_GX/en/installation.html"
     ],
-    "mountingLocation": "Same front white wall as TV, to the right of TV"
+    "mountingLocation": "Same front white wall as TV, to the right of TV",
+    "frameHoleSpacingMm": [
+      110.2,
+      69.2
+    ]
   },
   "negativeDistributor": {
     "mounting": "Integral DIN feet on shared horizontal rail",
@@ -98,5 +102,21 @@
     "railLengthMm": 150,
     "installationSteps": 26,
     "limits": "Wall screw length and engagement, device M3 screw length, clip latch geometry, grounding/bonding, waterproof pin order, fuse coordination and commissioning require actual-component/site verification. No unverified electrical bond or energization approval is depicted."
+  },
+  "gxAssembly": {
+    "version": "assembly-20261003-r5",
+    "boardId": "gx-touch50",
+    "data": "assets/gx-guide-data.js",
+    "installationSteps": 12,
+    "parts": 9,
+    "placement": "Same front white wall as TV, right of TV; screen centre 1450 mm above finished interior floor",
+    "userConfirmations": [
+      "2026-10-03: backing probably wood; rear inaccessible",
+      "2026-10-03: battery bay below FIND YOUR POWER; liftable decorative cover; upward behind cover, behind TV, then right to GX",
+      "2026-10-03: updated supplied-parts image shows two ferrites and HDMI cable installation slip"
+    ],
+    "mounting": "Front frame screws, official template method ①, 110.2 × 69.2 mm; no rear wing nuts",
+    "ferrites": "Both around HDMI cable; one close to GX, one close to HDMI plug; none on USB tail",
+    "limits": "Concealed route is explanatory. Verify backing, fastener type/length/engagement, pilot holes, rear cable exit, cable length and cover clearance on vehicle; no wall groove or measured hidden cable space is asserted. Ferrite size and closure motion are illustrative."
   }
 }

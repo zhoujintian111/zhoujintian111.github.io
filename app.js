@@ -1,13 +1,13 @@
-import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r4';
-import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r4';
-import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r4';
+import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r5';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r5';
+import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r5';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
   electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r4',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/gx-new.html?v=gx-frontwall-20261001'
+  gxNew: 'assets/views/gx-new.html?v=assembly-20261003-r5'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
@@ -295,6 +295,18 @@ const assemblyInspector=createAssemblyInspector({
   getLanguage:()=>state.lang,
   send:(command,value)=>{
     const frame=el.frameStack.querySelector('.view-frame.is-active');
+    if(command==='select' && assemblyTargets.some(target=>target.id===value)){
+      const gx=value==='gx-touch50';
+      const scenePath=gx?'gx-new.html':'electrical-new.html';
+      if(!frame?.src.includes(scenePath)){
+        assemblyDeepLink=value;
+        state.deviceMessage=null;
+        state.route=gx?'gx':'electrical';
+        state.version='new';
+        renderRoute();
+        return;
+      }
+    }
     frame?.contentWindow?.postMessage({type:'aiko-assembly-command',command,value},location.origin);
   }
 });
@@ -422,19 +434,30 @@ function loadFrame(src, options={}) {
   el.frameStack.appendChild(frame);
   frame.addEventListener('load', () => {
     if(generation!==sceneGeneration){frame.remove();return;}
-    requestAnimationFrame(() => frame.classList.add('is-active'));
+    requestAnimationFrame(() => {
+      if(generation!==sceneGeneration)return;
+      el.frameStack.querySelectorAll('.view-frame.is-active').forEach(old=>old.classList.remove('is-active'));
+      frame.classList.add('is-active');
+    });
     [...el.frameStack.querySelectorAll('.view-frame')].filter(x => x !== frame).forEach(old => {
       old.classList.add('is-leaving');
       setTimeout(() => old.remove(), 680);
     });
-    if (options.camera) activateCamera(frame, options.camera);
-    if(src===paths.gxNew&&!frame.contentWindow?.aikoGxScene)frame.contentWindow?.addEventListener('aiko-scene-ready',()=>{if(generation===sceneGeneration){if(options.camera)activateCamera(frame,options.camera);frame.contentWindow.postMessage({type:'aiko-language',language:state.lang},location.origin);}}, {once:true});
-    try{frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin)}catch(_){}
-    if(src===paths.electricalNew && assemblyDeepLink){
+    const selectPendingAssembly=()=>{
       const boardId=assemblyDeepLink;
+      const targetPath=boardId==='gx-touch50'?paths.gxNew:paths.electricalNew;
+      if(!boardId || src!==targetPath || src===paths.gxNew&&!frame.contentWindow?.aikoAssemblyGuide)return;
       assemblyDeepLink=null;
-      requestAnimationFrame(()=>frame.contentWindow?.postMessage({type:'aiko-assembly-command',command:'select',value:boardId},location.origin));
-    }
+      requestAnimationFrame(()=>{
+        if(generation!==sceneGeneration)return;
+        frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin);
+        frame.contentWindow?.postMessage({type:'aiko-assembly-command',command:'select',value:boardId},location.origin);
+      });
+    };
+    if (options.camera) activateCamera(frame, options.camera);
+    if(src===paths.gxNew&&!frame.contentWindow?.aikoAssemblyGuide)frame.contentWindow?.addEventListener('aiko-scene-ready',()=>{if(generation===sceneGeneration){if(options.camera)activateCamera(frame,options.camera);frame.contentWindow.postMessage({type:'aiko-language',language:state.lang},location.origin);selectPendingAssembly();}}, {once:true});
+    try{frame.contentWindow?.postMessage({type:'aiko-language',language:state.lang},location.origin)}catch(_){}
+    selectPendingAssembly();
     setLoading(false);
     if (options.onLoad) options.onLoad(frame,generation);
   }, {once:true});
@@ -518,8 +541,9 @@ function renderDetail() {
   const r=records[state.record] || records.guide;
   const selectedDeviceId=state.deviceMessage?.id;
   const communicationDevice=['comm-backplate','cm5-native','ethernet-switch','usr-router','cerbo-gx','aux-fuse','negative-distributor'].includes(selectedDeviceId);
-  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || (communicationDevice || assemblyTargets.some(board=>board.id===selectedDeviceId)) && state.record==='__device');
-  const assemblyTarget=state.record==='communication' || state.record==='__device' && communicationDevice?'comm-backplate':selectedDeviceId;
+  const gxDevice=selectedDeviceId==='gx-new';
+  const eligible=state.version==='new' && (state.record==='electricalNew' || state.record==='communication' || state.record==='gxNew' || (gxDevice || communicationDevice || assemblyTargets.some(board=>board.id===selectedDeviceId)) && state.record==='__device');
+  const assemblyTarget=state.record==='gxNew' || state.record==='__device' && gxDevice?'gx-touch50':state.record==='communication' || state.record==='__device' && communicationDevice?'comm-backplate':selectedDeviceId;
   assemblyInspector.setEligible(eligible,assemblyTarget);
   document.querySelector('.detail-tabs').hidden=assemblyInspector.active;
   el.detailBody.hidden=assemblyInspector.active;
@@ -652,6 +676,7 @@ window.addEventListener('message',event=>{
   const message=event.data;
   const deviceRecordMap={'gx-old':'gxOld','gx-new':'gxNew'};
   if(deviceRecordMap[message.id]) {
+    if(message.id==='gx-new')state.version='new';
     state.deviceMessage=null;
     state.detailTab='overview';
     showRecord(deviceRecordMap[message.id]);
@@ -664,6 +689,6 @@ window.addEventListener('message',event=>{
   showRecord('__device');
 });
 
-if(assemblyDeepLink)state.route='electrical';
+if(assemblyDeepLink)state.route=assemblyDeepLink==='gx-touch50'?'gx':'electrical';
 renderRoute();
 applyLanguage(initialLanguage,{persist:false});

@@ -1,4 +1,4 @@
-import { assemblyTargets, getAssemblyGuide } from './assembly-guide-data.js?v=assembly-20261003-r4';
+import { assemblyTargets, getAssemblyGuide } from './assembly-guide-data.js?v=assembly-20261003-r5';
 
 const copy = {
   zh: { title:'装配查看方式', normal:'常规', exploded:'爆炸图', animation:'装配演示', start:'查看局部装配', intro:'按下方安装说明先断电、拆旧，再安装和接线；切换装配演示可逐步查看。', commIntro:'通讯板及配件均现场安装。按步骤查看底板、导轨与限位、设备固定和各类线缆连接；每一步均可暂停、回放和拖动查看动作。', spread:'展开程度', parts:'点选配件，查看用途', quantity:'本处数量', purpose:'装在哪里', note:'安装说明', previous:'上一步', next:'下一步', play:'播放', pause:'暂停', restart:'重新播放', replayStep:'重看本步', exit:'返回全景', pilot:'选择安装区域，查看对应的配件、安装步骤和接线说明。',boards:'选择安装区域', step:'步骤', jump:'选择步骤', progress:'本步动作', source:'Stäubli 官方装配说明', sourceNote:'EVO2 需按实际料号、线材和工具匹配参数。', sources:'安装资料', camera:'可旋转、平移及缩放查看；展开间距仅用于讲解。', index:'配件编号为本图索引，尚未作为实物包装编号。',instructions:'安装说明',check:'完成检查',view:'画面说明' },
@@ -30,6 +30,7 @@ export function createAssemblyInspector({container, getLanguage, send}) {
     const guide=getAssemblyGuide(snapshot.available?snapshot.boardId:eligibleBoardId);
     const {parts,steps,boardContext}=guide;
     const isCommunication=guide.boardId==='comm-backplate';
+    const hasActionControls=isCommunication || guide.boardId==='gx-touch50';
     const boardSelector=`<div class="assembly-modes assembly-targets" role="group" aria-label="${esc(c.boards)}">${assemblyTargets.map(board=>`<button type="button" data-assembly-command="select" data-value="${board.id}" aria-pressed="${snapshot.available && board.id===guide.boardId}">${esc(local(board.shortLabel,lang))}</button>`).join('')}</div>`;
     container.hidden=!eligible && !snapshot.available;
     if(container.hidden){container.innerHTML='';lastLayout='';return;}
@@ -47,7 +48,7 @@ export function createAssemblyInspector({container, getLanguage, send}) {
     if(layout===lastLayout){syncControls(steps,step,c);return;}
     lastLayout=layout;
     let stepChoices='';
-    if(isCommunication){
+    if(hasActionControls){
       let group='';
       steps.forEach((item,i)=>{
         const nextGroup=local(item.group,lang);
@@ -57,23 +58,23 @@ export function createAssemblyInspector({container, getLanguage, send}) {
       if(group)stepChoices+='</optgroup>';
     }
     const transport=`<div class="assembly-playback"><button type="button" data-assembly-command="step" data-value="${step-1}" ${step===0?'disabled':''}>← ${esc(c.previous)}</button><button type="button" data-assembly-command="play">${esc(snapshot.playing?c.pause:step===steps.length-1?c.restart:c.play)}</button><button type="button" data-assembly-command="step" data-value="${step+1}" ${step===steps.length-1?'disabled':''}>${esc(c.next)} →</button></div>`;
-    const detailedControls=isCommunication?`<label class="assembly-step-select">${esc(c.jump)}<select data-assembly-step-select aria-label="${esc(c.jump)}">${stepChoices}</select></label><div class="assembly-action-controls"><label class="assembly-range">${esc(c.progress)} <output data-assembly-progress-value>${percent(snapshot.stepProgress)}%</output><input type="range" min="0" max="100" step="1" value="${percent(snapshot.stepProgress)}" data-assembly-progress aria-label="${esc(c.progress)}"></label><button type="button" class="assembly-replay" data-assembly-command="replay-step">↻ ${esc(c.replayStep)}</button></div>`:'';
+    const detailedControls=hasActionControls?`<label class="assembly-step-select">${esc(c.jump)}<select data-assembly-step-select aria-label="${esc(c.jump)}">${stepChoices}</select></label><div class="assembly-action-controls"><label class="assembly-range">${esc(c.progress)} <output data-assembly-progress-value>${percent(snapshot.stepProgress)}%</output><input type="range" min="0" max="100" step="1" value="${percent(snapshot.stepProgress)}" data-assembly-progress aria-label="${esc(c.progress)}"></label><button type="button" class="assembly-replay" data-assembly-command="replay-step">↻ ${esc(c.replayStep)}</button></div>`:'';
     const sources=(guide.sources||[]).filter(source=>{
       if(mode!=='animation')return true;
       if(source.steps?.length)return source.steps.includes(step);
       if(source.parts?.length)return source.parts.some(id=>(steps[step].parts||[]).includes(id));
       return true;
     });
-    const sourcesHtml=isCommunication && sources.length?`<div class="assembly-sources"><p class="assembly-caption">${esc(c.sources)}</p>${sources.map(source=>`<a class="assembly-source" href="${esc(source.url||source.href)}" target="_blank" rel="noopener">${esc(local(source.label||source.title||source.name,lang))} ↗</a>${source.note?`<p class="assembly-caption">${esc(local(source.note,lang))}</p>`:''}`).join('')}</div>`:'';
+    const sourcesHtml=hasActionControls && sources.length?`<div class="assembly-sources"><p class="assembly-caption">${esc(c.sources)}</p>${sources.map(source=>`<a class="assembly-source" href="${esc(source.url||source.href)}" target="_blank" rel="noopener">${esc(local(source.label||source.title||source.name,lang))} ↗</a>${source.note?`<p class="assembly-caption">${esc(local(source.note,lang))}</p>`:''}`).join('')}</div>`:'';
     container.innerHTML=`
       <div class="assembly-heading"><strong>${esc(local(boardContext.title,lang))}</strong><button type="button" data-assembly-command="exit">${esc(c.exit)}</button></div>
       ${boardSelector}<p class="assembly-caption">${esc(local(boardContext.communication,lang))}</p>
       <div class="assembly-modes" role="group" aria-label="${esc(c.title)}">${['normal','exploded','animation'].map(m=>`<button type="button" data-assembly-command="mode" data-value="${m}" aria-pressed="${mode===m}">${esc(c[m])}</button>`).join('')}</div>
       ${mode==='normal'?`<p class="assembly-caption">${esc(local(guide.intro,lang)||(isCommunication?c.commIntro:c.intro))}</p><p class="assembly-caption">${esc(local(boardContext.mounting,lang))}</p><h3 class="assembly-step-title">${esc(c.instructions)} · ${lang==='en'?`all ${steps.length} steps`:`完整${steps.length}步`}</h3><div class="assembly-instructions">${steps.map((item,i)=>`<details ${i===0?'open':''}><summary><span>${String(i+1).padStart(2,'0')}</span>${esc(local(item.title,lang))}</summary>${stepBody(item)}</details>`).join('')}</div>`:''}
       ${mode==='exploded'?`<label class="assembly-range">${esc(c.spread)} <output data-assembly-spread-value>${percent(snapshot.spread)}%</output><input type="range" min="0" max="100" step="1" value="${percent(snapshot.spread)}" data-assembly-spread aria-label="${esc(c.spread)}"></label>`:''}
-      ${mode==='animation'?`${detailedControls}<div class="assembly-progress">${esc(c.step)} ${step+1} / ${steps.length}</div><h3 class="assembly-step-title">${esc(local(steps[step].title,lang))}</h3>${isCommunication?transport:''}${stepBody(steps[step])}${!isCommunication?transport:''}`:''}
+      ${mode==='animation'?`${detailedControls}<div class="assembly-progress">${esc(c.step)} ${step+1} / ${steps.length}</div><h3 class="assembly-step-title">${esc(local(steps[step].title,lang))}</h3>${hasActionControls?transport:''}${stepBody(steps[step])}${!hasActionControls?transport:''}`:''}
       ${mode!=='normal'&&shownParts.length?`<p class="assembly-caption">${esc(c.parts)}</p><div class="assembly-parts">${shownParts.map((p,i)=>`<button type="button" data-assembly-command="part" data-value="${p.id}" aria-pressed="${p.id===selected.id}"><b>${esc(p.index||'A'+(i+1))}</b>${esc(local(p.name,lang))}</button>`).join('')}</div><div class="assembly-part-detail" aria-live="polite"><h3>${esc(local(selected.name,lang))}</h3><p>${esc(local(selected.spec,lang))}</p><dl><dt>${esc(c.quantity)}</dt><dd>${esc(local(selected.quantity,lang))}</dd><dt>${esc(c.purpose)}</dt><dd>${esc(local(selected.purpose,lang))}</dd><dt>${esc(c.note)}</dt><dd>${esc(local(selected.note,lang))}</dd></dl></div><p class="assembly-caption">${esc(c.camera)}</p><p class="assembly-caption">${esc(c.index)}</p>`:''}
-      ${!isCommunication&&((mode==='animation' && (step===6||step===7)) || selected?.id==='mc4' && mode==='exploded')?`<a class="assembly-source" href="https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_MA273-en.pdf" target="_blank" rel="noopener">${esc(c.source)} ↗</a><p class="assembly-caption">${esc(c.sourceNote)}</p>`:''}${sourcesHtml}`;
+      ${!hasActionControls&&((mode==='animation' && (step===6||step===7)) || selected?.id==='mc4' && mode==='exploded')?`<a class="assembly-source" href="https://www.staubli.com/content/dam/ecs/technical-documentation/assembly-instructions/RE/PV_MA273-en.pdf" target="_blank" rel="noopener">${esc(c.source)} ↗</a><p class="assembly-caption">${esc(c.sourceNote)}</p>`:''}${sourcesHtml}`;
   }
   container.addEventListener('click',event=>{
     const button=event.target.closest('[data-assembly-command]');

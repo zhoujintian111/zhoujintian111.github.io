@@ -190,7 +190,8 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
 
     const start = async () => {
       const { THREE, OrbitControls } = window.__AIKO_THREE_OFFLINE__;
-      const {makeGxTouch,gxTouchSpec}=await import('../gx-touch-model.js?v=gx-frontwall-20261001');
+      const {makeGxTouch,gxTouchSpec}=await import('../gx-touch-model.js?v=assembly-20261003-r5');
+      const {createGxAssemblyGuide}=await import('../gx-assembly-controller.js?v=assembly-20261003-r5');
       const gxPhoto=await new THREE.TextureLoader().loadAsync('../images/gx-touch-50-official.png');
       gxPhoto.colorSpace=THREE.SRGBColorSpace;
       gxPhoto.offset.set(49/1925,48/1307);gxPhoto.repeat.set(1804/1925,1210/1307);
@@ -993,7 +994,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       const dm=new THREE.Mesh(new THREE.PlaneGeometry(.37,.046),new THREE.MeshBasicMaterial({map:dt,transparent:true,depthTest:false}));dm.rotation.y=-Math.PI/2;dm.position.set(dx-.02,1.48,.60);dm.renderOrder=16;gxDimensions.add(dm);
       const gxPickRay=new THREE.Raycaster(),gxPointer=new THREE.Vector2();let gxDown=null;
       canvas.addEventListener('pointerdown',e=>{gxDown=[e.clientX,e.clientY]});
-      canvas.addEventListener('pointerup',e=>{if(!gxDown||Math.hypot(e.clientX-gxDown[0],e.clientY-gxDown[1])>6)return;const rect=canvas.getBoundingClientRect();gxPointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);gxPickRay.setFromCamera(gxPointer,camera);if(gxPickRay.intersectObject(gxTouch.group,true).length)parent.postMessage({type:'aiko-device',id:'gx-new',version:'new'},location.origin);});
+      canvas.addEventListener('pointerup',e=>{if(!gxDown||Math.hypot(e.clientX-gxDown[0],e.clientY-gxDown[1])>6)return;const rect=canvas.getBoundingClientRect();gxPointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);gxPickRay.setFromCamera(gxPointer,camera);if(gxPickRay.intersectObject(gxTouch.group,true).length){parent.postMessage({type:'aiko-device',id:'gx-new',version:'new'},location.origin);window.aikoAssemblyGuide?.selectBoard('gx-touch50');}});
       // 中央顶棚为长条凹入式亮面，两侧设置成排筒灯与蓝色轮廓灯。
       addBox(3.72, 0.028, 0.82, material.ceilingGlow, -1.28, 2.598, 0);
       addBox(3.90, 0.016, 0.020, material.ledBlue, -1.30, 2.565, -0.985);
@@ -1674,6 +1675,7 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
       let selectedView = 'gx-installation';
       let cameraTween = null;
       const moveCamera = (name, instant = false) => {
+        if(window.aikoAssemblyGuide?.snapshot().available)window.aikoAssemblyGuide.exit();
         selectedView = name;
         const target = cameraViews[name];
         const exteriorMode = target.mode === 'exterior';
@@ -1766,12 +1768,15 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
           camera.updateProjectionMatrix();
           if (raw >= 1) cameraTween = null;
         }
+        window.aikoAssemblyGuide?.tick(now);
         controls.update();
         renderer.render(scene, camera);
         requestAnimationFrame(render);
       };
 
-      window.aikoGxScene={scene,camera,world,controls,gxTouch,gxDimensions,moveCamera,cameraViews,installationReferences:{wallGraphic,tvBody,interiorFloor}};
+      const gxGuide=createGxAssemblyGuide(THREE,{scene,world,camera,controls,gxTouch,wallGraphic,tvBody,tvScreen,gxDimensions,viewName,viewNote,cancelCameraTween:()=>{cameraTween=null;},prepareInterior:()=>{world.visible=true;exteriorWorld.visible=false;gxDetailLight.visible=true;}});
+      window.aikoAssemblyGuide=gxGuide;
+      window.aikoGxScene={scene,camera,world,controls,gxTouch,gxDimensions,moveCamera,cameraViews,installationReferences:{wallGraphic,tvBody,tvScreen,interiorFloor},assembly:gxGuide.geometry};
       loading.hidden = true;
       moveCamera('gx-installation', true);
       window.dispatchEvent(new Event('aiko-scene-ready'));
@@ -1788,6 +1793,6 @@ body{padding:12px}.btn{appearance:none;border:1px solid var(--border);background
   </script>
 </div>
 
-<script src="../view-language.js?v=gx-frontwall-20261001"></script>
+<script src="../view-language.js?v=assembly-20261003-r5"></script>
 </body>
 </html>
