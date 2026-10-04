@@ -1,10 +1,10 @@
 import {readElectrical} from './full-checks.mjs';
 // Focused r12 visual evidence on the actual candidate. Read-only model inspection;
 // all view/state changes use the site's existing UI and real pointer/wheel input.
-export async function runHardware({page,context,frame,report,row,shot,ready,activeFrame,target}){
+export async function runHardware({page,context,frame,report,row,shot,ready,activeFrame,target,remainingOnly=false}){
  const settle=()=>page.waitForTimeout(450);
  const mode=async value=>{await page.locator(`[data-assembly-command="mode"][data-value="${value}"]`).click();await frame.waitForFunction(v=>window.aikoAssemblyGuide.snapshot().mode===v,value);await settle();};
- const step=async n=>{await page.locator('[data-assembly-step-select]').selectOption(String(n));await frame.waitForFunction(n=>window.aikoAssemblyGuide.snapshot().step===n,n);await settle();};
+ const step=async n=>{const select=page.locator('[data-assembly-step-select]');if(await select.count())await select.selectOption(String(n));else {let current=await frame.evaluate(()=>window.aikoAssemblyGuide.snapshot().step);while(current!==n){const next=current+(n>current?1:-1);await page.locator(`[data-assembly-command="step"][data-value="${next}"]`).click();await frame.waitForFunction(n=>window.aikoAssemblyGuide.snapshot().step===n,next);current=next;}}await frame.waitForFunction(n=>window.aikoAssemblyGuide.snapshot().step===n,n);await settle();};
  const progress=async p=>{await page.locator('[data-assembly-progress]').evaluate((e,p)=>{e.value=String(p*100);e.dispatchEvent(new Event('input',{bubbles:true}));},p);await frame.waitForFunction(p=>Math.abs(window.aikoAssemblyGuide.snapshot().stepProgress-p)<.01,p);await settle();};
  const mouse=async(dx,dy,wheel=0)=>{const b=await frame.locator('canvas').first().boundingBox(),x=b.x+b.width*.53,y=b.y+b.height*.45;await page.mouse.move(x,y);if(dx||dy){await page.mouse.down();await page.mouse.move(x+dx,y+dy,{steps:12});await page.mouse.up();}if(wheel)await page.mouse.wheel(0,wheel);await settle();};
  const actual=expression=>readElectrical(context,page,frame,expression);
@@ -12,9 +12,11 @@ export async function runHardware({page,context,frame,report,row,shot,ready,acti
  const initial=await actual(inspect);report.model.hardware=initial;
  row('H1-hardware','实际螺栓组数量、螺纹、尼龙锁母和平垫',initial.nuts===10&&initial.washers===20&&initial.heads===10&&initial.nylon===10&&initial.threaded===initial.shaftCount?'通过':'失败',initial);
  row('H1-baseline','两根150mm导轨和三块恒流板L型',initial.rails.length===2&&initial.rails.every(v=>Math.abs(v-1.5)<1e-6)&&initial.boards[0][0]===initial.boards[1][0]&&initial.boards[2][0]<initial.boards[1][0]&&initial.boards[2][1]===initial.boards[1][1]?'通过':'失败',initial);
+ if(!remainingOnly){
  await mode('animation');await step(2);await progress(.30);await mouse(0,0,-650);await shot('01-comm-socket-heads','导轨螺栓组：内六角、螺纹与通孔平垫',frame);
  const front=await actual('camera.position.toArray()');const b=await frame.locator('canvas').first().boundingBox();await mouse(b.width*.46,12,-250);const rear=await actual('camera.position.toArray()');await shot('02-comm-locknuts','实际旋转后的导轨后侧锁母和垫片',frame);row('H2-rotation','实际鼠标旋转有效',Math.hypot(...front.map((v,i)=>v-rear[i]))>.1?'通过':'失败',{front,rear});
- await page.locator('[data-assembly-command="select"][data-value="constant-aiko"]').click();await frame.waitForFunction(()=>window.aikoAssemblyGuide.snapshot().boardId==='constant-aiko');await mode('animation');await step(5);await progress(.25);await mouse(0,0,-500);await shot('03-board-screws','恒流板安装螺丝：内六角与螺纹',frame);
+ }else row('H2-previous','复用相同模型文件的通讯板前/后细节与鼠标旋转','待核实','源72d8e447运行37176709104已取得对应PNG；本次仅修测试步进控件，合并复核时核对资源哈希。');
+ await page.locator('[data-assembly-command="select"][data-value="constant-aiko"]').click();await frame.waitForFunction(()=>window.aikoAssemblyGuide.snapshot().boardId==='constant-aiko');await mode('exploded');await mouse(0,0,-350);await shot('03-board-screws','恒流板安装螺丝：内六角与螺纹',frame);
  const gxURL=new URL(target);gxURL.searchParams.set('assembly','gx-touch50');await page.goto(gxURL.href,{waitUntil:'domcontentloaded'});frame=await activeFrame();await ready(frame);await frame.waitForFunction(()=>!!window.aikoGxScene);
  const gx=()=>frame.evaluate(()=>{const a=window.aikoGxScene,all=[];a.scene.traverse(o=>all.push(o));return {center:a.gxTouch.group.position.toArray(),height:a.gxTouch.group.position.y-a.gxTouch.spec.floorY,fixings:a.gxTouch.fixings.length,frameHoles:a.gxTouch.mount.children[0].geometry.parameters.shapes.holes.length,ferrites:a.assembly.ferrites.map(o=>({endpoint:o.userData.endpoint,angle:o.userData.hinge.rotation.y,cores:o.getObjectsByProperty('name','Ferrite half-core with open cable groove').length})),hdmiContacts:all.filter(o=>o.name==='HDMI contact').length,usbContacts:all.filter(o=>o.name==='USB-A contact').length,plugs:['hdmi-plug','usb-plug'].map(id=>a.assembly.parts[id][0].position.toArray()),snapshot:window.aikoAssemblyGuide.snapshot()};});
  await mode('animation');await step(5);await progress(.30);await mouse(25,12,-650);await shot('04-gx-frame','GX原厂固定框：圆角、真实开口、两组孔和前侧螺钉',frame);

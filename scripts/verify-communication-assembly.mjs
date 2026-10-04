@@ -6,14 +6,16 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const actual=await import(pathToFileURL(path.join(base,'dist/assets/vendor/three/build/three.module.min.js')));
-const roundedSource=fs.readFileSync(path.join(base,'dist/assets/vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js'),'utf8').replace("from 'three'",`from '${pathToFileURL(path.join(base,'dist/assets/vendor/three/build/three.module.min.js')).href}'`);
+const hasDist=fs.existsSync(path.join(base,'dist/index.html'));
+const projectFile=p=>path.join(base,!hasDist&&p.startsWith('dist/')?p.slice(5):p);
+const actual=await import(pathToFileURL(projectFile('dist/assets/vendor/three/build/three.module.min.js')));
+const roundedSource=fs.readFileSync(projectFile('dist/assets/vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js'),'utf8').replace("from 'three'",`from '${pathToFileURL(projectFile('dist/assets/vendor/three/build/three.module.min.js')).href}'`);
 const {RoundedBoxGeometry}=await import('data:text/javascript;base64,'+Buffer.from(roundedSource).toString('base64'));
-const data=await import(pathToFileURL(path.join(base,'dist/assets/upgrade-data.js')));
-const communicationData=await import(pathToFileURL(path.join(base,'dist/assets/communication-guide-data.js')));
-const assemblyData=await import(pathToFileURL(path.join(base,'dist/assets/assembly-guide-data.js')));
+const data=await import(pathToFileURL(projectFile('dist/assets/upgrade-data.js')));
+const communicationData=await import(pathToFileURL(projectFile('dist/assets/communication-guide-data.js')));
+const assemblyData=await import(pathToFileURL(projectFile('dist/assets/assembly-guide-data.js')));
 const {assemblyGuideData,getAssemblyGuide}=assemblyData;
-const {createAssemblyInspector}=await import(pathToFileURL(path.join(base,'dist/assets/assembly-inspector.js')));
+const {createAssemblyInspector}=await import(pathToFileURL(projectFile('dist/assets/assembly-inspector.js')));
 const errors=[],messages=[];
 class Element {
   constructor(){this.listeners={};this.dataset={};this.style={};this.children=[];this.hidden=false;this.textContent='';this.innerHTML='';this.offsetWidth=260;this.offsetHeight=46;this.classList={add(){},remove(){},toggle(){}};}
@@ -38,7 +40,7 @@ let now=0,rafId=0;const frames=new Map();
 class FakeDate extends Date {static now(){return now;}}
 const THREE={...actual,WebGLRenderer:Renderer,PMREMGenerator:PMREM};
 const sandbox={THREE,RoundedBoxGeometry,OrbitControls:Controls,RoomEnvironment:actual.Group,...data,...assemblyData,...communicationData,document,window,devicePixelRatio:1,location:{origin:'https://test.invalid'},parent:{postMessage:m=>messages.push(m)},Date:FakeDate,performance:{now:()=>now},ResizeObserver:class{constructor(fn){this.fn=fn;}observe(){this.fn();}},requestAnimationFrame(fn){frames.set(++rafId,fn);return rafId;},cancelAnimationFrame(id){frames.delete(id);},getComputedStyle:()=>({getPropertyValue:()=>''}),console:{...console,error:(...a)=>errors.push(a.join(' '))}};
-let sceneCode=fs.readFileSync(path.join(base,'dist/assets/views/electrical-new.html'),'utf8').match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;\n/gm,'');
+let sceneCode=fs.readFileSync(projectFile('dist/assets/views/electrical-new.html'),'utf8').match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;\n/gm,'');
 sceneCode=sceneCode.replace("  loading.classList.add('is-done');", "  globalThis.audit={scene,camera,renderer,controls,pickables,cc1,cc2,cc3,mppt1,mppt2,mppt3,orionSmart,setMode,flowGroups,communication,commBack,commRail,commRails,commClipRecords,usrBody,usrDcNegative,commParts,commWireSets,communicationGuide,cm5,netSwitch,usr,cerbo,fuse,negativeDistributor,cm5Terminals,cm5Dc,moxaDc,usrDc,cerboDc,fusePositiveInput,fusePorts,negativeInput,negativePorts,switchPorts,cerboEth,usrLan,cm5Eth1};\n  loading.classList.add('is-done');");
 vm.createContext(sandbox);vm.runInContext(sceneCode,sandbox,{timeout:15000});
 assert(sandbox.audit,`Scene failed: ${nodes.get('.a3-error').textContent}`);
@@ -264,7 +266,7 @@ class AppElement extends Element {
  querySelectorAll(selector){return this.children.filter(o=>selector==='button'?o.tag==='button':selector.startsWith('.view-frame')?selector.slice(1).split('.').every(c=>o.className.split(' ').includes(c)):selector.startsWith('[data-')?Object.hasOwn(o.dataset,selector.slice(6,-1).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())):false);}
  querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
 }
-const appCode=fs.readFileSync(path.join(base,'dist/app.js'),'utf8').replace(/^import .*;\n/gm,'');
+const appCode=fs.readFileSync(projectFile('dist/app.js'),'utf8').replace(/^import .*;\n/gm,'');
 const appIds=new Map(),appWindow=new Element(),appDetailTabs=new AppElement();
 const appDocument={documentElement:{},activeElement:null,title:'',getElementById:id=>{if(!appIds.has(id))appIds.set(id,new AppElement());return appIds.get(id);},createElement:tag=>new AppElement(tag),querySelector:selector=>selector==='.detail-tabs'?appDetailTabs:selector.startsWith('#')?appDocument.getElementById(selector.slice(1)):null,querySelectorAll:()=>[]};
 for(const [id,key,values]of [['languageSwitch','language',['zh','en']],['versionSwitch','version',['old','new']]])for(const value of values){const button=new AppElement('button');button.dataset[key]=value;appDocument.getElementById(id).appendChild(button);}

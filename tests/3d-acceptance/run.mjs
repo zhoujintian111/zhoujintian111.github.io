@@ -167,7 +167,7 @@ try {
   row('K1-version','当前目标版本入口',frame.url().includes(expectedFrame)?'通过':'待核实',frame.url());
   if(full) {
     if(argv.includes('--hardware-only')){
-      const {runHardware}=await import('./hardware-checks.mjs');await runHardware({page,context,frame,report,row,shot,ready,activeFrame,target});
+      const {runHardware}=await import('./hardware-checks.mjs');await runHardware({page,context,frame,report,row,shot,ready,activeFrame,target,remainingOnly:argv.includes('--hardware-remainder')});
     }else if(argv.includes('--labels-only')||argv.includes('--board-labels-only')){
       const {runLabels}=await import('./label-checks.mjs');await runLabels({page,context,frame,report,row,shot,ready,activeFrame,target,boardOnly:argv.includes('--board-labels-only')});
     }else{

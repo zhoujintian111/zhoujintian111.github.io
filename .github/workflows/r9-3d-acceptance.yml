@@ -45,7 +45,7 @@ jobs:
           for attempt in {1..30}; do curl -fsS http://127.0.0.1:8765/ > /dev/null && break; sleep 1; done
       - name: Run Chrome and real WebGL acceptance
         if: env.QA_MODE != 'published'
-        run: node run.mjs --${QA_MODE} --headless --cloud-ci --software-webgl --url 'http://127.0.0.1:8765/?assembly=comm-backplate&v=assembly-20261004-r12' --hardware-only --output results/cloud
+        run: node run.mjs --${QA_MODE} --headless --cloud-ci --software-webgl --url 'http://127.0.0.1:8765/?assembly=comm-backplate&v=assembly-20261004-r12' --hardware-only --hardware-remainder --output results/cloud
       - name: Verify published files match the visually tested candidate
         if: env.QA_MODE == 'published'
         run: node verify-published.mjs

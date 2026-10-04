@@ -6,8 +6,10 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const read=p=>fs.readFileSync(path.join(base,p),'utf8');
-const load=p=>import(pathToFileURL(path.join(base,p)));
+const hasDist=fs.existsSync(path.join(base,'dist/index.html'));
+const projectFile=p=>path.join(base,!hasDist&&p.startsWith('dist/')?p.slice(5):p);
+const read=p=>fs.readFileSync(projectFile(p),'utf8');
+const load=p=>import(pathToFileURL(projectFile(p)));
 const THREEActual=await load('dist/assets/vendor/three/build/three.module.min.js');
 const model=await load('dist/assets/gx-touch-model.js');
 const data=await load('dist/assets/upgrade-data.js');
@@ -206,7 +208,7 @@ assert(!/\p{Script=Han}/u.test(gx.get('[data-view-name]').textContent+gx.get('[d
 // Integrate the real parent app with both guide families. The iframe bridge
 // dispatches messages to actual GX/electrical controllers, while DOM is simulated.
 const electrical=environment();
-const roundedSource=read('dist/assets/vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js').replace("from 'three'",`from '${pathToFileURL(path.join(base,'dist/assets/vendor/three/build/three.module.min.js')).href}'`);
+const roundedSource=read('dist/assets/vendor/three/examples/jsm/geometries/RoundedBoxGeometry.js').replace("from 'three'",`from '${pathToFileURL(projectFile('dist/assets/vendor/three/build/three.module.min.js')).href}'`);
 electrical.box.RoundedBoxGeometry=(await import('data:text/javascript;base64,'+Buffer.from(roundedSource).toString('base64'))).RoundedBoxGeometry;
 electrical.box.RoomEnvironment=THREEActual.Group;
 let electricalCode=read('dist/assets/views/electrical-new.html').match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;\n/gm,'');
