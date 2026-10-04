@@ -7,7 +7,7 @@ const liveSessions=new WeakMap();
 
 // Query actual live Three.js/OrbitControls instances. No paused function,
 // response rewrite, scene assignment or synthetic geometry is used.
-async function readElectrical(context,page,frame,expression) {
+export async function readElectrical(context,page,frame,expression) {
   let cached=liveSessions.get(frame);
   const cdp=cached?.cdp||await context.newCDPSession(page);
   const contexts=[];

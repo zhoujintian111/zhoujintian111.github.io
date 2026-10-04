@@ -6,9 +6,9 @@ const dir=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(dir,'../..');
 const out=path.join(dir,'results/published');fs.mkdirSync(out,{recursive:true});
 const base='https://zhoujintian111.github.io/';
-const version='assembly-20261004-r10';
+const version='assembly-20261004-r11';
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
-const files=['index.html','app.js','styles.css','assets/views/electrical-new.html','assets/views/gx-new.html'];
+const files=['index.html','app.js','styles.css','assets/views/electrical-new.html','assets/views/gx-new.html','assets/gx-assembly-controller.js'];
 const report={version,base,runId:process.env.GITHUB_RUN_ID,sourceCommit:process.env.GITHUB_SHA,checks:[],errors:[]};
 for(const file of files){
  const url=new URL(file,base);url.searchParams.set('v',version);

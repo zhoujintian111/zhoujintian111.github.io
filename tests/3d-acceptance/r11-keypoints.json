@@ -1,0 +1,62 @@
+{
+  "task": "r11半透明爆炸图标注",
+  "baselineMain": "67be44377d571eb2c09e53896b004f202568be4a",
+  "keypoints": [
+    {
+      "id": "theme",
+      "requirement": "统一爆炸图标签的半透明底、字色、强调色及安装背景",
+      "status": "delegated",
+      "basis": {
+        "kind": "user",
+        "quote": "爆炸图里的文字下面的框是白色的，换成半透明色。字色、半透明色以及背景颜色你根据清晰度和美观度进行调配。",
+        "reference": "当前用户消息2026-10-04",
+        "scope": "仅标签与安装背景显示；布局、几何、接线和名称保持已确认r10基线"
+      },
+      "expected": "深色半透明底+不透明白字；品牌橙作少量强调，安装背景科技灰浅",
+      "check": "真实标签纹理alpha与云端截图",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r11"
+      }
+    },
+    {
+      "id": "coverage",
+      "requirement": "通讯板、恒流板、GX采用一致标签样式，选中反馈和中英文清楚",
+      "status": "delegated",
+      "basis": {
+        "kind": "user",
+        "quote": "爆炸图里的文字下面的框是白色的，换成半透明色。字色、半透明色以及背景颜色你根据清晰度和美观度进行调配。",
+        "reference": "当前用户消息2026-10-04",
+        "scope": "仅标签与安装背景显示；布局、几何、接线和名称保持已确认r10基线"
+      },
+      "expected": "保留编号、名称、端点和位置；中英文及选中状态可辨",
+      "check": "受影响三种爆炸图、选中及英语截图；既有几何/复位检查",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r11"
+      }
+    },
+    {
+      "id": "delivery",
+      "requirement": "验证后更新既有GitHub网页",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "就是你帮我更新上去，然后我点这个这个域名的网址就可以看到更新后的这个网页了。",
+        "reference": "此前持续发布授权"
+      },
+      "expected": "原网址看到r11，线上文件与候选一致",
+      "check": "云端截图复核及公开资源SHA-256",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r11"
+      }
+    }
+  ]
+}
