@@ -1,0 +1,52 @@
+{
+  "version": "assembly-20261004-r12",
+  "sources": [
+    {
+      "kind": "manufacturer drawing",
+      "url": "https://www.victronenergy.com/upload/documents/GX-Touch-50.pdf",
+      "revision": "02",
+      "facts": "Screen 128.2×87.1×12.4 mm; frame 128.1×87 mm; pitch ①110.2×69.2 and ②116×52.6 mm; alternate stepped bores Ø7/Ø4.2",
+      "limits": "Window, radius, thickness and front screw final dimensions not confirmed"
+    },
+    {
+      "kind": "manufacturer accessory photo",
+      "url": "https://www.victronenergy.com/upload/documents/GX%20Touch%2050%20%28accesories2%29.png",
+      "facts": "Included rounded frame with open window, both hole patterns and separate front / alternative rear fixings",
+      "limits": "Only confirmed four front fixings used; no alternative rear wing nuts added"
+    },
+    {
+      "kind": "user original kit photographs",
+      "facts": "Black snap-on ferrite shell, split grey ferrite cores, hinge, latch, combined HDMI and USB-A lead; two ferrites on HDMI branch",
+      "limits": "Magnetic core part number and dimensions unmeasured; cable-end shell geometry illustrative"
+    },
+    {
+      "kind": "primary supplied purchase list with photos",
+      "file": "欧洲展车寄送清单_恒流板与磁性修订_20260929.xlsx",
+      "rows": [
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        37
+      ],
+      "facts": "Hex socket screws, bored flat washers, hex nylon locking nuts with blue collar",
+      "limits": "C13 screw-length conflict and final G03 fastener selection remain pending; cosmetic thread helix is not a fabrication profile"
+    }
+  ],
+  "protected": [
+    "L-shaped three boards",
+    "two 150 mm rails",
+    "existing power/data connections",
+    "GX right of television on same wall, 1450 mm centre",
+    "r11 translucent labels"
+  ],
+  "precision": "Photo and drawing based visual refinement; no new physical fit or manufacturing approval"
+}

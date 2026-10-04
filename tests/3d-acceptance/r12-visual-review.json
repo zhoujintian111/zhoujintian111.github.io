@@ -1,0 +1,79 @@
+{
+  "version": "assembly-20261004-r12",
+  "production": "Published; Pages deployment succeeded; all 7 actual public site files match the tested source",
+  "acceptance": "未由用户验收",
+  "visualReview": "actual PNGs inspected",
+  "runs": [
+    {
+      "id": 37176544160,
+      "commit": "ab75a982675c4a778b7b1a33fbdff2262346669d",
+      "result": "minimum render passed; harness rail-group read failed; report retained"
+    },
+    {
+      "id": 37176637845,
+      "commit": "1262e8a794565d1574f2fb4aa91d4f7e440483ef",
+      "result": "same harness issue; not counted as detail pass"
+    },
+    {
+      "id": 37176709104,
+      "commit": "72d8e4475d5b0f6b1562626f86c279ea35d829ca",
+      "result": "hardware counts, 150mm rails, L-layout, actual mouse rotation and rail front/rear screenshots passed; board selector harness failed; original failure retained"
+    },
+    {
+      "id": 37176969726,
+      "commit": "a995c93b5703b36180da99e65f6504def184f37b",
+      "result": "remaining focused checks passed; runtime errors empty; PNGs retrieved and visually inspected",
+      "artifact": 11293312722,
+      "artifactSha256": "df0ac67b3089fc5a8fff61c890d4e86f40711ddf56b87f82d984d1eda3c21de2"
+    }
+  ],
+  "inheritedEvidence": "Prior rail screenshots are applicable: actual electrical-new resource hash d3b17fb7d69926514e94f4be0473a2d56a537eaf95e5932bf416dd83f2de94da matches final run. No screenshot regenerated or mocked.",
+  "views": [
+    {
+      "file": "r12-third/cloud/01-comm-socket-heads-canvas.png",
+      "finding": "Real socket-head recesses and helical shafts visible; front washers share existing mounting axes."
+    },
+    {
+      "file": "r12-third/cloud/02-comm-locknuts-canvas.png",
+      "finding": "Real rear hex locknuts and blue nylon collars visible after actual mouse rotation; plate occludes the installed rear hardware by design."
+    },
+    {
+      "file": "r12-final/cloud/03-board-screws-canvas.png",
+      "finding": "Complete module, adapter and existing fastener hierarchy remain; exposed heads and shafts refined."
+    },
+    {
+      "file": "r12-final/cloud/04-gx-frame-canvas.png",
+      "finding": "Rounded frame, genuine central window and eight bore locations visible; four front screw heads. Final shaft length still not shown as known."
+    },
+    {
+      "file": "r12-final/cloud/05-ferrite-open-canvas.png",
+      "finding": "Split core, cable channel, shell and hinge/latch geometry visible in opening pose; warm scene lighting affects apparent gray."
+    },
+    {
+      "file": "r12-final/cloud/06-ferrite-closed-canvas.png",
+      "finding": "Closed shell surrounds the cable with end supports, seam and hinge; envelope illustrative."
+    },
+    {
+      "file": "r12-final/cloud/07-connectors-open-canvas.png",
+      "finding": "HDMI keyed trapezoidal and USB rectangular receptacles distinct; overmould, strain-relief ribs and USB retention windows refined. Individual contacts verified in actual geometry, not all readable in this camera angle."
+    },
+    {
+      "file": "r12-final/cloud/08-connectors-seated-canvas.png",
+      "finding": "Both plugs visibly seated within their corresponding sockets; HDMI ferrite remains on HDMI branch."
+    },
+    {
+      "file": "r12-final/cloud/00-smoke-canvas.png",
+      "finding": "Actual normal WebGL view loaded; preserved three-board L and wiring arrangement."
+    }
+  ],
+  "limits": [
+    "Photo-based visual detail, not certified manufacture geometry.",
+    "Ferrite dimensions, frame window/thickness and final GX wall screw type/diameter/length remain unmeasured.",
+    "Existing C13 length discrepancy remains pending.",
+    "Cosmetic helix is not a manufacturing thread profile.",
+    "Cloud Chrome/SwiftShader screenshots do not certify user-PC performance or physical installation."
+  ],
+  "publishedCommit": "21f107de02dbc06edc2ba6b104c48b854d5c0578",
+  "pagesRun": 37177319459,
+  "publicValidation": "r12-public-validation.json"
+}

@@ -149,3 +149,27 @@ node run.mjs --full --labels-only --headless --cloud-ci --software-webgl --url '
 只复查恒流板时可在上述命令中使用 `--board-labels-only` 替代 `--labels-only`；完整标签检查仍保留。几何/装配源检查、共有展示恢复以及语法检查通过。主网站发布提交777f68224f08ac10c4786c3585e2dc794d771f56。
 
 发布后Pages37173182336成功，公开资源核对37173237941通过，6个资源HTTP200且SHA-256一致。证据包r11-label-review-20261004.zip保存首测失败、局部重测、实际截图、视觉复核与线上哈希。默认工作流恢复full/repair-only；这次标签检查仍通过labels-only复用。文档与默认入口恢复提交使用[skip ci]，不为同一未改代码重复渲染。
+
+## r12配件外形精化（2026-10-04）
+
+用户要求细化HDMI、USB、螺丝/螺母/垫片、磁环及GX固定框。
+按官方Rev02图、原厂配件图、用户磁环照片和寄送清单照片实施；未测框厚/窗口细部、磁环包络和最终GX螺钉规格仍为示意待核，不声称制造精度。
+已确认布局、数量、接线与r11标签保持。
+
+- main源版本：`21f107de02dbc06edc2ba6b104c48b854d5c0578`；Pages运行37177319459成功。
+- 实际云端候选：`a995c93b5703b36180da99e65f6504def184f37b`，运行37176969726成功，Chrome154/WebGL2/SwiftShader，运行错误为空。
+- 通讯板前后实图和真实鼠标旋转沿用运行37176709104；该运行后来在恒流板测试控件上失败。只复用已通过部分，不将整个失败run算通过。
+- 两次报告中实际electrical-new.html的SHA-256相同：`d3b17fb7d69926514e94f4be0473a2d56a537eaf95e5932bf416dd83f2de94da`。
+- 最终云端14张PNG加前次4张通讯板PNG，9个不同模型状态的画布已实际查看。公开网址7个文件已HTTPS读取并逐字节哈希比对；此步骤不是新的线上浏览器渲染。
+- 原始失败报告保留，视觉结论另记，不修改原始自动报告中的待核实/失败状态。
+
+当前workflow命令带`--hardware-only --hardware-remainder`，仅补查恒流板和GX；通讯板截图复用上述相同资源证据。下一轮不得把此补测配置当成所有改动的全检。
+所有r12配件的可重复命令（在提供网站根目录的HTTP服务器下运行）：
+
+```bash
+node run.mjs --full --hardware-only --headless --cloud-ci --software-webgl --url 'http://127.0.0.1:8765/?assembly=comm-backplate&v=assembly-20261004-r12' --output results/cloud
+```
+
+沿用现有npm锁文件、Chrome和Python服务器；在既有workflow中去掉`--hardware-remainder`即可完整跑该配件范围。更广改动使用已有`--full`与其适用范围，不凭本轮配件截图代替未检查对象。
+说明与关键点：`r12-keypoints.json`、`r12-visual-review.json`、`r12-source-provenance.json`、`r12-public-validation.json`。物理数据和个别触点的可见性限制见视觉复核记录。
+网页：https://zhoujintian111.github.io/?assembly=gx-touch50&v=assembly-20261004-r12

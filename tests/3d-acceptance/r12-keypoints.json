@@ -17,8 +17,8 @@
       "check": "实际插口/插头截面、屏幕线连接和插接动画，云端细节PNG",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
+        "status": "passed",
+        "evidence": "实际19/4触点几何、插接与完全复位检查通过；run37176969726的07/08 PNG已查看，HDMI梯形/USB矩形插口与插接可见。端子尺寸为外观示意。",
         "version": "assembly-20261004-r12"
       }
     },
@@ -36,8 +36,8 @@
       "check": "实际孔洞、内六角与螺纹、尼龙圈；源数量与复位/云端PNG",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
+        "status": "passed",
+        "evidence": "10组贯穿螺栓/10锁母/20平垫数量未变；实际通孔射线检查与尼龙圈/线程检查通过；run37176709104的01/02、run37176969726的03 PNG已查看，同一electrical-new资源SHA-256。",
         "version": "assembly-20261004-r12"
       }
     },
@@ -55,8 +55,8 @@
       "check": "开合轴、线穿孔、两端2只数量；中间和闭合PNG",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
+        "status": "passed",
+        "evidence": "两端共2只，每只2半磁芯；实际铰链从-1.445rad到0；run37176969726的05/06 PNG已查看，开合与穿线可见。包络未实测。",
         "version": "assembly-20261004-r12"
       }
     },
@@ -74,8 +74,8 @@
       "check": "真开口、8处原厂孔、既有4颗前固定；定位/动画/PNG",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
+        "status": "passed",
+        "evidence": "官方Rev02轮廓及两组孔距；实际中央开口和8个贯穿孔射线通过；4颗前固定与1450mm高度不变；run37176969726的04 PNG已查看。窗口细部/框厚/G03规格仍示意待核。",
         "version": "assembly-20261004-r12"
       }
     },
@@ -93,8 +93,8 @@
       "check": "相关源几何和复位检查；修改范围差异",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
+        "status": "passed",
+        "evidence": "实际运行两轨各1.5场景单位=150mm、恒流板右上[5.5,6.3]/右下[5.5,4]/左下[1.9,4]；GX同墙右侧1450mm；三场景复位及跨语言/几何通过；r11配色代码未改，真实截图标签为半透明。",
         "version": "assembly-20261004-r12"
       }
     }
