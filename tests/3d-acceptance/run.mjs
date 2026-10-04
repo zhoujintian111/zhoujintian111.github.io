@@ -54,7 +54,7 @@ function saveReport() {
   fs.writeFileSync(path.join(out,'report.json'), JSON.stringify(report,null,2));
   const checks = report.checks.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.item)}</td><td>${esc(c.status)}</td><td><pre>${esc(typeof c.evidence==='string'?c.evidence:JSON.stringify(c.evidence,null,2))}</pre></td></tr>`).join('');
   const shots = report.screenshots.map(s=>`<figure><figcaption>${esc(s.title)}</figcaption><a href="${esc(s.file)}"><img src="${esc(s.file)}" loading="lazy"></a></figure>`).join('');
-  fs.writeFileSync(path.join(out,'report.html'), `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>r9 三维验收</title><style>body{font:15px system-ui;max-width:1300px;margin:24px auto;padding:16px;background:#f7f9fc;color:#152333}table{border-collapse:collapse;width:100%;background:white}td,th{border:1px solid #ccd5dd;padding:9px;text-align:left}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}img{max-width:100%;border:1px solid #bbc4ce}figure{margin:28px 0}figcaption{font-weight:600;margin-bottom:8px}</style><h1>r9 三维验收：${esc(report.overall)}</h1><p>${esc(report.environment.execution)} · ${esc(report.environment.platform)} · ${esc(report.environment.browserVersion||'浏览器未启动')}</p><p><a href="${esc(target)}">被测网页</a> · ${esc(report.started)}</p><p>画面与模型证据只验证网页表达；不等同于实车安装、电气安全或物料实测验收。待核实项不能算通过。</p><table><tr><th>编号</th><th>验收点</th><th>结果</th><th>证据/限制</th></tr>${checks}</table>${shots}<h2>错误与警告</h2><pre>${esc(JSON.stringify({errors:report.errors,warnings:report.warnings},null,2))}</pre><p><a href="report.json">完整模型数据及机器可读报告</a></p></html>`);
+  fs.writeFileSync(path.join(out,'report.html'), `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>三维验收</title><style>body{font:15px system-ui;max-width:1300px;margin:24px auto;padding:16px;background:#f7f9fc;color:#152333}table{border-collapse:collapse;width:100%;background:white}td,th{border:1px solid #ccd5dd;padding:9px;text-align:left}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}img{max-width:100%;border:1px solid #bbc4ce}figure{margin:28px 0}figcaption{font-weight:600;margin-bottom:8px}</style><h1>三维验收：${esc(report.overall)}</h1><p>${esc(report.environment.execution)} · ${esc(report.environment.platform)} · ${esc(report.environment.browserVersion||'浏览器未启动')}</p><p><a href="${esc(target)}">被测网页</a> · ${esc(report.started)}</p><p>画面与模型证据只验证网页表达；不等同于实车安装、电气安全或物料实测验收。待核实项不能算通过。</p><table><tr><th>编号</th><th>验收点</th><th>结果</th><th>证据/限制</th></tr>${checks}</table>${shots}<h2>错误与警告</h2><pre>${esc(JSON.stringify({errors:report.errors,warnings:report.warnings},null,2))}</pre><p><a href="report.json">完整模型数据及机器可读报告</a></p></html>`);
   fs.writeFileSync(path.join(dir,'latest-result.txt'), out + os.EOL);
   console.log(`REPORT: ${path.join(out,'report.html')}`);
 }
@@ -159,12 +159,12 @@ try {
   const webgl=await ready(frame);report.model.webgl=webgl;
   await frame.evaluate(()=>window.aikoAssemblyGuide.selectBoard('comm-backplate'));
   await page.waitForTimeout(800);
-  await shot('00-smoke','最小测试：r9真实WebGL模型',frame);
-  row('K1-render','r9模型加载、真实WebGL绘制与截图','通过',{frame:frame.url(),webgl});
+  await shot('00-smoke','最小测试：当前版本真实WebGL模型',frame);
+  row('K1-render','当前版本模型加载、真实WebGL绘制与截图','通过',{frame:frame.url(),webgl});
   if(cloudCI)row('K1-environment','Google Chrome在GitHub Actions中执行',process.env.GITHUB_ACTIONS==='true'?'通过':'待核实',report.environment);
   else row('K1-machine','用户电脑Google Chrome验收',remote?'待核实':'通过',report.environment);
   const expectedFrame=new URL(target).searchParams.get('v')||'assembly-20261003-r9';
-  row('K1-version','当前r9入口',frame.url().includes(expectedFrame)?'通过':'待核实',frame.url());
+  row('K1-version','当前目标版本入口',frame.url().includes(expectedFrame)?'通过':'待核实',frame.url());
   if(full) {
     const {runFull}=await import('./full-checks.mjs');
     await runFull({page,context,frame,report,row,shot,ready,activeFrame,target,semanticControls:remote&&argv.includes('--semantic-controls'),detailsOnly:argv.includes('--details-only'),repairOnly:argv.includes('--repair-only')});

@@ -85,8 +85,9 @@ const electricalExpression=`(()=>{
      const c=cables.find(o=>o.name===cableName);circuitChecks.push({name:cableName,exists:!!c,startError:c?Math.hypot(...c.start.map((v,i)=>v-port.toArray()[i])):null,scope:'配电端实际接点；设备端待视觉/厂家端口核实'});
    }
  });
- const labels=[];scene.traverse(o=>{if(o.userData.annotationCode)labels.push({code:o.userData.annotationCode,names:o.userData.annotationNames,shown:shown(o),position:point(o)});if(o.userData.assemblyLabel)labels.push({data:o.userData.assemblyLabel,shown:shown(o)});});
- return {camera:${cameraExpression},boards,orion:point(orionSmart),rails,units:{modelUnitsPerMm:mm(1)},fixings,clips,cables,circuitChecks,labels,
+ const canvasRect=controls.domElement.getBoundingClientRect();
+ const labels=[];scene.traverse(o=>{if(o.userData.annotationCode){const points=[[-.5,-.1275],[.5,-.1275],[-.5,.1275],[.5,.1275]].map(([x,y])=>new THREE.Vector3(x,y,0).applyMatrix4(o.matrixWorld).project(camera)).map(p=>({x:(p.x+1)*canvasRect.width/2,y:(1-p.y)*canvasRect.height/2}));labels.push({code:o.userData.annotationCode,names:o.userData.annotationNames,text:o.userData.annotationText,language:o.userData.annotationLanguage,shown:shown(o),position:point(o),screenBounds:{left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))}});}if(o.userData.assemblyLabel)labels.push({data:o.userData.assemblyLabel,shown:shown(o)});});
+ return {camera:${cameraExpression},boards,orion:point(orionSmart),rails,units:{modelUnitsPerMm:mm(1)},fixings,clips,cables,circuitChecks,labels,canvas:{width:canvasRect.width,height:canvasRect.height,visibleHeight:Math.min(canvasRect.height,innerHeight-canvasRect.top)},
    snapshot:window.aikoAssemblyGuide.snapshot(),partPose:Object.fromEntries(Object.entries(commParts).filter(([id])=>id!=='wiring').map(([id,parts])=>[id,parts.map(pose)]))};
 })()`;
 
@@ -158,6 +159,7 @@ export async function runFull({page,context,frame,report,row,shot,ready,activeFr
   await frame.evaluate(()=>window.aikoAssemblyGuide.selectBoard('comm-backplate'));
   await mode('exploded');await shot('03-comm-exploded','通讯集成板爆炸图：螺丝、导轨、配件及编号',frame);
   const exploded=await attempt('K3-exploded-data','爆炸图实际姿态取证',model);
+  if(exploded){const visible=exploded.labels.filter(l=>l.shown&&l.code);report.model.explodedLabels=visible;row('R10-label-bounds','爆炸图C01–C15全部在实际可见画布内',visible.length===15&&visible.every(l=>l.screenBounds.left>=-1&&l.screenBounds.right<=exploded.canvas.width+1&&l.screenBounds.top>=-1&&l.screenBounds.bottom<=exploded.canvas.visibleHeight+1)?'通过':'失败',{canvas:exploded.canvas,labels:visible});}
   if(initial&&exploded)row('K3-exploded','爆炸图状态和实际零件分离',exploded.snapshot.mode==='exploded'&&hash(initial.partPose)!==hash(exploded.partPose)?'通过':'失败',{normalPoseHash:hash(initial.partPose),explodedPoseHash:hash(exploded.partPose)});
   await mode('normal');await shot('04-comm-normal','通讯集成板复位后的常规状态',frame);
   const restored=await attempt('K3-reset-data','常规复位取证',model);
@@ -169,6 +171,7 @@ export async function runFull({page,context,frame,report,row,shot,ready,activeFr
   await controlClick(page.locator('[data-assembly-command="play"]'));
   await frame.waitForFunction(()=>window.aikoAssemblyGuide.snapshot().stepProgress>.12,null,{timeout:8000});
   await controlClick(page.locator('[data-assembly-command="play"]'));
+  await frame.waitForFunction(()=>!window.aikoAssemblyGuide.snapshot().playing);
   const playAfter=await frame.evaluate(()=>window.aikoAssemblyGuide.snapshot());
   const poseAfter=await attempt('K3-play-end','动画运动取证',model);
   await shot('05-comm-animation','通讯板安装动画：实际播放后暂停',frame);
@@ -176,14 +179,17 @@ export async function runFull({page,context,frame,report,row,shot,ready,activeFr
   }else{await mode('animation');}
   // Detailed evidence uses the real step selector and action slider. Each
   // device clip is captured at hook, pivot and spring-return phases.
+  const clipEvidence=[];
   for(const index of [3,6,7,8])for(const p of repairOnly?[.55,1]:[.15,.55,1]){
     await scrub(index,p);
+    if(repairOnly){const actual=await model();clipEvidence.push({step:index,progress:p,clip:actual.clips.find(c=>({router:3,negative:6,cm5:7,moxa:8})[c.device]===index)});}
     await shot(`06-clip-${index}-${Math.round(p*100)}`,`步骤${index+1} 导轨卡扣：${Math.round(p*100)}%动作`,frame);
   }
   for(const index of repairOnly?[5,9,20]:[5,9,11,12,20,21,22]){
     await scrub(index,index>=20?.8:1);
     await shot(`07-detail-step-${index+1}`,`安装步骤${index+1}：螺丝、卡扣、上墙或接线细节`,frame);
   }
+  if(repairOnly)row('R10-clip-opacity','当前卡扣固定钩保持不透明',clipEvidence.length===8&&clipEvidence.every(e=>e.clip?.shown&&e.clip.hook.material.opacity===1)?'通过':'失败',clipEvidence);
   const stepOptions=await page.locator('[data-assembly-step-select] option').evaluateAll(nodes=>nodes.map(o=>({value:o.value,text:o.textContent})));
   report.model.communicationSteps=stepOptions;
   row('K5-clip-visual','四台设备卡扣挂入、压扣和回弹是否清晰正确','待核实','已保存四台设备三阶段截图。几何存在与动作取证不自动证明实物卡扣形状、夹持力或装配适配。');
@@ -199,6 +205,7 @@ export async function runFull({page,context,frame,report,row,shot,ready,activeFr
   await frame.waitForFunction(()=>!!window.aikoGxScene,null,{timeout:30000});
   await frame.evaluate(()=>window.aikoAssemblyGuide.selectBoard('gx-touch50'));
   await mode('normal');await shot('08-gx-normal','GX常规安装：电视右侧同一面白墙',frame);
+  row('R10-GX-overlay','GX重复信息卡已隐藏，不遮挡视角按钮',await page.locator('.stage-status').isHidden()?'通过':'失败',{hidden:await page.locator('.stage-status').isHidden()});
   const gx=await frame.evaluate(async()=>{
     const THREE=await import('../vendor/three/build/three.module.min.js');
     const a=window.aikoGxScene;a.scene.updateMatrixWorld(true);
