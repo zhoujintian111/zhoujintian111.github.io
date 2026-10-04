@@ -1190,6 +1190,7 @@ try{
     }
   }
   function restoreAssembly(){
+    commPresentation.restore();
     setAssemblyContext(false);
     activeAssembly.origins.forEach((position,o)=>o.position.copy(position));
     if(assemblySelectionVisibility)assemblySelectionVisibility.forEach((visible,o)=>o.visible=visible);
@@ -1214,6 +1215,7 @@ try{
     const {board,original,parts,wiring,origins}=activeAssembly;
     const showGuide=assemblyState.available&&assemblyState.mode!=='normal';
     if(!showGuide){restoreAssembly();updateAssemblyHighlight();return;}
+    commPresentation.setActive(true);
     setAssemblyContext(true);
     const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=true;
     const installation=assemblyState.mode==='animation',originalReference=installation&&assemblyState.step<3;

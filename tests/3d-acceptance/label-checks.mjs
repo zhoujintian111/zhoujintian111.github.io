@@ -7,11 +7,17 @@ return {text,background,whitePixels,selected:!!o.userData.annotationSelected,ton
 const electricalExpression=`(()=>{${sample}
 const labels=[];scene.traverse(o=>{if(o.userData.annotationCode&&shown(o))labels.push(inspect(o,o.children[0],o.userData.annotationText));});return {labels,background:scene.background.getHex(),snapshot:window.aikoAssemblyGuide.snapshot(),camera:camera.position.toArray()};})()`;
 const gxExpression=sample+`const a=window.aikoGxScene;return {labels:a.assembly.labels.children.filter(o=>o.isSprite&&shown(o)).map(o=>inspect(o,o,o.userData.assemblyLabel.text)),background:a.scene.background.getHex(),snapshot:window.aikoAssemblyGuide.snapshot()};`;
-export async function runLabels({page,context,frame,report,row,shot,ready,activeFrame,target}){
+export async function runLabels({page,context,frame,report,row,shot,ready,activeFrame,target,boardOnly=false}){
  const mode=async name=>{await page.locator('[data-assembly-command="mode"][data-value="'+name+'"]').click();await frame.waitForFunction(name=>window.aikoAssemblyGuide.snapshot().mode===name,name);await page.waitForTimeout(250);};
  const language=async lang=>{await page.locator('[data-language="'+lang+'"]').click();await frame.waitForFunction(lang=>document.documentElement.lang.startsWith(lang),lang);await page.waitForTimeout(250);};
  const electrical=()=>readElectrical(context,page,frame,electricalExpression);
  const check=(id,result,count)=>{report.model[id]=result;row(id,'实际半透明标签、白色实字及浅灰背景',result.labels.length===count&&result.labels.every(l=>l.background[3]>0&&l.background[3]<255&&l.whitePixels>100&&!l.toneMapped)&&result.background===0xe1e1e1?'通过':'失败',result);};
+ if(boardOnly){
+  await page.locator('[data-assembly-command="select"][data-value="constant-aiko"]').click();await frame.waitForFunction(()=>window.aikoAssemblyGuide.snapshot().boardId==='constant-aiko');
+  const normal=(await electrical()).background;await language('en');await mode('exploded');await shot('04-board-labels-en','恒流板背景修复后的真实爆炸图',frame);check('T4-board',await electrical(),5);
+  await mode('normal');const restored=(await electrical()).background;row('T4-normal','恒流板常规背景恢复',restored===normal?'通过':'失败',{normal,restored});
+  row('T8-visual','恒流板修复画面清晰度','待核实','取回实际PNG后视觉复核；其他标签沿用前次已通过的截图。');return;
+ }
  await mode('exploded');await shot('01-comm-labels-zh','通讯板爆炸图：半透明标签',frame);const comm=await electrical();check('T1-comm',comm,15);
  await page.locator('[data-assembly-command="part"][data-value="fuse-fasteners"]').click();await frame.waitForFunction(()=>window.aikoAssemblyGuide.snapshot().partId==='fuse-fasteners');await shot('02-comm-selected','保险座螺丝标签选中反馈',frame);
  const selected=await electrical();const tag=selected.labels.find(l=>l.selected);row('T2-selected','选中标签仍半透明且强调可辨',!!tag&&tag.background[3]<255&&tag.background[3]>comm.labels[0].background[3]?'通过':'失败',tag);
