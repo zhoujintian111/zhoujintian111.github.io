@@ -12,6 +12,11 @@ export function createGxAssemblyGuide(THREE,context){
  const gray=new THREE.MeshStandardMaterial({color:0x585e62,roughness:.8});
  const orange=new THREE.MeshBasicMaterial({color:0xff5a00,depthTest:false});
  const box=(parent,w,h,d,x,y,z,mat=black)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);parent.add(m);return m;};
+ const profile=(kind,w,h,Path=THREE.Shape)=>{const p=new Path(),x=w/2,y=h/2;
+   if(kind==='hdmi'){p.moveTo(-x,y);p.lineTo(x,y);p.lineTo(x,-y*.35);p.lineTo(x*.72,-y);p.lineTo(-x*.72,-y);p.lineTo(-x,-y*.35);p.closePath();}
+   else {p.moveTo(-x,-y);p.lineTo(x,-y);p.lineTo(x,y);p.lineTo(-x,y);p.closePath();}return p;};
+ const axialShape=(parent,shape,length,x,y=0,z=0,material=silver)=>{const m=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:length,bevelEnabled:false,curveSegments:16}),material);m.rotation.y=Math.PI/2;m.position.set(x,y,z);parent.add(m);return m;};
+ const roundedBody=(parent,w,h,length,x)=>{const p=new THREE.Shape(),r=.0018,a=w/2,b=h/2;p.moveTo(-a+r,-b);p.lineTo(a-r,-b);p.quadraticCurveTo(a,-b,a,-b+r);p.lineTo(a,b-r);p.quadraticCurveTo(a,b,a-r,b);p.lineTo(-a+r,b);p.quadraticCurveTo(-a,b,-a,b-r);p.lineTo(-a,-b+r);p.quadraticCurveTo(-a,-b,-a+r,-b);return axialShape(parent,p,length,x,0,0,black);};
  const line=(parent,points,material=orange)=>{const o=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),material);o.renderOrder=30;parent.add(o);return o;};
  const tube=(parent,points,radius=.0018)=>{const curve=new THREE.CatmullRomCurve3(points,false,'centripetal');const m=new THREE.Mesh(new THREE.TubeGeometry(curve,100,radius,8,false),black);parent.add(m);return m;};
  // Labels are screen-sized callouts; their leaders track the actual moving part.
@@ -47,12 +52,15 @@ export function createGxAssemblyGuide(THREE,context){
    const group=new THREE.Group();group.name=name;group.position.copy(position);group.userData.illustrativeEnvelope=true;layer.add(group);
    const lower=new THREE.Group(),hinge=new THREE.Group();group.add(lower,hinge);hinge.position.set(.010,0,0);
    const half=(parent,upper)=>{
-     const shape=new THREE.Shape(),start=upper?0:Math.PI,end=start+Math.PI;
-     shape.absarc(0,0,.009,start,end,false);shape.lineTo(.0028*Math.cos(end),.0028*Math.sin(end));shape.absarc(0,0,.0028,end,start,true);shape.closePath();
-     const geo=new THREE.ExtrudeGeometry(shape,{depth:.023,steps:1,bevelEnabled:true,bevelSegments:1,bevelSize:.0006,bevelThickness:.0005,curveSegments:12});
-     geo.translate(0,0,-.0115);geo.rotateX(Math.PI/2);
-     const shell=new THREE.Mesh(geo,black);parent.add(shell);shell.position.x=upper?-.010:0;
-     const core=new THREE.Mesh(new THREE.CylinderGeometry(.00295,.00295,.020,16,1,true,upper?0:Math.PI,Math.PI),gray);core.rotation.y=Math.PI/2;core.position.x=upper?-.010:0;parent.add(core);
+     const start=upper?0:Math.PI,end=start+Math.PI,offset=upper?-.010:0;
+     const ringHalf=(outer,inner,length,material,name,along=0)=>{const shape=new THREE.Shape();shape.absarc(0,0,outer,start,end,false);shape.lineTo(inner*Math.cos(end),inner*Math.sin(end));shape.absarc(0,0,inner,end,start,true);shape.closePath();const geo=new THREE.ExtrudeGeometry(shape,{depth:length,bevelEnabled:false,curveSegments:24});geo.translate(0,0,-length/2);geo.rotateX(Math.PI/2);const m=new THREE.Mesh(geo,material);m.name=name;m.position.set(offset,along,0);parent.add(m);return m;};
+     ringHalf(.009,.0078,.023,black,'Plastic half-shell');
+     ringHalf(.0077,.0028,.019,gray,'Ferrite half-core with open cable groove');
+     for(const y of [-.0105,.0105])ringHalf(.0089,.0028,.002,black,'End retaining rim',y);
+     // End ribs, a tangent hinge and opposite latch remain visible when the shell opens.
+     for(const y of [-.007,.007])ringHalf(.0093,.009,.0012,black,'Moulded shell rib',y);
+     for(const y of [-.0075,.0075]){const knuckle=new THREE.Mesh(new THREE.CylinderGeometry(.0015,.0015,.004,16),black);knuckle.position.set(offset+.010,y,0);knuckle.name='Hinge knuckle';parent.add(knuckle);}
+     const latch=box(parent,.003,.006,.002,offset-.0095,0,upper?.001:-.001);latch.name=upper?'Snap latch tongue':'Snap latch catch';
    };
    half(lower,false);half(hinge,true);group.rotation.x=Math.PI/2;
    group.userData.hinge=hinge;return group;
@@ -69,9 +77,33 @@ export function createGxAssemblyGuide(THREE,context){
  const endpointInset=new THREE.Group();endpointInset.name='Cerbo GX MK2 connector detail — illustrative inset';endpointInset.userData.illustrativeInset=true;endpointInset.position.set(.38,1.10,.29);layer.add(endpointInset);
  const panel=box(endpointInset,.004,.098,.164,.008,0,0,new THREE.MeshStandardMaterial({color:0x15465e,roughness:.55}));
  const socketMat=new THREE.MeshStandardMaterial({color:0x060a0e,roughness:.6});
- const ports={hdmi:box(endpointInset,.004,.015,.023,.002,.010,-.040,silver),usb:box(endpointInset,.004,.010,.017,.002,.010,.041,silver)};
- box(endpointInset,.0041,.011,.019,-.0001,.010,-.040,socketMat);box(endpointInset,.0041,.006,.013,-.0001,.010,.041,socketMat);
- const makePlug=(kind,z)=>{const group=new THREE.Group();group.name=kind==='hdmi'?'GX HDMI plug':'GX USB power plug';group.position.set(-.018,.010,z);endpointInset.add(group);box(group,.018,.012,kind==='hdmi'?.020:.014,-.007,0,0);box(group,.012,kind==='hdmi'?.010:.007,kind==='hdmi'?.018:.012,.008,0,0,silver);return group;};
+ const gold=new THREE.MeshStandardMaterial({color:0xcab268,metalness:.8,roughness:.32});
+ const ports={};
+ for(const [kind,z,w,h] of [['hdmi',-.040,.019,.011],['usb',.041,.013,.008]]){
+   const group=new THREE.Group();group.name=kind==='hdmi'?'HDMI keyed receptacle':'USB-A receptacle';group.position.set(0,.010,z);endpointInset.add(group);ports[kind]=group;
+   const mouth=profile(kind,w+.001,h+.001);mouth.holes.push(profile(kind,w,h,THREE.Path));axialShape(group,mouth,.010,-.004);
+   box(group,.001,h-.001,w-.001,.0055,0,0,socketMat);
+   box(group,.006,.0012,w-.002,.002,kind==='usb'?.0012:0,0,socketMat);
+ }
+ const makePlug=(kind,z)=>{const group=new THREE.Group();group.name=kind==='hdmi'?'GX HDMI plug':'GX USB power plug';group.position.set(-.010,.010,z);endpointInset.add(group);
+   group.userData.shapeBasis='Original kit photo; connector envelope remains illustrative';
+   const w=kind==='hdmi'?.018:.012,h=kind==='hdmi'?.010:.007,t=.00035;
+   roundedBody(group,kind==='hdmi'?.020:.014,.012,.018,-.016);
+   for(let i=0;i<4;i++){const rib=new THREE.Mesh(new THREE.CylinderGeometry(.0028-i*.00015,.0028-i*.00015,.0008,20),black);rib.rotation.z=Math.PI/2;rib.position.x=-.017-i*.0012;rib.name='Ribbed strain relief';group.add(rib);}
+   if(kind==='hdmi'){
+     const shell=profile(kind,w,h);shell.holes.push(profile(kind,w-2*t,h-2*t,THREE.Path));axialShape(group,shell,.012,.002).name='HDMI trapezoidal hollow metal shell';
+     const insert=profile(kind,w-.002,h-.002);insert.holes.push(profile(kind,w-.004,.0028,THREE.Path));axialShape(group,insert,.010,.002,0,0,socketMat).name='HDMI dielectric with keyed mating slot';
+     for(const [count,y] of [[10,.0014],[9,-.0014]])for(let i=0;i<count;i++)box(group,.007,.00018,.00045,.009,y,(i-(count-1)/2)*.00135,gold).name='HDMI contact';
+   }else{
+     for(const side of [-1,1])box(group,.012,h,t,.008,0,side*(w-t)/2,silver);
+     box(group,.012,t,w,.008,-(h-t)/2,0,silver);
+     // Two actual retention windows in the top metal sheet.
+     const top=profile('usb',.012,w);for(const zc of [-.003,.003]){const hole=new THREE.Path();hole.moveTo(-.0011,zc-.0009);hole.lineTo(.0011,zc-.0009);hole.lineTo(.0011,zc+.0009);hole.lineTo(-.0011,zc+.0009);hole.closePath();top.holes.push(hole);}
+     const sheet=new THREE.Mesh(new THREE.ExtrudeGeometry(top,{depth:t,bevelEnabled:false}),silver);sheet.rotation.x=-Math.PI/2;sheet.position.set(.008,h/2-t,0);sheet.name='USB-A top shell with retention windows';group.add(sheet);
+     box(group,.010,.0012,w-.001,.007,-.001,0,socketMat);
+     for(let i=0;i<4;i++)box(group,.007,.00018,.0008,.009,-.00031,(i-1.5)*.0025,gold).name='USB-A contact';
+   }
+   return group;};
  const hdmiPlug=makePlug('hdmi',-.040),usbPlug=makePlug('usb',.041);
  const tail=tube(endpointInset,[V(-.070,-.035,-.074),V(-.072,-.02,-.05),V(-.067,.010,-.040),V(-.032,.010,-.040)],.002);
  const usbTail=tube(endpointInset,[V(-.070,-.035,-.074),V(-.078,-.022,.015),V(-.065,.010,.041),V(-.032,.010,.041)],.0017);

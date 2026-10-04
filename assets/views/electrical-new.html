@@ -253,6 +253,16 @@ try{
     const s=cylinder(.045*scale,.035*scale,mat.silver,x,y,z);s.userData.mountingScrewHead=true;parent.add(s);
     const slot=box(.055*scale,.009*scale,.012,mat.black,x,y,z+.022,0);parent.add(slot);
   }
+  // Upgrade hardware only: socket-head screws in the supplied purchase photos.
+  // The locked old equipment continues to use screw() unchanged.
+  function socketScrew(x,y,z,parent,scale=1){
+    const radius=.045*scale,height=.035*scale,shape=new THREE.Shape();shape.absarc(0,0,radius,0,Math.PI*2,false);
+    const hex=new THREE.Path();for(let i=0;i<6;i++){const a=i*Math.PI/3,p=[Math.cos(a)*radius*.46,Math.sin(a)*radius*.46];i?hex.lineTo(...p):hex.moveTo(...p);}hex.closePath();shape.holes.push(hex);
+    const head=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:height*.74,bevelEnabled:true,bevelSize:.0007,bevelThickness:.0005,bevelSegments:2,curveSegments:24}),mat.silver);
+    head.geometry.translate(0,0,-height*.24);head.position.set(x,y,z);head.userData.mountingScrewHead=true;head.name='Hex socket screw head';parent.add(head);
+    const floor=cylinder(radius,height*.26,mat.silver,0,0,-height*.37);head.add(floor);
+    const recess=cylinder(radius*.41,.0005,mat.blackRubber,0,0,-height*.239);head.add(recess);return head;
+  }
   function labelTexture(title,subtitle='',accent='#ffffff',w=512,h=256){
     const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
     g.clearRect(0,0,w,h);g.fillStyle='rgba(255,255,255,.10)';g.fillRect(24,24,w-48,2);
@@ -534,6 +544,22 @@ try{
     const hole=new THREE.Path();hole.absarc(0,0,inner,0,Math.PI*2,true);shape.holes.push(hole);
     const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:length,bevelEnabled:false,curveSegments:24}),material);mesh.geometry.translate(0,0,-length/2);mesh.castShadow=true;return mesh;
   }
+  function flatWasher(outer,inner,length){
+    // Lathed section has a real bore and small edge chamfers, bounded by the original envelope.
+    const c=Math.min(length*.18,(outer-inner)*.12),p=[[inner,-length/2+c],[inner+c,-length/2],[outer-c,-length/2],[outer,-length/2+c],[outer,length/2-c],[outer-c,length/2],[inner+c,length/2],[inner,length/2-c],[inner,-length/2+c]].map(([x,y])=>new THREE.Vector2(x,y));
+    const mesh=new THREE.Mesh(new THREE.LatheGeometry(p,32),mat.silver);mesh.rotation.x=Math.PI/2;mesh.name='Chamfered flat washer with through bore';return mesh;
+  }
+  function lockNut(radius,bore,height){
+    const shape=new THREE.Shape();for(let i=0;i<6;i++){const a=i*Math.PI/3;i?shape.lineTo(radius*Math.cos(a),radius*Math.sin(a)):shape.moveTo(radius*Math.cos(a),radius*Math.sin(a));}shape.closePath();const hole=new THREE.Path();hole.absarc(0,0,bore,0,Math.PI*2,true);shape.holes.push(hole);
+    const nut=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:height*.72,bevelEnabled:true,bevelSize:.0012,bevelThickness:.001,bevelSegments:2,curveSegments:24}),mat.silver);nut.geometry.translate(0,0,-height/2);nut.name='Hex nylon-insert locknut with through bore';
+    const collar=annularPiece(radius*.80,bore,height*.28,mat.silver);collar.position.z=height*.36;nut.add(collar);
+    const insert=annularPiece(radius*.69,bore,height*.13,new THREE.MeshStandardMaterial({color:0x276eaf,roughness:.62}));insert.position.z=height*.435;insert.name='Blue nylon locking insert';nut.add(insert);return nut;
+  }
+  function threadShaft(shaft,radius,length,pitch){
+    // Cosmetic helix distinguishes a threaded fastener; not a manufacturing thread profile.
+    const turns=length/pitch,pts=[];for(let i=0;i<=Math.ceil(turns*12);i++){const t=i/Math.ceil(turns*12),a=t*turns*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*radius*.98,(t-.5)*length,Math.sin(a)*radius*.98));}
+    const ridge=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),Math.ceil(turns*12),radius*.08,4,false),mat.silver);ridge.name='Illustrative thread ridge';shaft.add(ridge);return shaft;
+  }
   function commFixing(parent,x,y,z,scale,id,withRearNut=false){
     // All rear hardware seats against the actual 4 mm plate, not an assumed
     // device-local plane. Unconfirmed shaft lengths only illustrate this stack.
@@ -545,14 +571,15 @@ try{
     const shaftLength=id==='rail-fasteners'?.16:headUnderside-(nutRearZ-.012);
     const addedAt=commParts[id].length;
     captureCommPart(id,parent,()=>{
-      const headIndex=parent.children.length;screw(x,y,z,parent,scale);parent.children[headIndex].userData.commFixingHead=true;
+      const head=socketScrew(x,y,z,parent,scale);head.userData.commFixingHead=true;
       const shaft=axisCylinder(parent,.030*scale,shaftLength,mat.silver,x,y,headUnderside-shaftLength/2);
+      threadShaft(shaft,.030*scale,shaftLength,id==='cerbo-fasteners'?.005:.007);
       shaft.userData.commFixingShaft=true;shaft.userData.lengthBasis=id==='rail-fasteners'?'prepared M4×16; trial-fit required':'illustrative through displayed stack; final length unconfirmed';
       shaft.userData.illustrativeLength=id!=='rail-fasteners';if(id==='rail-fasteners')shaft.userData.preparedLengthMm=16;
-      const washer=annularPiece(.055*scale,.031*scale,washerThickness,mat.silver);washer.position.set(x,y,headUnderside-washerThickness/2);parent.add(washer);
+      const washer=flatWasher(.055*scale,.031*scale,washerThickness);washer.position.set(x,y,headUnderside-washerThickness/2);parent.add(washer);
       if(withRearNut){
-        const rearWasher=annularPiece(.055*scale,.031*scale,washerThickness,mat.silver);rearWasher.position.set(x,y,rearZ-washerThickness/2);rearWasher.userData.commRearWasher=true;parent.add(rearWasher);
-        const nut=axisCylinder(parent,.050*scale,nutThickness,mat.silver,x,y,rearZ-washerThickness-nutThickness/2,'z',6);nut.userData.commRearNut=true;
+        const rearWasher=flatWasher(.055*scale,.031*scale,washerThickness);rearWasher.position.set(x,y,rearZ-washerThickness/2);rearWasher.userData.commRearWasher=true;parent.add(rearWasher);
+        const nut=lockNut(.050*scale,.031*scale,nutThickness);nut.position.set(x,y,rearZ-washerThickness-nutThickness/2);parent.add(nut);nut.userData.commRearNut=true;
       }
     });
     // Rear hardware belongs to the plate stack, independent of device travel.
@@ -576,7 +603,7 @@ try{
     return new THREE.Vector3(x,y,z).add(axis==='x'?new THREE.Vector3(.06,0,0):axis==='-x'?new THREE.Vector3(-.06,0,0):axis==='-y'?new THREE.Vector3(0,-.06,0):new THREE.Vector3(0,0,.06));
   }
   function attachMeta(g,key){const d=deviceMessage(key);deviceMeta(g,d.id,d.title,d.text,'signal');Object.assign(g.userData,d);return g;}
-  function mountAt(x,y,r=.032){const p=commAt(x,y,2.7);communication.add(cylinder(r,.03,mat.blackRubber,p.x,p.y,p.z));screw(p.x,p.y,p.z+.027,communication,.58);}
+  function mountAt(x,y,r=.032){const p=commAt(x,y,2.7);communication.add(cylinder(r,.03,mat.blackRubber,p.x,p.y,p.z));socketScrew(p.x,p.y,p.z+.027,communication,.58);}
   [[15,15],[15,125],[15,235],[435,15],[435,125],[435,235]].forEach(([x,y])=>{
     const p=commAt(x,y,-8),spacer=new THREE.Group();spacer.position.copy(p);spacer.name='plain-spacer-6.2-15-12';spacer.userData={innerDiameterMm:6.2,outerDiameterMm:15,heightMm:12,plainBore:true};
     spacer.add(annularPiece(.075,.031,.12,mat.frame));communication.add(spacer);commParts.spacers.push(spacer);
@@ -770,7 +797,7 @@ try{
     g.add(box(1.96,1.50,.04,adapterMat,0,0,.02,.03));parts.adapter.push(g.children.at(-1));
     [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,hy])=>{
       g.add(cylinder(.0325,.018,mat.blackRubber,x,hy,.045));
-      screw(x,hy,.065,g,.74);
+      socketScrew(x,hy,.065,g,.74);
     });
     parts['wall-screws']=g.children.slice(1);
     g.add(box(1.34,1.04,.035,silver,0,0,.075,.05));
@@ -778,13 +805,13 @@ try{
       g.add(box(.12,.24,.04,silver,x,hy,.09,.03));
       g.add(cylinder(.0375,.018,adapterMat,x,hy,.116));
       g.add(cylinder(.0225,.023,mat.blackRubber,x,hy,.126));
-      const before=g.children.length;screw(x,hy,.145,g,.82);
+      const before=g.children.length;socketScrew(x,hy,.145,g,.82);
       parts['module-screws'].push(...g.children.slice(before));
     });
     g.add(box(1.30,1.00,.50,silver,0,0,.335,.047));
     g.add(box(1.31,1.01,.014,gasketMat,0,0,.574,.035));
     g.add(box(1.34,1.04,.035,silver,0,0,.592,.05));
-    [[-.61,-.46],[-.61,.46],[.61,-.46],[.61,.46]].forEach(([x,hy])=>screw(x,hy,.618,g,.82));
+    [[-.61,-.46],[-.61,.46],[.61,-.46],[.61,.46]].forEach(([x,hy])=>socketScrew(x,hy,.618,g,.82));
     [[-.62,-.43],[-.62,.43],[.62,-.43],[.62,.43]].forEach(([x,hy])=>g.add(box(.03,.07,.48,silver,x,hy,.335,.008)));
 
     // Schematic waterproof panel socket plus separate mating cable plug.
@@ -1080,9 +1107,9 @@ try{
   };
   const assemblyRecords=new Map([cc1,cc2,cc3].map((board,index)=>{
     const parts=boardAssemblyParts.get(board),wiring=boardWiringMap.get(board);
-    // Smooth shafts convey prepared lengths, not a backboard thread form.
-    [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,y])=>parts['wall-screws'].push(axisCylinder(board,.024,.08,mat.silver,x,y,.006)));
-    [[-.73,-.365],[-.73,.365],[.73,-.365],[.73,.365]].forEach(([x,y])=>parts['module-screws'].push(axisCylinder(board,.019,.06,mat.silver,x,y,.098)));
+    // Prepared shaft lengths are unchanged. Thread detail is an illustrative helix.
+    [[-.66,-.61],[-.66,.61],[.66,-.61],[.66,.61]].forEach(([x,y])=>parts['wall-screws'].push(threadShaft(axisCylinder(board,.024,.08,mat.silver,x,y,.006),.024,.08,.008)));
+    [[-.73,-.365],[-.73,.365],[.73,-.365],[.73,.365]].forEach(([x,y])=>parts['module-screws'].push(threadShaft(axisCylinder(board,.019,.06,mat.silver,x,y,.098),.019,.06,.007)));
     parts.mc4=wiring.filter(o=>o.userData.connectorType==='mc4-cable');
     const origins=new Map();
     for(const id of assemblyIds)for(const object of parts[id]){
@@ -1601,6 +1628,6 @@ try{
 }
 </script>
 
-<script src="../view-language.js?v=assembly-20261004-r11"></script>
+<script src="../view-language.js?v=assembly-20261004-r12"></script>
 </body>
 </html>
