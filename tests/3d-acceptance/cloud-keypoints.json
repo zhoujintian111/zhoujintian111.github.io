@@ -1,0 +1,97 @@
+{
+  "task": "独立GitHub Actions云端r9验收",
+  "keypoints": [
+    {
+      "id": "C1",
+      "requirement": "仅独立测试分支新增测试与工作流，不修改或发布网站",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "好的",
+        "reference": "2026-10-04 09:23 用户同意此前四步GitHub Actions独立云端验收方案；沿用原始只新增测试、不改网站授权"
+      },
+      "expected": "原有网站树与main分支保持原样；无部署步骤",
+      "check": "核对远端base tree、提交文件列表和main ref",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "r9-cloud-20261004"
+      }
+    },
+    {
+      "id": "C2",
+      "requirement": "先证明Chrome启动、真实WebGL绘制和截图保存成功",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "好的",
+        "reference": "2026-10-04 09:23 用户同意此前四步GitHub Actions独立云端验收方案；沿用原始只新增测试、不改网站授权"
+      },
+      "expected": "最小场景加载并保存实际图像",
+      "check": "Chrome版本、GL renderer与drawCalls、PNG截图",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "r9-cloud-20261004"
+      }
+    },
+    {
+      "id": "C3",
+      "requirement": "最小测试通过且人工检查截图后才能扩展完整检查",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "好的",
+        "reference": "2026-10-04 09:23 用户同意此前四步GitHub Actions独立云端验收方案；沿用原始只新增测试、不改网站授权"
+      },
+      "expected": "先smoke；再full，full仍先做smoke",
+      "check": "核对工作流QA_MODE及实际报告和图像",
+      "depends_on": [
+        "C2"
+      ],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "r9-cloud-20261004"
+      }
+    },
+    {
+      "id": "C4",
+      "requirement": "由GPT获取并检查截图和数据，无需用户安装、下载或传结果",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "好的",
+        "reference": "2026-10-04 09:23 用户同意此前四步GitHub Actions独立云端验收方案；沿用原始只新增测试、不改网站授权"
+      },
+      "expected": "工作流保存证据，GPT读取实际产物",
+      "check": "GitHub run、artifact与视觉复核记录",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "r9-cloud-20261004"
+      }
+    },
+    {
+      "id": "C5",
+      "requirement": "保持已确认布局和证据边界，无法确认的不猜测",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "好的",
+        "reference": "2026-10-04 09:23 用户同意此前四步GitHub Actions独立云端验收方案；沿用原始只新增测试、不改网站授权"
+      },
+      "expected": "L型、2x150mm、GX电视右侧同墙中心1450mm；实物未知保留待核实",
+      "check": "实际模型测量、三种状态和安装步骤图像",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "r9-cloud-20261004"
+      }
+    }
+  ]
+}
