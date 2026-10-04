@@ -219,11 +219,11 @@ try{
   const micro=noiseMap();
 
   const mat={
-    panel:new THREE.MeshPhysicalMaterial({color:0x8d8f8b,roughness:.68,metalness:.06,clearcoat:.04,clearcoatRoughness:.9,normalMap:micro,normalScale:new THREE.Vector2(.05,.05)}),
+    panel:new THREE.MeshPhysicalMaterial({color:0x8d8f8b,roughness:.68,metalness:.06,clearcoat:.04,clearcoatRoughness:.9,bumpMap:micro,bumpScale:.002}),
     frame:new THREE.MeshPhysicalMaterial({color:0x737d82,roughness:.25,metalness:.86,clearcoat:.14}),
-    blue:new THREE.MeshPhysicalMaterial({color:0x07516f,roughness:.55,metalness:.05,clearcoat:.09,clearcoatRoughness:.8,normalMap:micro,normalScale:new THREE.Vector2(.06,.06)}),
+    blue:new THREE.MeshPhysicalMaterial({color:0x07516f,roughness:.55,metalness:.05,clearcoat:.09,clearcoatRoughness:.8,bumpMap:micro,bumpScale:.002}),
     blueDark:new THREE.MeshPhysicalMaterial({color:0x06394f,roughness:.6,metalness:.06,clearcoat:.05}),
-    black:new THREE.MeshPhysicalMaterial({color:0x111416,roughness:.46,metalness:.25,clearcoat:.08,normalMap:micro,normalScale:new THREE.Vector2(.04,.04)}),
+    black:new THREE.MeshPhysicalMaterial({color:0x111416,roughness:.46,metalness:.25,clearcoat:.08,bumpMap:micro,bumpScale:.002}),
     blackRubber:new THREE.MeshPhysicalMaterial({color:0x090c0e,roughness:.7,metalness:.02}),
     red:new THREE.MeshPhysicalMaterial({color:0xa91d25,roughness:.5,metalness:.03,clearcoat:.14}),
     brass:new THREE.MeshPhysicalMaterial({color:0xb78a3d,roughness:.26,metalness:.9}),
@@ -896,7 +896,7 @@ try{
 
   // Buck Boost input and output.
   const bo=buckOut.clone().add(buck.position),bg=buckGnd.clone().add(buck.position),bi=buckIn.clone().add(buck.position),sp=sourceP.clone().add(source.position),sn=sourceN.clone().add(source.position);
-  cable(flowGroups.drive,R,.06,[bi,[.82,3.95,.82],[1.35,2.1,.78],[2.45,.72,.69],sp],'原车正极 → Buck IN+');
+  cable(flowGroups.drive,R,.06,[bi,[.82,3.95,.82],[1.35,2.1,.78],[2.45,.72,.69],sp],'保留的行车充电正极 → Buck Boost 800 IN+',{nameEn:'Retained vehicle charging positive → Buck Boost 800 IN+'});
   cable(flowGroups.drive,K,.06,[bg,[.38,3.88,.7],[1.02,1.88,.7],[2.12,.62,.64],sn],'原车负极 → Buck GND');
   cable(flowGroups.drive,R,.06,[bo,[-.52,4.58,.86],[-.78,4.92,.9],mgPairs[3].plus],'Buck OUT+ → MG 第4组');
   cable(flowGroups.drive,K,.06,[bg,[.02,4.45,.72],[-.34,4.85,.8],mgPairs[3].minus],'Buck GND → MG 第4组');
@@ -1124,7 +1124,9 @@ try{
     const halves=[sorted.slice(0,Math.ceil(sorted.length/2)),sorted.slice(Math.ceil(sorted.length/2))];
     halves.forEach((column,side)=>{
       column.sort((a,b)=>b.projected.y-a.projected.y);
-      const spacing=Math.max(halfY*2+.055,.14),span=(column.length-1)*spacing,mid=Math.max(-.72+span/2,Math.min(.72-span/2,column.reduce((n,e)=>n+(e.preferredY??e.projected.y),0)/Math.max(1,column.length)));
+      const upper=.94-halfY,lower=-.78+halfY;
+      const spacing=Math.min(Math.max(halfY*2+.055,.14),(upper-lower)/Math.max(1,column.length-1)),span=(column.length-1)*spacing;
+      const mid=THREE.MathUtils.clamp(column.reduce((n,e)=>n+(e.preferredY??e.projected.y),0)/Math.max(1,column.length),lower+span/2,upper-span/2);
       column.forEach(({g,leader,target,selected},i)=>{
         refreshInstallationAnnotation(g,selected);g.visible=leader.visible=true;g.scale.setScalar(labelScale);
         const x=(side?1:-1)*(1-halfX-.04),y=mid+span/2-i*spacing;
@@ -1431,6 +1433,17 @@ try{
     });
   }
   function ghostCommObjects(objects,opacity,preserveClips=false){for(const object of objects)object.traverse(mesh=>{if(!mesh.material||mesh.userData.isCableHit)return;if(preserveClips){for(let parent=mesh;parent&&parent!==object.parent;parent=parent.parent)if(parent.userData.deviceClip)return;}const original=commMaterialOrigins.get(mesh);if(!original||Array.isArray(original))return;let ghost=commGhostMaterials.get(mesh);if(!ghost){ghost=original.clone();commGhostMaterials.set(mesh,ghost);}ghost.transparent=true;ghost.opacity=original.opacity*opacity;ghost.depthWrite=false;mesh.material=ghost;});}
+  // Installation-only contrast: leave original materials and physical geometry intact.
+  const commClipDetailMaterials=new Map();
+  function clarifyDeviceClip(record){
+    record.root.traverse(mesh=>{
+      const original=commMaterialOrigins.get(mesh);if(!original||Array.isArray(original))return;
+      if(record.root.userData.kind==='plastic'){mesh.material=original;return;}
+      let detail=commClipDetailMaterials.get(mesh);
+      if(!detail){detail=original.clone();detail.color.setHex(0x667581);detail.metalness=.20;detail.roughness=.48;detail.transparent=false;detail.opacity=1;detail.depthWrite=true;commClipDetailMaterials.set(mesh,detail);}
+      mesh.material=detail;
+    });
+  }
   function poseDeviceClip(record,progress){
     const object=record.device,base=commOrigins.get(object),p=commClamp(progress);
     // Phase 1: approach upper lip. Phase 2: pivot about the engaged lip.
@@ -1487,19 +1500,19 @@ try{
       if(activeClip){
         // Keep actual hook and spring opaque; ghost only the body obscuring them.
         ghostCommObjects([activeClip.device],.12,true);ghostCommObjects([commBack],.08);
-        ghostCommObjects([activeClip.carrier],.28);
+        clarifyDeviceClip(activeClip);
         activeClip.device.traverse(mesh=>{if(mesh.geometry?.type==='PlaneGeometry'&&mesh.material?.map)mesh.visible=false;});
         [cm5,netSwitch,negativeDistributor,usr,cerbo,fuse].filter(device=>device!==activeClip.device).forEach(device=>device.visible=false);
       }
       if(step===5){
         // Installation detail only: expose both fixing heads and rear hardware.
         // Electrical output studs remain in the ghosted body, visually distinct.
-        ghostCommObjects([fuse],.13);ghostCommObjects([commBack],.10);
+        ghostCommObjects([fuse],.48);ghostCommObjects([commBack],.10);
         commParts['fuse-fasteners'].forEach(object=>object.traverse(mesh=>{const original=commMaterialOrigins.get(mesh);if(original)mesh.material=original;}));
         fuse.traverse(mesh=>{if(mesh.geometry?.type==='PlaneGeometry'&&mesh.material?.map)mesh.visible=false;});
         [cm5,netSwitch,negativeDistributor,usr,cerbo].forEach(device=>device.visible=false);
       }
-      if(step===9){ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.18,true);ghostCommObjects([commBack],.12);}
+      if(step===9){ghostCommObjects([cm5,netSwitch,negativeDistributor,usr],.18,true);ghostCommObjects([commBack],.12);commClipRecords.forEach(clarifyDeviceClip);}
 
       if(step===10||step===11&&p<.70){ghostCommObjects([commBack],.20);ghostCommObjects([cm5,netSwitch,negativeDistributor,usr,cerbo,fuse],.28);}
     }
@@ -1567,6 +1580,10 @@ try{
   });
 
   const resize=()=>{const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()};
+  // The parent stage clips its iframe: fit the drawing surface to the visible frame.
+  const viewport=root.querySelector('.a3-viewport');
+  const fitEmbeddedViewport=()=>{if(parent!==window&&viewport){const top=viewport.getBoundingClientRect().top;viewport.style.minHeight='260px';viewport.style.height=Math.max(260,window.innerHeight-top)+'px';}};
+  if(parent!==window){fitEmbeddedViewport();window.addEventListener('resize',fitEmbeddedViewport);const headerObserver=new ResizeObserver(fitEmbeddedViewport);for(const node of root.querySelectorAll('.a3-head,.a3-toolbar'))headerObserver.observe(node);}
   const ro=new ResizeObserver(resize);ro.observe(canvas);resize();
   let running=true;const animate=()=>{if(!running)return;assemblyTick(Date.now());communicationTick(Date.now());controls.update();commPresentation.update();if(assemblyState.available&&assemblyState.mode!=='normal')updateAssemblyLabels();if(commState.available&&commState.mode!=='normal')updateCommunicationLabels();renderer.render(scene,camera);requestAnimationFrame(animate)};animate();
   document.addEventListener('visibilitychange',()=>{if(document.hidden){running=false;if(commState.playing){commState.playing=false;emitCommunication();}if(assemblyState.playing){assemblyState.playing=false;emitAssembly();}}else if(!running){running=true;animate()}});
@@ -1576,6 +1593,6 @@ try{
 }
 </script>
 
-<script src="../view-language.js?v=assembly-20261003-r9"></script>
+<script src="../view-language.js?v=assembly-20261004-r10"></script>
 </body>
 </html>

@@ -1,0 +1,131 @@
+{
+  "task": "r10网页局部显示修复",
+  "baseline": {
+    "main": "b0d1734fa2266d888b19f2684ffbbf7784ec713f",
+    "version": "assembly-20261003-r9"
+  },
+  "keypoints": [
+    {
+      "id": "layout",
+      "requirement": "保持三板L型、两根150 mm导轨及分轨设备、GX电视右侧同墙中心1450 mm",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "三块恒流板为 L 型、两根导轨各150 mm、GX在电视右侧同一面墙上且中心高1450 mm",
+        "reference": "用户验收要求"
+      },
+      "expected": "模型几何与拓扑保持基线",
+      "check": "现有模型检查与云端截图",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r10"
+      }
+    },
+    {
+      "id": "labels",
+      "requirement": "爆炸图全部编号在可见画布中且不被底部卡遮挡",
+      "status": "delegated",
+      "basis": {
+        "kind": "user",
+        "quote": "现在，修改你觉得我这个网页中需要完善的地方",
+        "reference": "当前用户请求",
+        "scope": "既有网页的显示清晰度与操作完善，不改变已确认实体布局、接线或未知实物参数"
+      },
+      "expected": "C01至C15可见、引线清晰",
+      "check": "实际画布边界检查和截图",
+      "depends_on": [
+        "layout"
+      ],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r10"
+      }
+    },
+    {
+      "id": "details",
+      "requirement": "当前卡扣、保险座及螺丝动作清楚",
+      "status": "delegated",
+      "basis": {
+        "kind": "user",
+        "quote": "现在，修改你觉得我这个网页中需要完善的地方",
+        "reference": "当前用户请求",
+        "scope": "既有网页的显示清晰度与操作完善，不改变已确认实体布局、接线或未知实物参数"
+      },
+      "expected": "保留实际几何，安装细节提高对比并保留外壳轮廓",
+      "check": "四台设备三阶段及保险座截图",
+      "depends_on": [
+        "layout"
+      ],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r10"
+      }
+    },
+    {
+      "id": "gx-controls",
+      "requirement": "GX信息卡不覆盖视角控制按钮",
+      "status": "delegated",
+      "basis": {
+        "kind": "user",
+        "quote": "现在，修改你觉得我这个网页中需要完善的地方",
+        "reference": "当前用户请求",
+        "scope": "既有网页的显示清晰度与操作完善，不改变已确认实体布局、接线或未知实物参数"
+      },
+      "expected": "GX视角按钮无遮挡",
+      "check": "实际页面矩形交叉检查及截图",
+      "depends_on": [
+        "layout"
+      ],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r10"
+      }
+    },
+    {
+      "id": "materials",
+      "requirement": "修正微纹理用途并说明保留的行车充电线路",
+      "status": "delegated",
+      "basis": {
+        "kind": "user",
+        "quote": "现在，修改你觉得我这个网页中需要完善的地方",
+        "reference": "当前用户请求",
+        "scope": "既有网页的显示清晰度与操作完善，不改变已确认实体布局、接线或未知实物参数"
+      },
+      "expected": "仅新电路场景改微纹理；原线路几何不变；新名称有英文",
+      "check": "源差异及常规截图",
+      "depends_on": [
+        "layout"
+      ],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r10"
+      }
+    },
+    {
+      "id": "delivery",
+      "requirement": "修改验证后更新原GitHub网页",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "就是你帮我更新上去，然后我点这个这个域名的网址就可以看到更新后的这个网页了。",
+        "reference": "此前发布授权及当前修改请求"
+      },
+      "expected": "云端验收后发布；未知螺丝长度、实物针脚不判通过",
+      "check": "工作流截图、主分支版本与部署检查",
+      "depends_on": [
+        "layout"
+      ],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r10"
+      }
+    }
+  ]
+}

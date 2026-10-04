@@ -90,7 +90,7 @@ const electricalExpression=`(()=>{
    snapshot:window.aikoAssemblyGuide.snapshot(),partPose:Object.fromEntries(Object.entries(commParts).filter(([id])=>id!=='wiring').map(([id,parts])=>[id,parts.map(pose)]))};
 })()`;
 
-export async function runFull({page,context,frame,report,row,shot,ready,activeFrame,target,semanticControls=false,detailsOnly=false}) {
+export async function runFull({page,context,frame,report,row,shot,ready,activeFrame,target,semanticControls=false,detailsOnly=false,repairOnly=false}) {
   const controlClick=async(locator)=>{
     if(semanticControls){await locator.evaluate(element=>element.click());}
     else await locator.click({noWaitAfter:true,timeout:30000});
@@ -176,11 +176,11 @@ export async function runFull({page,context,frame,report,row,shot,ready,activeFr
   }else{await mode('animation');}
   // Detailed evidence uses the real step selector and action slider. Each
   // device clip is captured at hook, pivot and spring-return phases.
-  for(const index of [3,6,7,8])for(const p of [.15,.55,1]){
+  for(const index of [3,6,7,8])for(const p of repairOnly?[.55,1]:[.15,.55,1]){
     await scrub(index,p);
     await shot(`06-clip-${index}-${Math.round(p*100)}`,`步骤${index+1} 导轨卡扣：${Math.round(p*100)}%动作`,frame);
   }
-  for(const index of [5,9,11,12,20,21,22]){
+  for(const index of repairOnly?[5,9,20]:[5,9,11,12,20,21,22]){
     await scrub(index,index>=20?.8:1);
     await shot(`07-detail-step-${index+1}`,`安装步骤${index+1}：螺丝、卡扣、上墙或接线细节`,frame);
   }
@@ -229,7 +229,7 @@ export async function runFull({page,context,frame,report,row,shot,ready,activeFr
   row('K4-GX-wall','GX位于电视右侧同一安装墙面',gx.rightOfTv&&gx.gxWallDistanceMm<.1&&gx.sameWallFootprints&&gx.tvWallNormalDot>.999&&gx.gxWallNormalDot>.999&&gx.tvInFrontOfWall?'通过':'失败',{rightOfTv:gx.rightOfTv,gxWallDistanceMm:gx.gxWallDistanceMm,tvBodyRearGapMm:gx.tvWallDistanceMm,sameWallFootprints:gx.sameWallFootprints,wallBounds:gx.wallBounds,normals:[gx.tvWallNormalDot,gx.gxWallNormalDot],rightSource:gx.rightSource,scope:'检验同一有限墙面内的投影、朝向和GX固定平面；TV背部安装件不在此项验证范围，机壳与墙间距按实测记录，不要求TV机壳后面贴墙。'});
   await mode('exploded');await shot('09-gx-exploded','GX爆炸图：屏幕、固定框、螺丝及线缆',frame);
   await mode('animation');
-  for(const index of [3,5,6,8,9]){
+  for(const index of repairOnly?[3,5]:[3,5,6,8,9]){
     await scrub(index,.7);await shot(`10-gx-animation-${index+1}`,`GX安装动画步骤${index+1}`,frame);
   }
   await mode('normal');

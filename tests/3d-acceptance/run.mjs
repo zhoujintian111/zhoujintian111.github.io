@@ -163,11 +163,11 @@ try {
   row('K1-render','r9模型加载、真实WebGL绘制与截图','通过',{frame:frame.url(),webgl});
   if(cloudCI)row('K1-environment','Google Chrome在GitHub Actions中执行',process.env.GITHUB_ACTIONS==='true'?'通过':'待核实',report.environment);
   else row('K1-machine','用户电脑Google Chrome验收',remote?'待核实':'通过',report.environment);
-  const expectedFrame='assembly-20261003-r9';
+  const expectedFrame=new URL(target).searchParams.get('v')||'assembly-20261003-r9';
   row('K1-version','当前r9入口',frame.url().includes(expectedFrame)?'通过':'待核实',frame.url());
   if(full) {
     const {runFull}=await import('./full-checks.mjs');
-    await runFull({page,context,frame,report,row,shot,ready,activeFrame,target,semanticControls:remote&&argv.includes('--semantic-controls'),detailsOnly:argv.includes('--details-only')});
+    await runFull({page,context,frame,report,row,shot,ready,activeFrame,target,semanticControls:remote&&argv.includes('--semantic-controls'),detailsOnly:argv.includes('--details-only'),repairOnly:argv.includes('--repair-only')});
   }
   await Promise.allSettled(assets);
 } catch(error) {
