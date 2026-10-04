@@ -1,0 +1,102 @@
+{
+  "task": "r12配件外形细化",
+  "baselineMain": "777f68224f08ac10c4786c3585e2dc794d771f56",
+  "precision": "按照片和官方尺寸图提高外形准确度；未测尺寸不用于施工尺寸或制造验收。用户未回答可选精度问题，保持既有示意尺寸，不自行确定实物规格。",
+  "keypoints": [
+    {
+      "id": "connectors",
+      "requirement": "细化GX原厂HDMI、USB线端及相配插口",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "一些细节：HDMI端子形状、USB端子形状、螺丝/螺母/垫片形状、磁环形状、GX固定框形状都做精确一些。",
+        "reference": "当前用户消息2026-10-04；布局依据tests/3d-acceptance/README-cloud.md已引用原话",
+        "scope": "用户本轮HDMI/USB形状要求；原厂组合线与Cerbo连接关系沿用已确认基线"
+      },
+      "expected": "用户本轮HDMI/USB形状要求；原厂组合线与Cerbo连接关系沿用已确认基线",
+      "check": "实际插口/插头截面、屏幕线连接和插接动画，云端细节PNG",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r12"
+      }
+    },
+    {
+      "id": "fasteners",
+      "requirement": "依据清单商品照片细化螺丝、尼龙锁母和通孔平垫",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "一些细节：HDMI端子形状、USB端子形状、螺丝/螺母/垫片形状、磁环形状、GX固定框形状都做精确一些。",
+        "reference": "当前用户消息2026-10-04；布局依据tests/3d-acceptance/README-cloud.md已引用原话",
+        "scope": "商品照片仅证实外形类型，不把C13/G03等待核长度改为确定值；保留装配层次/数量"
+      },
+      "expected": "商品照片仅证实外形类型，不把C13/G03等待核长度改为确定值；保留装配层次/数量",
+      "check": "实际孔洞、内六角与螺纹、尼龙圈；源数量与复位/云端PNG",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r12"
+      }
+    },
+    {
+      "id": "ferrites",
+      "requirement": "按已提供实物照片细化磁环两半外壳、磁芯、铰链和锁扣",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "一些细节：HDMI端子形状、USB端子形状、螺丝/螺母/垫片形状、磁环形状、GX固定框形状都做精确一些。",
+        "reference": "当前用户消息2026-10-04；布局依据tests/3d-acceptance/README-cloud.md已引用原话",
+        "scope": "照片可确认结构；长度、外径及孔径沿用示意并标未测，不声称实物尺寸"
+      },
+      "expected": "照片可确认结构；长度、外径及孔径沿用示意并标未测，不声称实物尺寸",
+      "check": "开合轴、线穿孔、两端2只数量；中间和闭合PNG",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r12"
+      }
+    },
+    {
+      "id": "frame",
+      "requirement": "按原厂Rev02图及照片细化标准GX Touch 50正面框",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "一些细节：HDMI端子形状、USB端子形状、螺丝/螺母/垫片形状、磁环形状、GX固定框形状都做精确一些。",
+        "reference": "当前用户消息2026-10-04；布局依据tests/3d-acceptance/README-cloud.md已引用原话",
+        "scope": "原厂外形128.1×87mm、孔距①110.2×69.2，②116×52.6；仍只使用正面①；框厚/窗口细部未测"
+      },
+      "expected": "原厂外形128.1×87mm、孔距①110.2×69.2，②116×52.6；仍只使用正面①；框厚/窗口细部未测",
+      "check": "真开口、8处原厂孔、既有4颗前固定；定位/动画/PNG",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r12"
+      }
+    },
+    {
+      "id": "baseline",
+      "requirement": "保护L型/150mm两轨/GX同墙1450mm及r11半透明标签",
+      "status": "confirmed",
+      "basis": {
+        "kind": "user",
+        "quote": "一些细节：HDMI端子形状、USB端子形状、螺丝/螺母/垫片形状、磁环形状、GX固定框形状都做精确一些。",
+        "reference": "当前用户消息2026-10-04；布局依据tests/3d-acceptance/README-cloud.md已引用原话",
+        "scope": "用户本轮局部外形修改；此前明确布局、两轨和高度/标签指令继续有效"
+      },
+      "expected": "用户本轮局部外形修改；此前明确布局、两轨和高度/标签指令继续有效",
+      "check": "相关源几何和复位检查；修改范围差异",
+      "depends_on": [],
+      "verification": {
+        "status": "not_run",
+        "evidence": "",
+        "version": "assembly-20261004-r12"
+      }
+    }
+  ]
+}
