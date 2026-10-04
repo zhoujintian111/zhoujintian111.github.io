@@ -18,9 +18,9 @@
       "check": "现有模型检查与云端截图",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "assembly-20261004-r10"
+        "status": "passed",
+        "version": "assembly-20261004-r10",
+        "evidence": "云端Chrome运行37170901526；cloud/report.json及review.json；相关既有几何/复位/语言检查通过。"
       }
     },
     {
@@ -39,9 +39,9 @@
         "layout"
       ],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "assembly-20261004-r10"
+        "status": "passed",
+        "version": "assembly-20261004-r10",
+        "evidence": "云端Chrome运行37170901526；cloud/report.json及review.json；相关既有几何/复位/语言检查通过。"
       }
     },
     {
@@ -60,9 +60,9 @@
         "layout"
       ],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "assembly-20261004-r10"
+        "status": "passed",
+        "version": "assembly-20261004-r10",
+        "evidence": "云端Chrome运行37170901526；cloud/report.json及review.json；相关既有几何/复位/语言检查通过。"
       }
     },
     {
@@ -81,9 +81,9 @@
         "layout"
       ],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "assembly-20261004-r10"
+        "status": "passed",
+        "version": "assembly-20261004-r10",
+        "evidence": "云端Chrome运行37170901526；cloud/report.json及review.json；相关既有几何/复位/语言检查通过。"
       }
     },
     {
@@ -102,9 +102,9 @@
         "layout"
       ],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "assembly-20261004-r10"
+        "status": "passed",
+        "version": "assembly-20261004-r10",
+        "evidence": "git diff：仅新场景改bumpMap和保留线路双语名称；常规/旋转截图已看，实际拓扑K5-power通过。"
       }
     },
     {
@@ -122,9 +122,9 @@
         "layout"
       ],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "assembly-20261004-r10"
+        "status": "passed",
+        "version": "assembly-20261004-r10",
+        "evidence": "main 67be44377d571eb2c09e53896b004f202568be4a；Pages运行37171517551成功；公开文件核对运行37171542727，5个HTTP 200且SHA-256吻合；未知实物项目仍待核实。"
       }
     }
   ]
