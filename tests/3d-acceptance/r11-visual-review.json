@@ -1,0 +1,74 @@
+{
+  "version": "assembly-20261004-r11",
+  "scope": "爆炸图标签与安装背景配色；不改变装配几何、布线、编号或文字",
+  "palette": {
+    "background": "#e1e1e1",
+    "label": "rgba(0,0,0,.66)",
+    "selected": "rgba(0,0,0,.82)",
+    "text": "#ffffff",
+    "accent": "#ff5a00"
+  },
+  "initialRun": {
+    "id": 37172521418,
+    "commit": "b79610817fdaf33b1aadb3e4a94249ca56b3ab86",
+    "artifactId": 11292430314,
+    "artifactSha256": "3cf43e60e2e206ed458e1b2779d131fc1b294f9bf8b152fda08c830da39e93ae",
+    "outcome": "恒流板背景检查失败；通讯板与GX标签、旋转、中英文和选中检查通过。原始失败报告保留。"
+  },
+  "screenshotsReviewed": [
+    {
+      "file": "00-smoke-canvas.png",
+      "finding": "真实三维模型已显示，常规背景保留。"
+    },
+    {
+      "file": "01-comm-labels-zh-canvas.png",
+      "finding": "15个标签白字清晰，半透明底透出后方零件，橙色引线可辨。"
+    },
+    {
+      "file": "02-comm-selected-canvas.png",
+      "finding": "C15选中框橙色加重，文字保持白色。"
+    },
+    {
+      "file": "03-comm-english-rotated-canvas.png",
+      "finding": "实际旋转后英文和橙色引线可辨；背景穿透可见。"
+    },
+    {
+      "file": "04-board-labels-en-canvas.png",
+      "finding": "标签透明与白字正确；背景仍沿用旧深色，需修复后重看。"
+    },
+    {
+      "file": "05-gx-labels-en-canvas.png",
+      "finding": "8个英文标签和引线清晰，无白色标签底。"
+    },
+    {
+      "file": "06-gx-labels-zh-selected-canvas.png",
+      "finding": "中文标签可辨，G02选中橙框可见。"
+    }
+  ],
+  "retest": {
+    "id": 37173023053,
+    "commit": "2b913d4cb069db59cf869690e4da436979b330ca",
+    "status": "passed",
+    "scope": "仅恒流板背景修复与正常背景恢复",
+    "artifactId": 11292426080,
+    "artifactSha256": "ca65b7134920bf1c4a51b7c90a62ade939ad6b06d048340bd064e43bbcdd8e94",
+    "visual": "实际04-board-labels-en-canvas.png已查看；背景浅灰，黑色半透明底后面的竖框可透见，白字和橙色线可辨，5标签均在画布内。"
+  },
+  "sourceChecks": [
+    "verify-assembly: passed",
+    "verify-installation-presentation: passed",
+    "verify-communication-assembly: passed",
+    "verify-gx-assembly: passed before board-only background fix",
+    "syntax and git diff --check: passed"
+  ],
+  "limits": "纹理alpha本身不能证明可读性，已实际逐图查看。此次不重复整套安装动画验收。实物尺寸及未确认规格沿用原待核实状态。",
+  "publication": {
+    "status": "passed",
+    "main": "777f68224f08ac10c4786c3585e2dc794d771f56",
+    "pagesRun": 37173182336,
+    "hashRun": 37173237941,
+    "hashArtifactId": 11292800129,
+    "hashArtifactSha256": "c7b1c0bf4cfa3da855fb1317117eb9c6dd91f274ab4ba3e523c197300c4bcfdb",
+    "finding": "Pages部署成功；6个公开资源HTTP200，SHA-256与被检查候选一致。"
+  }
+}
