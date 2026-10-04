@@ -83,17 +83,17 @@ export function createGxAssemblyGuide(THREE,context){
    const group=new THREE.Group();group.name=kind==='hdmi'?'HDMI keyed receptacle':'USB-A receptacle';group.position.set(0,.010,z);endpointInset.add(group);ports[kind]=group;
    const mouth=profile(kind,w+.001,h+.001);mouth.holes.push(profile(kind,w,h,THREE.Path));axialShape(group,mouth,.010,-.004);
    box(group,.001,h-.001,w-.001,.0055,0,0,socketMat);
-   box(group,.006,.0012,w-.002,.002,kind==='usb'?-.0015:0,0,socketMat);
+   box(group,.006,.0012,w-.002,.002,kind==='usb'?.0012:0,0,socketMat);
  }
- const makePlug=(kind,z)=>{const group=new THREE.Group();group.name=kind==='hdmi'?'GX HDMI plug':'GX USB power plug';group.position.set(-.018,.010,z);endpointInset.add(group);
+ const makePlug=(kind,z)=>{const group=new THREE.Group();group.name=kind==='hdmi'?'GX HDMI plug':'GX USB power plug';group.position.set(-.010,.010,z);endpointInset.add(group);
    group.userData.shapeBasis='Original kit photo; connector envelope remains illustrative';
    const w=kind==='hdmi'?.018:.012,h=kind==='hdmi'?.010:.007,t=.00035;
    roundedBody(group,kind==='hdmi'?.020:.014,.012,.018,-.016);
    for(let i=0;i<4;i++){const rib=new THREE.Mesh(new THREE.CylinderGeometry(.0028-i*.00015,.0028-i*.00015,.0008,20),black);rib.rotation.z=Math.PI/2;rib.position.x=-.017-i*.0012;rib.name='Ribbed strain relief';group.add(rib);}
    if(kind==='hdmi'){
      const shell=profile(kind,w,h);shell.holes.push(profile(kind,w-2*t,h-2*t,THREE.Path));axialShape(group,shell,.012,.002).name='HDMI trapezoidal hollow metal shell';
-     box(group,.010,.0018,w-.002,.007,0,0,socketMat);
-     for(const [count,y] of [[10,.001],[9,-.001]])for(let i=0;i<count;i++)box(group,.007,.00018,.00045,.009,y,(i-(count-1)/2)*.00145,gold).name='HDMI contact';
+     const insert=profile(kind,w-.002,h-.002);insert.holes.push(profile(kind,w-.004,.0028,THREE.Path));axialShape(group,insert,.010,.002,0,0,socketMat).name='HDMI dielectric with keyed mating slot';
+     for(const [count,y] of [[10,.0014],[9,-.0014]])for(let i=0;i<count;i++)box(group,.007,.00018,.00045,.009,y,(i-(count-1)/2)*.00135,gold).name='HDMI contact';
    }else{
      for(const side of [-1,1])box(group,.012,h,t,.008,0,side*(w-t)/2,silver);
      box(group,.012,t,w,.008,-(h-t)/2,0,silver);
