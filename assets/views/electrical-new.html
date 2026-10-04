@@ -138,7 +138,7 @@ function createInstallationPresentation(THREE,{scene,camera,renderer,controls}){
   key.position.set(-.70,.85,.60);fill.position.set(.85,.05,-.10);
   key.target.position.set(0,0,-1);fill.target.position.set(0,0,-1);
   rig.add(key,fill,key.target,fill.target,new THREE.HemisphereLight(0xffffff,0x707780,.55));
-  const background=new THREE.Color(0xd6dade);let saved=null;
+  const background=new THREE.Color(0xe1e1e1);let saved=null;
   function update(){
     if(!saved)return;
     camera.updateMatrixWorld(true);camera.getWorldPosition(rig.position);camera.getWorldQuaternion(rig.quaternion);
@@ -1108,8 +1108,14 @@ try{
     const lang=interfaceLanguage==='en'?'en':'zh',name=g.userData.annotationNames[lang==='en'?1:0],key=lang+':'+selected;
     let material=g.userData.annotationMaterials.get(key);
     if(!material){
-      const texture=canvasTexture(800,204,(ctx,w,h)=>{ctx.fillStyle=selected?'#ff5a00':'#ffffff';ctx.fillRect(0,0,w,h);ctx.fillStyle=selected?'#ffffff':'#bd4000';ctx.font='700 73px Arial';ctx.textBaseline='middle';ctx.fillText(g.userData.annotationCode,28,60,w-56);ctx.fillStyle=selected?'#ffffff':'#19212a';ctx.font='600 61px Arial, "Microsoft YaHei", sans-serif';ctx.fillText(name,28,151,w-56);});
-      material=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthTest:false,depthWrite:false});g.userData.annotationMaterials.set(key,material);
+      const texture=canvasTexture(800,204,(ctx,w,h)=>{
+        ctx.clearRect(0,0,w,h);ctx.fillStyle=selected?'rgba(0,0,0,.82)':'rgba(0,0,0,.66)';ctx.fillRect(0,0,w,h);
+        ctx.strokeStyle=selected?'#ff5a00':'rgba(255,255,255,.18)';ctx.lineWidth=selected?4:2;ctx.strokeRect(1,1,w-2,h-2);
+        ctx.fillStyle='#ff5a00';ctx.fillRect(0,0,selected?12:6,h);
+        ctx.fillStyle='#ffffff';ctx.font='700 73px Arial';ctx.textBaseline='middle';ctx.fillText(g.userData.annotationCode,28,60,w-56);
+        ctx.font='600 61px Arial, "Microsoft YaHei", sans-serif';ctx.fillText(name,28,151,w-56);
+      });
+      material=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthTest:false,depthWrite:false,toneMapped:false});g.userData.annotationMaterials.set(key,material);
     }
     g.children[0].material=material;g.userData.annotationLanguage=lang;g.userData.annotationText=g.userData.annotationCode+' · '+name;g.userData.annotationSelected=selected;
   }
@@ -1141,7 +1147,7 @@ try{
     const g=installationAnnotation(assemblyLabels,['A02','A05','A01','A03','A09'][i],assemblyShortNames[id]);
     g.traverse(o=>{o.userData.assemblyPart=id;if(o.isMesh){o.userData.deviceRoot=cc1;pickables.push(o);}});return g;
   });
-  const leaderMaterial=new THREE.MeshBasicMaterial({color:0xb34511,depthTest:false,depthWrite:false,transparent:true,opacity:.8});
+  const leaderMaterial=new THREE.MeshBasicMaterial({color:0xff5a00,depthTest:false,depthWrite:false,transparent:true,opacity:.90,toneMapped:false});
   const assemblyLeaders=assemblyIds.map(()=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,1,5),leaderMaterial);assemblyLabels.add(m);return m;});
   const assemblyHighlight=new THREE.Box3Helper(new THREE.Box3(),0xff5a00);assemblyHighlight.visible=false;world.add(assemblyHighlight);
   const mc4Prep=new THREE.Group();guideLayer.add(mc4Prep);mc4Prep.visible=false;
@@ -1184,6 +1190,7 @@ try{
     }
   }
   function restoreAssembly(){
+    commPresentation.restore();
     setAssemblyContext(false);
     activeAssembly.origins.forEach((position,o)=>o.position.copy(position));
     if(assemblySelectionVisibility)assemblySelectionVisibility.forEach((visible,o)=>o.visible=visible);
@@ -1208,6 +1215,7 @@ try{
     const {board,original,parts,wiring,origins}=activeAssembly;
     const showGuide=assemblyState.available&&assemblyState.mode!=='normal';
     if(!showGuide){restoreAssembly();updateAssemblyHighlight();return;}
+    commPresentation.setActive(true);
     setAssemblyContext(true);
     const compactInfo=root.querySelector('.a3-selection');if(compactInfo&&parent!==window)compactInfo.hidden=true;
     const installation=assemblyState.mode==='animation',originalReference=installation&&assemblyState.step<3;
@@ -1593,6 +1601,6 @@ try{
 }
 </script>
 
-<script src="../view-language.js?v=assembly-20261004-r10"></script>
+<script src="../view-language.js?v=assembly-20261004-r11"></script>
 </body>
 </html>

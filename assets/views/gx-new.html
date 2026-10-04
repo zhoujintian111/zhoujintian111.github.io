@@ -174,7 +174,7 @@ function createInstallationPresentation(THREE,{scene,camera,renderer,controls}){
   key.position.set(-.70,.85,.60);fill.position.set(.85,.05,-.10);
   key.target.position.set(0,0,-1);fill.target.position.set(0,0,-1);
   rig.add(key,fill,key.target,fill.target,new THREE.HemisphereLight(0xffffff,0x707780,.55));
-  const background=new THREE.Color(0xd6dade);let saved=null;
+  const background=new THREE.Color(0xe1e1e1);let saved=null;
   function update(){
     if(!saved)return;
     camera.updateMatrixWorld(true);camera.getWorldPosition(rig.position);camera.getWorldQuaternion(rig.quaternion);
@@ -218,7 +218,7 @@ function createInstallationPresentation(THREE,{scene,camera,renderer,controls}){
     const start = async () => {
       const { THREE, OrbitControls } = window.__AIKO_THREE_OFFLINE__;
       const {makeGxTouch,gxTouchSpec}=await import('../gx-touch-model.js?v=assembly-20261003-r5');
-      const {createGxAssemblyGuide}=await import('../gx-assembly-controller.js?v=assembly-20261004-r10');
+      const {createGxAssemblyGuide}=await import('../gx-assembly-controller.js?v=assembly-20261004-r11');
       const gxPhoto=await new THREE.TextureLoader().loadAsync('../images/gx-touch-50-official.png');
       gxPhoto.colorSpace=THREE.SRGBColorSpace;
       gxPhoto.offset.set(49/1925,48/1307);gxPhoto.repeat.set(1804/1925,1210/1307);
@@ -1842,6 +1842,6 @@ function createInstallationPresentation(THREE,{scene,camera,renderer,controls}){
   </script>
 </div>
 
-<script src="../view-language.js?v=assembly-20261004-r10"></script>
+<script src="../view-language.js?v=assembly-20261004-r11"></script>
 </body>
 </html>

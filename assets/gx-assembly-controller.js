@@ -24,10 +24,13 @@ export function createGxAssemblyGuide(THREE,context){
    for(const word of words){const next=row?row+join+word:word;if(row&&ctx.measureText(next).width>(maxWidth-24)*2){lines.push(row);row=word;}else row=next;}if(row)lines.push(row);
    const pixelWidth=Math.min(maxWidth,Math.max(118,...lines.map(t=>ctx.measureText(t).width/2+24))),pixelHeight=lines.length*19+12;
    canvas.width=Math.ceil(pixelWidth*2);canvas.height=pixelHeight*2;
-   ctx.fillStyle='rgba(247,249,250,.98)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#ff5a00';ctx.fillRect(0,0,6,canvas.height);ctx.fillStyle='#19232c';ctx.font='600 '+fontSize*2+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';lines.forEach((t,i)=>ctx.fillText(t,20,24+i*38));
+   const selected=!!partId&&state.partId===partId;
+   ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle=selected?'rgba(0,0,0,.82)':'rgba(0,0,0,.66)';ctx.fillRect(0,0,canvas.width,canvas.height);
+   ctx.strokeStyle=selected?'#ff5a00':'rgba(255,255,255,.18)';ctx.lineWidth=selected?4:2;ctx.strokeRect(1,1,canvas.width-2,canvas.height-2);
+   ctx.fillStyle='#ff5a00';ctx.fillRect(0,0,selected?12:6,canvas.height);ctx.fillStyle='#ffffff';ctx.font='600 '+fontSize*2+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';lines.forEach((t,i)=>ctx.fillText(t,20,24+i*38));
    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,depthTest:false,depthWrite:false}));sprite.name=text;sprite.userData.assemblyLabel={partId,text,pixelWidth,pixelHeight};if(partId){sprite.userData.assemblyPart=partId;sprite.userData.assemblyBoardId='gx-touch50';}sprite.renderOrder=42;parent.add(sprite);
-   const leader=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(0,0,0),V(0,0,0)]),new THREE.LineBasicMaterial({color:0x64717c,transparent:true,opacity:.78,depthTest:false,depthWrite:false}));leader.name='Leader · '+text;leader.renderOrder=41;parent.add(leader);
+   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}));sprite.name=text;sprite.userData.assemblyLabel={partId,text,pixelWidth,pixelHeight};if(partId){sprite.userData.assemblyPart=partId;sprite.userData.assemblyBoardId='gx-touch50';}sprite.renderOrder=42;parent.add(sprite);
+   const leader=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(0,0,0),V(0,0,0)]),new THREE.LineBasicMaterial({color:0xff5a00,transparent:true,opacity:.90,depthTest:false,depthWrite:false,toneMapped:false}));leader.name='Leader · '+text;leader.renderOrder=41;parent.add(leader);
    labelEntries.push({sprite,leader,anchor:typeof anchor==='function'?anchor:()=>anchor.clone(),side,pixelWidth,pixelHeight,partId});return sprite;
  };
  const labels=new THREE.Group();layer.add(labels);
