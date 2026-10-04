@@ -14,9 +14,9 @@
       "check": "核对远端base tree、提交文件列表和main ref",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "r9-cloud-20261004"
+        "status": "passed",
+        "evidence": "GitHub compare显示仅7项新增测试/工作流；main保持b0d1734fa2266d888b19f2684ffbbf7784ec713f。",
+        "version": "a836c5c6b711e7d3fd1ad7faf2f5948fefe31e6e"
       }
     },
     {
@@ -32,9 +32,9 @@
       "check": "Chrome版本、GL renderer与drawCalls、PNG截图",
       "depends_on": [],
       "verification": {
-        "status": "not_run",
-        "evidence": "",
-        "version": "r9-cloud-20261004"
+        "status": "passed",
+        "evidence": "GitHub run37168263935；Chrome154.0.8037.57、WebGL2、drawCalls5199、无contextLost、错误为空；00-smoke.png已实际查看。",
+        "version": "a836c5c6b711e7d3fd1ad7faf2f5948fefe31e6e"
       }
     },
     {
