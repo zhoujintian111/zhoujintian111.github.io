@@ -1,13 +1,13 @@
 import { hardware, deviceMessage } from './assets/upgrade-data.js?v=assembly-20261003-r7';
-import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261003-r9';
-import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261003-r9';
+import { createAssemblyInspector } from './assets/assembly-inspector.js?v=assembly-20261004-r10';
+import { assemblyTargets } from './assets/assembly-guide-data.js?v=assembly-20261004-r10';
 
 const paths = {
   vehicle: 'assets/views/vehicle-master.html',
   electricalOld: 'assets/views/electrical-old.html',
-  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261003-r9',
+  electricalNew: 'assets/views/electrical-new.html?v=assembly-20261004-r10',
   gxOld: 'assets/views/gx-old.html',
-  gxNew: 'assets/views/gx-new.html?v=assembly-20261003-r9'
+  gxNew: 'assets/views/gx-new.html?v=assembly-20261004-r10'
 };
 
 const initialLanguage = localStorage.getItem('aiko-language') === 'en' ? 'en' : 'zh';
@@ -321,6 +321,7 @@ function beginScene() {
   const oldFrame=el.frameStack.querySelector('.view-frame.is-active');
   oldFrame?.contentWindow?.postMessage({type:'aiko-assembly-command',command:'exit'},location.origin);
   assemblyInspector.reset();
+  el.stageStatus.parentElement.hidden=false;
   sceneGeneration+=1;
   sceneTimers.forEach(timer=>clearTimeout(timer));
   sceneTimers.clear();
@@ -428,6 +429,8 @@ function setLoading(show) { el.loading.hidden = !show; }
 function loadFrame(src, options={}) {
   const generation=beginScene();
   setLoading(true);
+  // GX already has an in-scene caption; the duplicate overlay covered view buttons.
+  el.stageStatus.parentElement.hidden=src===paths.gxNew;
   const frame = document.createElement('iframe');
   frame.className = 'view-frame';
   frame.src = src;
@@ -671,6 +674,7 @@ window.addEventListener('message',event=>{
   if(!activeFrame || event.source!==activeFrame.contentWindow) return;
   if(event.data.type==='aiko-assembly-state'){
     assemblyInspector.update(event.data);
+    el.stageStatus.parentElement.hidden=activeFrame.src.includes('gx-new.html')||(event.data.available&&event.data.mode!=='normal');
     document.querySelector('.detail-tabs').hidden=assemblyInspector.active;
     el.detailBody.hidden=assemblyInspector.active;
     return;
