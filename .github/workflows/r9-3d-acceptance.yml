@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      QA_MODE: full
+      QA_MODE: published
     defaults:
       run:
         working-directory: tests/3d-acceptance
